@@ -25,7 +25,9 @@ export interface Immoble {
 // Camps editables al formulari (sense id)
 export type ImmobleDades = Omit<Immoble, 'id'>
 
+// Codis d'error estables que el Main retorna al Renderer.
+// El Renderer els tradueix amb t('errors.<CODI>'); mai es mostra el text de SQLite.
+export type CodiError = 'CONTRACTE_SOLAPAT' | 'FK_VIOLADA' | 'CHECK_VIOLAT' | 'DESCONEGUT'
+
 // Resposta uniforme de tots els handlers IPC.
-// Els errors de SQLite (triggers, CHECK, claus foranes) es converteixen
-// en un missatge al Main; el Renderer només mira `ok`.
-export type Resultat<T> = { ok: true; dades: T } | { ok: false; error: string }
+export type Resultat<T> = { ok: true; dades: T } | { ok: false; error: CodiError }
