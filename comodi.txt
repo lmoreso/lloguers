@@ -1,0 +1,4 @@
+$ sudo apt install git
+git config --global user.name "Lluis M. Bosch"
+git config --global user.email "lmoreso@yahoo.com"
+git config --global init.defaultBranch main
