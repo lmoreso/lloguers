@@ -18,7 +18,6 @@ CREATE TABLE inmobles (
     ced_hab_data     TEXT,
     ced_hab_caduc    TEXT
 , afegit_el TEXT, ultima_mod TEXT);
-CREATE TABLE sqlite_sequence(name,seq);
 CREATE TABLE inquilins (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     nom              TEXT,

@@ -1,0 +1,6 @@
+{
+  "version": "0.2",
+  "language": "en,ca,es",
+  "dictionaries": ["sql"],
+  "ignorePaths": ["node_modules", "out", "dist"]
+}
