@@ -1,8 +1,20 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
+import type { Immoble, ImmobleDades, Resultat } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  inmobles: {
+    obtenir: (): Promise<Resultat<Immoble[]>> => ipcRenderer.invoke('inmobles:obtenir'),
+    obtenirUn: (id: number): Promise<Resultat<Immoble | null>> =>
+      ipcRenderer.invoke('inmobles:obtenirUn', id),
+    crear: (dades: ImmobleDades): Promise<Resultat<Immoble>> =>
+      ipcRenderer.invoke('inmobles:crear', dades),
+    actualitzar: (id: number, dades: ImmobleDades): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('inmobles:actualitzar', id, dades),
+    eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('inmobles:eliminar', id)
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
