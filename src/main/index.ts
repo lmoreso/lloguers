@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import './database'
 import { registrarIpcInmobles } from './ipc/inmobles'
 import { registrarIpcInquilins } from './ipc/inquilins'
+import { registrarIpcConfig } from './ipc/config'
 
 function createWindow(): void {
   // Create the browser window.
@@ -58,6 +59,8 @@ app.whenReady().then(() => {
   registrarIpcInmobles()
 
   registrarIpcInquilins()
+
+  registrarIpcConfig()
 
   createWindow()
 

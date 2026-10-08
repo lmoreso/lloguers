@@ -39,6 +39,14 @@ export interface Inquili {
 // Camps editables al formulari (sense id)
 export type InquiliDades = Omit<Inquili, 'id'>
 
+// Idiomes de la interfície. Afegir-ne un de nou = ampliar aquesta unió i crear el JSON.
+export type Idioma = 'ca' | 'es'
+
+// Contingut de ~/Lloguers/config.json
+export interface Config {
+  idioma: Idioma
+}
+
 // Codis d'error estables que el Main retorna al Renderer.
 // El Renderer els tradueix amb t('errors.<CODI>'); mai es mostra el text de SQLite.
 export type CodiError = 'CONTRACTE_SOLAPAT' | 'FK_VIOLADA' | 'CHECK_VIOLAT' | 'DESCONEGUT'

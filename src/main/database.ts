@@ -42,4 +42,4 @@ function aplicarMigracions(): void {
 
 aplicarMigracions()
 
-export { db, docsDir }
+export { db, docsDir, DADES }

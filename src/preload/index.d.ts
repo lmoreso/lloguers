@@ -1,5 +1,12 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import type { Immoble, ImmobleDades, Inquili, InquiliDades, Resultat } from '../shared/tipus'
+import type {
+  Config,
+  Immoble,
+  ImmobleDades,
+  Inquili,
+  InquiliDades,
+  Resultat
+} from '../shared/tipus'
 
 declare global {
   interface Window {
@@ -18,6 +25,10 @@ declare global {
         crear: (dades: InquiliDades) => Promise<Resultat<Inquili>>
         actualitzar: (id: number, dades: InquiliDades) => Promise<Resultat<void>>
         eliminar: (id: number) => Promise<Resultat<void>>
+      }
+      config: {
+        obtenir: () => Promise<Resultat<Config>>
+        desar: (config: Config) => Promise<Resultat<void>>
       }
     }
   }
