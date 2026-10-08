@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import './database'
 import { registrarIpcInmobles } from './ipc/inmobles'
+import { registrarIpcInquilins } from './ipc/inquilins'
 
 function createWindow(): void {
   // Create the browser window.
@@ -55,6 +56,8 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   registrarIpcInmobles()
+
+  registrarIpcInquilins()
 
   createWindow()
 

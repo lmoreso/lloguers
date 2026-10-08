@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { Immoble, ImmobleDades, Resultat } from '../shared/tipus'
+import type { Immoble, ImmobleDades, Inquili, InquiliDades, Resultat } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
@@ -13,6 +13,16 @@ const api = {
     actualitzar: (id: number, dades: ImmobleDades): Promise<Resultat<void>> =>
       ipcRenderer.invoke('inmobles:actualitzar', id, dades),
     eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('inmobles:eliminar', id)
+  },
+  inquilins: {
+    obtenir: (): Promise<Resultat<Inquili[]>> => ipcRenderer.invoke('inquilins:obtenir'),
+    obtenirUn: (id: number): Promise<Resultat<Inquili | null>> =>
+      ipcRenderer.invoke('inquilins:obtenirUn', id),
+    crear: (dades: InquiliDades): Promise<Resultat<Inquili>> =>
+      ipcRenderer.invoke('inquilins:crear', dades),
+    actualitzar: (id: number, dades: InquiliDades): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('inquilins:actualitzar', id, dades),
+    eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('inquilins:eliminar', id)
   }
 }
 

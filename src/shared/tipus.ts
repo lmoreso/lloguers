@@ -25,6 +25,20 @@ export interface Immoble {
 // Camps editables al formulari (sense id)
 export type ImmobleDades = Omit<Immoble, 'id'>
 
+export interface Inquili {
+  id: number
+  nom: string | null
+  cognoms: string | null
+  nif: string | null
+  telefon_1: string | null
+  // A la BD són INTEGER 0/1 (o NULL); el Main els converteix a boolean.
+  ck_tel1_wassap: boolean
+  ck_tel1_bizum: boolean
+}
+
+// Camps editables al formulari (sense id)
+export type InquiliDades = Omit<Inquili, 'id'>
+
 // Codis d'error estables que el Main retorna al Renderer.
 // El Renderer els tradueix amb t('errors.<CODI>'); mai es mostra el text de SQLite.
 export type CodiError = 'CONTRACTE_SOLAPAT' | 'FK_VIOLADA' | 'CHECK_VIOLAT' | 'DESCONEGUT'
