@@ -24,8 +24,13 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@mantine/core": "^9.7.1",
+    "@mantine/dates": "^9.7.1",
+    "@mantine/form": "^9.7.1",
     "@mantine/hooks": "^9.7.1",
-    "better-sqlite3": "^13.0.3"
+    "@mantine/modals": "^9.7.1",
+    "@mantine/notifications": "^9.7.1",
+    "better-sqlite3": "^13.0.3",
+    "dayjs": "^1.11.23"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
