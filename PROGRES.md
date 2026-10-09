@@ -8,8 +8,10 @@
 
 - L'usuari vol anar **pas a pas**: un pas (o una ordre) cada vegada, esperant que confirmi el resultat abans de passar al següent.
 - Idioma de la conversa: **català**.
-- Editor: VS Code (veu els errors de TypeScript, ESLint i Prettier directament; no cal demanar-li que els enganxi tots si ho té net, però `npm run typecheck` és útil després de tocar `tsconfig`).
-- Control de versions: Git + compte de GitHub (ja configurat). L'usuari fa ell mateix els commits; se li proposa el missatge.
+- Editor: VS Code (veu els errors de TypeScript, ESLint i Prettier directament; no cal demanar-li que els enganxi tots si ho té net, però `npm run typecheck` és útil després de tocar `tsconfig`, `.d.ts` o el preload).
+- Control de versions: Git + compte de GitHub (ja configurat). L'usuari fa ell mateix els commits; se li proposa el missatge i se li recorda mirar el `git status` abans de `git add -A`.
+- Quan una ordre no mostra res si va bé, o una sortida arriba tallada, demanar-ne la part que falta en lloc de suposar-la.
+- Les proves de la Fase B es fan des de les DevTools (`F12` > Console) amb `window.api.*`; l'usuari comprova la BD amb `sqlite3`.
 
 ## Entorn (verificat)
 
@@ -18,7 +20,7 @@
 | SO | Ubuntu Cinnamon 26.04 (VM) sobre amfitrió Ubuntu 24.04 |
 | Usuari / host | `lluismb@UbuntuKvm` |
 | Carpeta del projecte | `~/Projectes/Lloguers/lloguers/` |
-| Carpeta de dades | `~/Lloguers/` (**L majúscula**; conté `lloguers.sqlite` i `documents/`) |
+| Carpeta de dades | `~/Lloguers/` (**L majúscula**; conté `lloguers.sqlite`, `config.json` i `documents/`) |
 | Node.js | v24.21.0 (instal·lat amb nvm, `nvm install --lts`) |
 | npm | 11.19.0 |
 | nvm | v0.40.3 |
@@ -27,39 +29,55 @@
 | `curl`, `git`, `python3`, `build-essential` | instal·lats amb apt |
 | Electron | 39.8.10 |
 | Vite | 7.3.7 |
+| electron-builder | 26.15.3 |
 | `better-sqlite3` | 13.0.3 |
 
 ## Estat actual
 
-**Fase A (base) feta.** Falta començar la Fase B de `NOTES.md`.
+**Fases A i B fetes, i prova d'empaquetat anticipada superada.** Toca començar la Fase C de `NOTES.md`.
 
-### Fet
+### Fase A: base (feta)
 
-1. Entorn preparat i projecte creat amb `npm create @quick-start/electron@latest`
-   (nom `lloguers`, framework `react`, TypeScript **Yes**, sense updater ni mirror).
-2. Scripts d'instal·lació d'npm aprovats (vegeu "Incidències") i permisos del sandbox d'Electron arreglats.
-3. `better-sqlite3`, `@types/better-sqlite3` i `@electron/rebuild` instal·lats; `better-sqlite3` compilat contra Electron.
-   `npm run dev` arrenca amb el mòdul instal·lat. Commit i push fets.
-4. `001_inicial.sql` a `src/main/migrations/`, amb la línia `CREATE TABLE sqlite_sequence` eliminada.
+1. Projecte creat amb `npm create @quick-start/electron@latest` (nom `lloguers`, framework `react`, TypeScript **Yes**).
+2. Scripts d'instal·lació d'npm aprovats i permisos del sandbox arreglats (vegeu "Incidències").
+3. `better-sqlite3`, `@types/better-sqlite3` i `@electron/rebuild` instal·lats; mòdul compilat contra Electron.
+4. `src/main/migrations/001_inicial.sql` (sense la línia `CREATE TABLE sqlite_sequence`).
 5. `src/main/database.ts`: connexió a `~/Lloguers/lloguers.sqlite` (`journal_mode = WAL`, `foreign_keys = ON`),
-   sistema de migracions amb `PRAGMA user_version`, i `export { db, docsDir }`. Carregat des de `src/main/index.ts`
-   amb `import './database'`. Commit fet.
-6. BD existent verificada (4 taules, 2 índexs, 9 triggers, 10 columnes a `contractes`, sense `ruta_contracte`)
-   i marcada amb `PRAGMA user_version = 1` **sense executar** la migració.
-   Còpia de seguretat feta a `~/Lloguers/lloguers.sqlite.bak` (fora del repositori).
-7. `src/shared/tipus.ts` amb `Immoble` i `ImmobleDades` (sense `afegit_el` ni `ultima_mod`).
-   `src/shared/**/*` afegit a l'`include` de `tsconfig.node.json` i `tsconfig.web.json`; `npm run typecheck` net.
-8. `src/main/inmobles.ts` amb el CRUD (`obtenirInmobles`, `obtenirInmoble`, `crearInmoble`,
-   `actualitzarInmoble`, `eliminarInmoble`). `SELECT` amb columnes explícites; `INSERT`/`UPDATE` no toquen els camps d'auditoria.
-9. cSpell desactivat per al projecte a `.vscode/settings.json` (`"cSpell.enabled": false`).
-10. `Resultat<T>` afegit al final de `src/shared/tipus.ts`.
-11. `NOTES.md` revisat i corregit (4 incoherències resoltes; vegeu `NOTES.md` per a l'estat final).
+   migracions amb `PRAGMA user_version`, i `export { db, docsDir, DADES }`. Carregat des de `index.ts`.
+6. BD existent verificada (4 taules, 2 índexs, 9 triggers, 10 columnes a `contractes`) i marcada
+   `user_version = 1` **sense executar** la migració. Còpies de seguretat a `~/Lloguers/` (`.bak`, `.bak2`), fora del repositori.
+7. cSpell desactivat per al projecte (`.vscode/settings.json`).
+
+### Fase B: backend al Main Process (feta)
+
+- `src/shared/tipus.ts`: `Immoble`, `ImmobleDades`, `Inquili`, `InquiliDades`, `Idioma`, `Config`,
+  `CodiError` (`CONTRACTE_SOLAPAT` | `FK_VIOLADA` | `CHECK_VIOLAT` | `DESCONEGUT`) i `Resultat<T>` amb `error: CodiError`.
+  Cap tipus inclou `afegit_el` ni `ultima_mod`.
+- `src/main/errors.ts`: `traduirError(e)` i `executar(op)`, que converteix qualsevol operació en un `Resultat<T>`.
+- `src/main/inmobles.ts` i `src/main/inquilins.ts` (CRUD amb `SELECT` de columnes explícites). A `inquilins` la
+  conversió `0/1/NULL` ↔ `boolean` dels indicadors `ck_tel1_*` es fa només aquí.
+- `src/main/config.ts`: llegeix i escriu `~/Lloguers/config.json` (`{ "idioma": "ca" }`); si no existeix o és invàlid, crea el
+  valor per defecte des de `app.getLocale()` (fallback `ca`).
+- `src/main/ipc/{inmobles,inquilins,config}.ts`, registrats a `index.ts` abans de crear la finestra.
+- Preload i `src/preload/index.d.ts` amb `window.api.inmobles`, `.inquilins` i `.config`
+  (cal duplicar la forma de l'objecte `api` als dos fitxers cada cop que s'hi afegeix un mètode).
+- Provat des de les DevTools: lectura d'immobles i inquilins, crear/actualitzar/eliminar un inquilí de prova
+  (`ultima_mod` s'actualitza sola), config (crear, desar, rebuig d'un idioma invàlid). Fila de prova esborrada.
+
+### Prova d'empaquetat anticipada (feta, amb `npm run build:unpack`)
+
+- Migracions incrustades al codi amb `import.meta.glob('./migrations/*.sql', { query: '?raw', import: 'default', eager: true })`.
+  Ja no es llegeixen del disc.
+- `electron-builder.yml`: `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'` (**un sol text**) i `snap` tret de `linux.target`.
+- Executada l'app empaquetada amb `HOME=/tmp/provahome` (instal·lació des de zero): ha sortit
+  `Migració aplicada: 001_inicial.sql`, la BD nova té `user_version = 1` i 4 taules, i la BD real no s'ha tocat.
+- `better-sqlite3` 13 porta els binaris a `prebuilds/<plataforma>.node`; ens cal només `linux-x64`.
 
 ### Pendent de confirmar
 
-- **Commit** dels punts 7 a 10 (`tipus.ts`, `tsconfig`, `inmobles.ts`, `settings.json`). L'últim commit confirmat és el de `database.ts`.
-- Aplicar a `NOTES.md` els tres retocs menors de l'última revisió (redacció de "Entorn", línia llarga de
-  `user_version` i indentació del bloc d'estructura d'i18n), si no s'han fet ja.
+- **Commit** dels canvis a `NOTES.md` i `PROGRES.md` (les dues versions actualitzades).
+- Pujar les dues versions noves al projecte de Claude (**tots dos alhora**, perquè no es desquadrin).
+- No s'ha vist la sortida del `cmp` de la còpia `lloguers.sqlite.bak2`.
 
 ## Versions reals vs. la guia
 
@@ -73,6 +91,8 @@ La guia genèrica és antiga respecte al que s'ha instal·lat:
 - `window.api` es declara a `src/preload/index.d.ts` (cobert per `tsconfig.web.json`); no cal `electron.d.ts`.
 - La plantilla ja porta `"postinstall": "electron-builder install-app-deps"`, que recompila els mòduls natius
   contra Electron després de cada `npm install`. No cal executar `electron-rebuild` a mà.
+- electron-builder avisa que `@electron/rebuild` és una dependència sobrera; és inofensiu. Es pot treure de
+  `devDependencies` més endavant.
 
 ## Incidències resoltes (cal repetir-les si es reinstal·la)
 
@@ -102,6 +122,7 @@ sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
 ```
 
 Es perd si es reinstal·la Electron (p. ex. `rm -rf node_modules` + `npm install`). Cal repetir-ho llavors.
+L'app empaquetada (`dist/linux-unpacked/`) necessita el mateix sobre el seu propi `chrome-sandbox`.
 
 ### 3. Error TypeScript 4023 a `database.ts`
 
@@ -113,24 +134,43 @@ import type { Database as DatabaseType } from 'better-sqlite3'
 const db: DatabaseType = new Database(dbPath)
 ```
 
+### 4. Avís de `baseUrl` a `tsconfig.web.json`
+
+`Option 'baseUrl' is deprecated and will stop functioning in TypeScript 7.0.`
+Solució: eliminar `baseUrl` i posar la ruta de `paths` relativa (`"./src/renderer/src/*"`).
+
+### 5. `asarUnpack` invàlid a `electron-builder.yml`
+
+`configuration.asarUnpack.1 should be a string`: la validació només accepta **un sol text**, no una llista.
+Solució: `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`.
+Si un canvi a aquest fitxer no té efecte, comprovar-ho amb `grep -n asarUnpack electron-builder.yml`
+(una vegada es va malmetre en editar-lo i va caldre substituir-lo sencer).
+
+### 6. Missatges de `libva` / `vaInitialize` a la terminal
+
+Venen de la GPU virtual de la VM (`virtio_gpu`): Chromium no pot usar l'acceleració de vídeo i renderitza per programari.
+Són inofensius. Si molesten, `app.disableHardwareAcceleration()` al Main.
+
 ## Pròxim pas
 
-**Fase B, pas 1 de `NOTES.md`: codis d'error.**
+**Fase C, pas 8 de `NOTES.md`: instal·lar Mantine i complements.**
 
-- Canviar `Resultat<T>` a `src/shared/tipus.ts` perquè porti `error: CodiError` (ara porta `error: string`, que
-  contradiu la decisió d'i18n) i definir `CodiError` com a unió de codis:
-  `CONTRACTE_SOLAPAT`, `FK_VIOLADA`, `CHECK_VIOLAT`, `DESCONEGUT`.
-- Crear `src/main/errors.ts` amb `traduirError(e)`: `SQLITE_CONSTRAINT_TRIGGER` → `CONTRACTE_SOLAPAT`,
-  `..._FOREIGNKEY` → `FK_VIOLADA`, `..._CHECK` → `CHECK_VIOLAT`, resta → `DESCONEGUT`.
-  Comprovar amb una prova real que `better-sqlite3` retorna aquests noms de codi.
+- Paquets previstos: `@mantine/core`, `@mantine/hooks`, `@mantine/form`, `@mantine/dates` (amb `dayjs`),
+  `@mantine/notifications` i `@mantine/modals`.
+- Seguir la documentació de la **versió instal·lada** (les versions majors han canviat coses).
+- Després d'instal·lar, executar `npm install-scripts ls` per si algun paquet nou necessita aprovació.
+- Muntar `MantineProvider`, `DatesProvider`, `Notifications` i `ModalsProvider`.
 
-Després: handlers IPC d'`inmobles` (pas 2), preload i `window.api.inmobles` (pas 3) i prova des de les DevTools (pas 4).
+Després: i18n (pas 9), `react-router-dom` i disseny general (pas 10), utilitats de dates i errors (pas 11).
 
 ## Altres pendents
 
-- Empaquetat (Fase E): `migracionsDir` apunta a `src/main/migrations` i només funciona en desenvolupament.
-  Cal incloure les migracions com a recurs o amb `?raw` de Vite, i fer `asarUnpack` de `better-sqlite3`.
-  Opcional: fer una prova d'empaquetat anticipada després del pas 7 de la Fase B, per detectar-ho aviat.
+- Verificar amb un cas real (pas 15, contractes) que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*`
+  que usa `traduirError`. Si no coincideixen, `CONTRACTE_SOLAPAT` no es detectarà.
+- `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD
+  (p. ex. l'idioma invàlid). Només cosmètic; ajustar el text si molesta.
+- Empaquetat (Fase E): excloure els binaris de `better-sqlite3` d'altres plataformes (opcional), revisar `appId`,
+  `maintainer` i el bloc `publish` (apunta a `example.com`), generar `.deb` / AppImage i provar al portàtil Mint.
 
 ## Git
 

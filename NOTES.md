@@ -175,17 +175,19 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 - [x] Tipus compartits a `src/shared/tipus.ts` (`Immoble`, `ImmobleDades`).
 - [x] `src/main/inmobles.ts` (CRUD).
 
-### Fase B: backend al Main Process
-1. Codis d'error: `Resultat<T>` amb `error: CodiError` (unió de codis) i `src/main/errors.ts`
-   amb `traduirError(e)`: `SQLITE_CONSTRAINT_TRIGGER` → `CONTRACTE_SOLAPAT`,
-   `..._FOREIGNKEY` → `FK_VIOLADA`, `..._CHECK` → `CHECK_VIOLAT`, resta → `DESCONEGUT`.
-2. Handlers IPC d'`inmobles` (`src/main/ipc/inmobles.ts`) i registre a `index.ts`.
-3. Preload + `window.api.inmobles` tipat a `src/preload/index.d.ts`.
-4. Prova des de les DevTools: `await window.api.inmobles.obtenir()` retorna els immobles migrats.
-5. Mateixa cadena per a `inquilins` (tipus, CRUD, IPC, preload). Decidir si `ck_tel1_*` van
-   com a `0 | 1` o `boolean` al tipus.
-6. `config.ts`: llegir/escriure `~/Lloguers/config.json`; IPC `config:obtenir` i `config:desar`.
-7. Commit.
+### Fase B: backend al Main Process (feta)
+1. [x] Codis d'error: `Resultat<T>` amb `error: CodiError` i `src/main/errors.ts` amb `traduirError(e)`
+   i `executar(op)`, que converteix qualsevol operació en un `Resultat<T>`.
+   **Pendent de verificar amb un cas real** que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*`
+   (es farà al pas 15, amb contractes).
+2. [x] Handlers IPC d'`inmobles` (`src/main/ipc/inmobles.ts`) i registre a `index.ts`.
+3. [x] Preload + `window.api.inmobles` tipat a `src/preload/index.d.ts`.
+4. [x] Prova des de les DevTools: `inmobles.obtenir()` retorna els immobles migrats, sense camps d'auditoria.
+5. [x] Mateixa cadena per a `inquilins`. `ck_tel1_*` són `boolean` al tipus; la conversió 0/1 ↔ boolean
+   es fa només a `src/main/inquilins.ts`. Provats crear, actualitzar i eliminar.
+6. [x] `config.ts` i IPC `config:obtenir` / `config:desar`. El Main valida l'idioma abans d'escriure.
+7. [x] Commit.
+8. [x] Prova d'empaquetat anticipada (`npm run build:unpack`): vegeu el pas 19.
 
 ### Fase C: base de la UI
 8. Instal·lar Mantine i complements; `MantineProvider`, `DatesProvider`, `Notifications`, `ModalsProvider`.
@@ -206,6 +208,13 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 18. Documents (UI): pestanya dins del contracte.
 
 ### Fase E: distribució
-19. Empaquetat: `migracionsDir` no funciona fora de desenvolupament (incloure les migracions
-    com a recurs o amb `?raw` de Vite), `asarUnpack` de `better-sqlite3` a `electron-builder.yml`.
+19. Empaquetat. Fet i verificat amb `build:unpack` i un `HOME` buit (instal·lació des de zero):
+    - [x] Migracions incrustades al codi amb `import.meta.glob(..., { query: '?raw', eager: true })`
+      a `database.ts` (ja no es llegeixen del disc).
+    - [x] `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`. Ha de ser **un sol text**,
+      no una llista (la validació d'electron-builder la rebutja).
+    - [x] `snap` tret de `linux.target` (necessita `snapcraft`).
+    - [ ] `better-sqlite3` 13 porta els binaris a `prebuilds/<plataforma>.node`; només ens cal `linux-x64`.
+      Opcional: excloure la resta per reduir la mida.
+    - [ ] Revisar `appId`, `maintainer` i el bloc `publish` (apunta a `example.com`).
 20. `npm run build:linux` (`.deb` / AppImage) i prova al portàtil Mint.
