@@ -1,0 +1,42 @@
+{
+  "app": {
+    "titol": "Lloguers"
+  },
+  "menu": {
+    "immobles": "Immobles",
+    "inquilins": "Inquilins",
+    "contractes": "Contractes",
+    "configuracio": "Configuració",
+    "quantA": "Quant a"
+  },
+  "comu": {
+    "afegir": "Afegir",
+    "editar": "Editar",
+    "eliminar": "Eliminar",
+    "desar": "Desar",
+    "cancellar": "Cancel·lar",
+    "tancar": "Tancar",
+    "cercar": "Cercar",
+    "si": "Sí",
+    "no": "No",
+    "carregant": "Carregant…"
+  },
+  "errors": {
+    "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
+    "FK_VIOLADA": "L'operació no és possible perquè hi ha dades relacionades.",
+    "CHECK_VIOLAT": "Alguna de les dades introduïdes no és vàlida.",
+    "DESCONEGUT": "S'ha produït un error inesperat."
+  },
+  "configuracio": {
+    "titol": "Configuració",
+    "idioma": "Idioma",
+    "idiomes": {
+      "ca": "Català",
+      "es": "Castellano"
+    }
+  },
+  "quantA": {
+    "titol": "Quant a",
+    "versio": "Versió"
+  }
+}

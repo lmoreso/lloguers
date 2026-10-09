@@ -192,7 +192,7 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 ### Fase C: base de la UI
 8. Instal·lar Mantine i complements; `MantineProvider`, `DatesProvider`, `Notifications`, `ModalsProvider`.
 9. i18n: `i18next`, `ca.json`, `es.json`, claus tipades i selector d'idioma connectat a `config`.
-10. `react-router-dom` i disseny general (menú: Immobles, Inquilins, Contractes).
+10. `react-router-dom` i disseny general (menú: Immobles, Inquilins, Contractes, Configuració, Quant a).
 11. Utilitats: conversió `Date` ↔ ISO sense `toISOString()`, i helper `CodiError` → `t('errors.X')` → notificació.
 12. Commit.
 

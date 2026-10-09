@@ -1,0 +1,42 @@
+{
+  "app": {
+    "titol": "Alquileres"
+  },
+  "menu": {
+    "immobles": "Inmuebles",
+    "inquilins": "Inquilinos",
+    "contractes": "Contratos",
+    "configuracio": "Configuración",
+    "quantA": "Acerca de"
+  },
+  "comu": {
+    "afegir": "Añadir",
+    "editar": "Editar",
+    "eliminar": "Eliminar",
+    "desar": "Guardar",
+    "cancellar": "Cancelar",
+    "tancar": "Cerrar",
+    "cercar": "Buscar",
+    "si": "Sí",
+    "no": "No",
+    "carregant": "Cargando…"
+  },
+  "errors": {
+    "CONTRACTE_SOLAPAT": "El período se solapa con otro contrato de este inmueble.",
+    "FK_VIOLADA": "La operación no es posible porque hay datos relacionados.",
+    "CHECK_VIOLAT": "Alguno de los datos introducidos no es válido.",
+    "DESCONEGUT": "Se ha producido un error inesperado."
+  },
+  "configuracio": {
+    "titol": "Configuración",
+    "idioma": "Idioma",
+    "idiomes": {
+      "ca": "Català",
+      "es": "Castellano"
+    }
+  },
+  "quantA": {
+    "titol": "Acerca de",
+    "versio": "Versión"
+  }
+}

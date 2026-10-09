@@ -14,17 +14,27 @@ import '@mantine/notifications/styles.css'
 import 'dayjs/locale/ca'
 import 'dayjs/locale/es'
 import App from './App'
+import i18n from './i18n'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <MantineProvider>
-      {/* Locale fix de moment; al pas 9 es connectarà a l'idioma de config.json */}
-      <DatesProvider settings={{ locale: 'ca' }}>
-        <ModalsProvider>
-          <Notifications />
-          <App />
-        </ModalsProvider>
-      </DatesProvider>
-    </MantineProvider>
-  </StrictMode>
-)
+async function arrencar(): Promise<void> {
+  // L'idioma es llegeix de ~/Lloguers/config.json abans de pintar res.
+  const resposta = await window.api.config.obtenir()
+  const idioma = resposta.ok ? resposta.dades.idioma : 'ca'
+  await i18n.changeLanguage(idioma)
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <MantineProvider>
+        {/* Locale de dates fix de moment; es connectarà a l'idioma al pas 9g */}
+        <DatesProvider settings={{ locale: 'ca' }}>
+          <ModalsProvider>
+            <Notifications />
+            <App />
+          </ModalsProvider>
+        </DatesProvider>
+      </MantineProvider>
+    </StrictMode>
+  )
+}
+
+arrencar()
