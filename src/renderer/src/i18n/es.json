@@ -39,6 +39,29 @@
     "titol": "Acerca de",
     "versio": "Versión"
   },
+    "inquilins": {
+    "nou": "Nuevo inquilino",
+    "editar": "Editar inquilino",
+    "camps": {
+      "nom": "Nombre",
+      "cognoms": "Apellidos",
+      "nif": "NIF",
+      "telefon": "Teléfono",
+      "wassap": "WhatsApp",
+      "bizum": "Bizum"
+    },
+    "buit": "Todavía no hay ningún inquilino.",
+    "senseNom": "(sin nombre)",
+    "desat": "Inquilino guardado.",
+    "eliminat": "Inquilino eliminado.",
+    "eliminar": {
+      "titol": "Eliminar inquilino",
+      "confirmacio": "¿Seguro que quieres eliminar a {{nom}}? Esta acción no se puede deshacer."
+    },
+    "validacio": {
+      "nomOCognoms": "Hay que rellenar el nombre o los apellidos."
+    }    
+  },
   "proves" :{
         "titol": "Pruebas de Mantine",
         "dataPicker": "Selecciona una fecha",

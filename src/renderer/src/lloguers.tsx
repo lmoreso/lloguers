@@ -2,6 +2,7 @@ import { AppShell, NavLink, Title } from '@mantine/core'
 import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import SelectorIdioma from './components/SelectorIdioma'
+import Inquilins from './pantalles/Inquilins'
 
 const SECCIONS = [
   { ruta: '/immobles', clau: 'menu.immobles' },
@@ -36,7 +37,7 @@ function Estructura(): React.JSX.Element {
         <Routes>
           <Route path="/" element={<Navigate to="/immobles" replace />} />
           <Route path="/immobles" element={<Title order={2}>{t('menu.immobles')}</Title>} />
-          <Route path="/inquilins" element={<Title order={2}>{t('menu.inquilins')}</Title>} />
+          <Route path="/inquilins" element={<Inquilins />} />
           <Route path="/contractes" element={<Title order={2}>{t('menu.contractes')}</Title>} />
           <Route
             path="/configuracio"

@@ -39,6 +39,29 @@
     "titol": "Quant a",
     "versio": "Versió"
   },
+    "inquilins": {
+    "nou": "Nou inquilí",
+    "editar": "Editar inquilí",
+    "camps": {
+      "nom": "Nom",
+      "cognoms": "Cognoms",
+      "nif": "NIF",
+      "telefon": "Telèfon",
+      "wassap": "WhatsApp",
+      "bizum": "Bizum"
+    },
+    "buit": "Encara no hi ha cap inquilí.",
+    "senseNom": "(sense nom)",
+    "desat": "Inquilí desat.",
+    "eliminat": "Inquilí eliminat.",
+    "eliminar": {
+      "titol": "Eliminar inquilí",
+      "confirmacio": "Segur que vols eliminar {{nom}}? Aquesta acció no es pot desfer."
+    },
+    "validacio": {
+      "nomOCognoms": "Cal omplir el nom o els cognoms."
+    }    
+  },
   "proves" :{
         "titol": "Proves de Mantine",
         "dataPicker": "Sel·lecciona una data",
