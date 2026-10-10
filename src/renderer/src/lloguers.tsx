@@ -3,6 +3,8 @@ import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-ro
 import { useTranslation } from 'react-i18next'
 import SelectorIdioma from './components/SelectorIdioma'
 import Inquilins from './pantalles/Inquilins'
+import Immobles from './pantalles/Immobles'
+import FitxaImmoble from './pantalles/FitxaImmoble'
 
 const SECCIONS = [
   { ruta: '/immobles', clau: 'menu.immobles' },
@@ -28,7 +30,7 @@ function Estructura(): React.JSX.Element {
             component={Link}
             to={s.ruta}
             label={t(s.clau)}
-            active={pathname === s.ruta}
+            active={pathname === s.ruta || pathname.startsWith(`${s.ruta}/`)}
           />
         ))}
       </AppShell.Navbar>
@@ -36,7 +38,9 @@ function Estructura(): React.JSX.Element {
       <AppShell.Main>
         <Routes>
           <Route path="/" element={<Navigate to="/immobles" replace />} />
-          <Route path="/immobles" element={<Title order={2}>{t('menu.immobles')}</Title>} />
+          <Route path="/immobles" element={<Immobles />} />
+          <Route path="/immobles/nou" element={<FitxaImmoble key="nou" />} />
+          <Route path="/immobles/:id" element={<FitxaImmoble key="edicio" />} />
           <Route path="/inquilins" element={<Inquilins />} />
           <Route path="/contractes" element={<Title order={2}>{t('menu.contractes')}</Title>} />
           <Route

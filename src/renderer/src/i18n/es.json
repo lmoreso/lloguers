@@ -19,7 +19,9 @@
     "cercar": "Buscar",
     "si": "Sí",
     "no": "No",
-    "carregant": "Cargando…"
+    "carregant": "Cargando…",
+    "obligatori": "Este campo es obligatorio.",
+    "tornar": "Volver"    
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El período se solapa con otro contrato de este inmueble.",
@@ -39,7 +41,7 @@
     "titol": "Acerca de",
     "versio": "Versión"
   },
-    "inquilins": {
+  "inquilins": {
     "nou": "Nuevo inquilino",
     "editar": "Editar inquilino",
     "camps": {
@@ -62,6 +64,43 @@
       "nomOCognoms": "Hay que rellenar el nombre o los apellidos."
     }    
   },
+  "immobles": {
+    "nou": "Nuevo inmueble",
+    "editar": "Editar inmueble",
+    "buit": "Todavía no hay ningún inmueble.",
+    "desat": "Inmueble guardado.",
+    "eliminat": "Inmueble eliminado.",
+    "eliminar": {
+      "titol": "Eliminar inmueble",
+      "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Esta acción no se puede deshacer."
+    },
+    "seccions": {
+      "adreca": "Dirección",
+      "cadastre": "Catastro",
+      "certificat": "Certificado energético",
+      "cedula": "Cédula de habitabilidad"
+    },
+    "camps": {
+      "via": "Vía",
+      "numVia": "Número",
+      "pis": "Piso",
+      "porta": "Puerta",
+      "codiPostal": "Código postal",
+      "localitat": "Localidad",
+      "provincia": "Provincia",
+      "refCatastral": "Referencia catastral",
+      "superficie": "Superficie (m²)",
+      "superficiePati": "Superficie del patio (m²)",
+      "registre": "Registro",
+      "classe": "Clase",
+      "data": "Fecha",
+      "caducitat": "Caducidad"
+    },
+    "validacio": {
+      "numero": "Introduce un número válido."
+    },
+    "noTrobat": "No se ha encontrado este inmueble."    
+  },  
   "proves" :{
         "titol": "Pruebas de Mantine",
         "dataPicker": "Selecciona una fecha",

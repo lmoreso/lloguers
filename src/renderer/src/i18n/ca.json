@@ -19,7 +19,9 @@
     "cercar": "Cercar",
     "si": "Sí",
     "no": "No",
-    "carregant": "Carregant…"
+    "carregant": "Carregant…",
+    "obligatori": "Aquest camp és obligatori.",
+    "tornar": "Tornar"    
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
@@ -39,7 +41,7 @@
     "titol": "Quant a",
     "versio": "Versió"
   },
-    "inquilins": {
+  "inquilins": {
     "nou": "Nou inquilí",
     "editar": "Editar inquilí",
     "camps": {
@@ -62,6 +64,43 @@
       "nomOCognoms": "Cal omplir el nom o els cognoms."
     }    
   },
+  "immobles": {
+    "nou": "Nou immoble",
+    "editar": "Editar immoble",
+    "buit": "Encara no hi ha cap immoble.",
+    "desat": "Immoble desat.",
+    "eliminat": "Immoble eliminat.",
+    "eliminar": {
+      "titol": "Eliminar immoble",
+      "confirmacio": "Segur que vols eliminar {{nom}}? Aquesta acció no es pot desfer."
+    },
+    "seccions": {
+      "adreca": "Adreça",
+      "cadastre": "Cadastre",
+      "certificat": "Certificat energètic",
+      "cedula": "Cèdula d'habitabilitat"
+    },
+    "camps": {
+      "via": "Via",
+      "numVia": "Número",
+      "pis": "Pis",
+      "porta": "Porta",
+      "codiPostal": "Codi postal",
+      "localitat": "Localitat",
+      "provincia": "Província",
+      "refCatastral": "Referència cadastral",
+      "superficie": "Superfície (m²)",
+      "superficiePati": "Superfície del pati (m²)",
+      "registre": "Registre",
+      "classe": "Classe",
+      "data": "Data",
+      "caducitat": "Caducitat"
+    },
+    "validacio": {
+      "numero": "Introdueix un número vàlid."
+    },
+    "noTrobat": "No s'ha trobat aquest immoble."
+  },  
   "proves" :{
         "titol": "Proves de Mantine",
         "dataPicker": "Sel·lecciona una data",
