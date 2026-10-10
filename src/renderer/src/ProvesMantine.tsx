@@ -4,6 +4,8 @@ import SelectorIdioma from './components/SelectorIdioma'
 import { DatePickerInput } from '@mantine/dates'
 import dayjs from 'dayjs'
 import { useState } from 'react'
+import { esOk } from './utils/resultat'
+import { Idioma } from '../../shared/tipus'
 
 type ProvesMantineProps = {
   onTornar: () => void
@@ -12,6 +14,11 @@ type ProvesMantineProps = {
 function ProvesMantine({ onTornar }: ProvesMantineProps): React.JSX.Element {
   const { t } = useTranslation()
   const [data, setData] = useState<string | null>(dayjs().format('YYYY-MM-DD'))
+
+  async function provarError(): Promise<void> {
+    const r = await window.api.config.desar({ idioma: 'fr' as Idioma })
+    console.log('esOk (error) ->', esOk(r))
+  }
 
   return (
     <Stack p="lg" gap="xs">
@@ -44,6 +51,9 @@ function ProvesMantine({ onTornar }: ProvesMantineProps): React.JSX.Element {
             <Text>{t('proves.canviIdioma')}</Text>
             <SelectorIdioma />
             <DatePickerInput label={t('proves.dataPicker')} value={data} onChange={setData} />
+            <Button mt="md" onClick={provarError}>
+              Frances (error)
+            </Button>
           </Stack>
         </Stack>
       </Paper>

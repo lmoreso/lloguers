@@ -1,7 +1,7 @@
 import { SegmentedControl } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
 import { useTranslation } from 'react-i18next'
 import type { Idioma } from '../../../shared/tipus'
+import { esOk } from '../utils/resultat'
 
 const IDIOMES: Idioma[] = ['ca', 'es']
 
@@ -14,10 +14,7 @@ function SelectorIdioma(): React.JSX.Element {
 
     // Primer es desa al disc; només si va bé es canvia la interfície.
     const resposta = await window.api.config.desar({ idioma })
-    if (!resposta.ok) {
-      notifications.show({ color: 'red', message: t(`errors.${resposta.error}`) })
-      return
-    }
+    if (!esOk(resposta)) return
     await i18n.changeLanguage(idioma)
   }
 
