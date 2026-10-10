@@ -99,7 +99,16 @@
     "validacio": {
       "numero": "Introduce un número válido."
     },
-    "noTrobat": "No se ha encontrado este inmueble."    
+    "noTrobat": "No se ha encontrado este inmueble.",
+    "caducitats": {
+      "titol": "Caducidades",
+      "certificat": "Certificado",
+      "cedula": "Cédula",
+      "caducat": "caducado",
+      "aviat": "caduca pronto",
+      "avis_one": "{{count}} inmueble con documentos caducados o a punto de caducar.",
+      "avis_other": "{{count}} inmuebles con documentos caducados o a punto de caducar."
+    }        
   },  
   "proves" :{
         "titol": "Pruebas de Mantine",

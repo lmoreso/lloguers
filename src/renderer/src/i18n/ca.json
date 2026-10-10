@@ -99,7 +99,16 @@
     "validacio": {
       "numero": "Introdueix un número vàlid."
     },
-    "noTrobat": "No s'ha trobat aquest immoble."
+    "noTrobat": "No s'ha trobat aquest immoble.",
+    "caducitats": {
+      "titol": "Caducitats",
+      "certificat": "Certificat",
+      "cedula": "Cèdula",
+      "caducat": "caducat",
+      "aviat": "caduca aviat",
+      "avis_one": "{{count}} immoble amb documents caducats o a punt de caducar.",
+      "avis_other": "{{count}} immobles amb documents caducats o a punt de caducar."
+    }    
   },  
   "proves" :{
         "titol": "Proves de Mantine",

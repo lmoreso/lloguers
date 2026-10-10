@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, Group, Table, Text, Title } from '@mantine/core'
+import { Alert, Badge, Button, Group, Table, Text, Title } from '@mantine/core'
+import { estatCaducitat } from '../utils/caducitat'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
@@ -12,6 +13,19 @@ function adreca(i: Immoble): string {
   return `${i.via} ${i.num_via}, ${i.pis}${i.porta ? ` ${i.porta}` : ''}`
 }
 
+const DOCUMENTS = [
+  { clau: 'certificat', camp: 'cert_en_caduc' },
+  { clau: 'cedula', camp: 'ced_hab_caduc' }
+] as const
+
+// Documents d'un immoble que estan caducats o a punt de caducar.
+function alertes(i: Immoble): { clau: 'certificat' | 'cedula'; estat: 'caducat' | 'aviat' }[] {
+  return DOCUMENTS.flatMap((d) => {
+    const estat = estatCaducitat(i[d.camp])
+    return estat ? [{ clau: d.clau, estat }] : []
+  })
+}
+
 function Immobles(): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -19,6 +33,7 @@ function Immobles(): React.JSX.Element {
   const [carregant, setCarregant] = useState(true)
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
+  const ambAvisos = immobles.filter((i) => alertes(i).length > 0).length
 
   useEffect(() => {
     let cancelat = false
@@ -57,6 +72,11 @@ function Immobles(): React.JSX.Element {
 
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
       {!carregant && immobles.length === 0 && <Text c="dimmed">{t('immobles.buit')}</Text>}
+      {ambAvisos > 0 && (
+        <Alert color="orange" mb="md">
+          {t('immobles.caducitats.avis', { count: ambAvisos })}
+        </Alert>
+      )}
 
       {immobles.length > 0 && (
         <Table striped highlightOnHover>
@@ -66,6 +86,7 @@ function Immobles(): React.JSX.Element {
               <Table.Th>{t('immobles.camps.localitat')}</Table.Th>
               <Table.Th>{t('immobles.camps.refCatastral')}</Table.Th>
               <Table.Th>{t('immobles.camps.superficie')}</Table.Th>
+              <Table.Th>{t('immobles.caducitats.titol')}</Table.Th>
               <Table.Th />
             </Table.Tr>
           </Table.Thead>
@@ -76,6 +97,15 @@ function Immobles(): React.JSX.Element {
                 <Table.Td>{i.localitat}</Table.Td>
                 <Table.Td>{i.ref_catastral}</Table.Td>
                 <Table.Td>{i.superficie_m2}</Table.Td>
+                <Table.Td>
+                  <Group gap="xs">
+                    {alertes(i).map((a) => (
+                      <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
+                        {t(`immobles.caducitats.${a.clau}`)}: {t(`immobles.caducitats.${a.estat}`)}
+                      </Badge>
+                    ))}
+                  </Group>
+                </Table.Td>
                 <Table.Td>
                   <Group gap="xs" wrap="nowrap">
                     <Button

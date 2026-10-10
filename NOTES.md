@@ -105,7 +105,12 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
   amb un comptador (`versio`) a les dependències.
 - **Formularis en modal**: el formulari es munta només mentre el modal és obert, així sempre comença net
   i no cal cap `reset`. Els camps de text buits es desen com a `NULL` (`buitANull`).  
-
+- **Formularis llargs**: pantalla pròpia amb ruta (`/x/nou`, `/x/:id`), no modal. La fitxa carrega les dades i
+  **després** munta el formulari, que agafa els valors inicials sense `reset`. A les rutes, una `key` diferent
+  per a "nou" i "edició" perquè React no reutilitzi l'estat.
+- **Números al formulari**: camp de text amb `inputMode="decimal"` que accepta coma o punt; es converteix amb
+  `aNumero()` i a la BD sempre va amb punt. Els camps buits es desen com a `NULL` (`buitANull`).
+  
 ## Diferències amb la guia
 
 1. La guia desa la BD a `app.getPath('userData')`; aquí s'usa `~/Lloguers/` (vegeu més amunt).
@@ -225,8 +230,9 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 ### Fase D: pantalles
 13. [x] Inquilins: llista + formulari en modal, validació (nom o cognoms), eliminació amb confirmació.
     Valida Mantine (decisió definitiva). Pantalles a `src/renderer/src/pantalles/`.
-14. Immobles: llista + formulari per seccions (adreça, cadastre, certificat energètic, cèdula);
-    avís de caducitats properes.
+14. [x] Immobles: llista, formulari per seccions en pantalla pròpia (`/immobles/nou`, `/immobles/:id`),
+    eliminació amb confirmació i avís de caducitats (certificat i cèdula) a 60 dies
+    (`DIES_AVIS` a `src/renderer/src/utils/caducitat.ts`). El dia de caducitat el document encara és vigent.
 15. Contractes (backend): CRUD, comprovar els triggers de solapament amb dades de prova.
 16. Contractes (UI): selectors d'immoble i inquilí, gestió de `CONTRACTE_SOLAPAT`,
     marca de contracte vigent (`data_fi` buida).
