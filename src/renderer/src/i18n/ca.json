@@ -38,5 +38,11 @@
   "quantA": {
     "titol": "Quant a",
     "versio": "Versió"
+  },
+  "proves" :{
+        "titol": "Proves de Mantine",
+        "dataPicker": "Sel·lecciona una data",
+        "canviIdioma": "Sel·lecciona un idioma",
+        "tornar": "Tornar a l'inici"
   }
 }

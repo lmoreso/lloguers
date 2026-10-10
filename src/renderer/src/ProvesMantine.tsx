@@ -1,15 +1,23 @@
 import { Button, Group, Paper, Stack, Text, Title, Anchor } from '@mantine/core'
+import { useTranslation } from 'react-i18next'
+import SelectorIdioma from './components/SelectorIdioma'
+import { DatePickerInput } from '@mantine/dates'
+import dayjs from 'dayjs'
+import { useState } from 'react'
 
 type ProvesMantineProps = {
   onTornar: () => void
 }
 
 function ProvesMantine({ onTornar }: ProvesMantineProps): React.JSX.Element {
+  const { t } = useTranslation()
+  const [data, setData] = useState<string | null>(dayjs().format('YYYY-MM-DD'))
+
   return (
     <Stack p="lg" gap="xs">
       <Group justify="space-between">
         <Button variant="subtle" onClick={onTornar}>
-          {"← Tornar a l'inici"}
+          {`← ${t('proves.tornar')}`}
         </Button>
 
         <Text c="dimmed" size="sm">
@@ -17,7 +25,7 @@ function ProvesMantine({ onTornar }: ProvesMantineProps): React.JSX.Element {
         </Text>
       </Group>
 
-      <Title order={2}>Proves de Mantine</Title>
+      <Title order={2}>{t('proves.titol')}</Title>
 
       <Paper withBorder shadow="md" radius="md" p="lg">
         <Stack gap="md">
@@ -28,9 +36,15 @@ function ProvesMantine({ onTornar }: ProvesMantineProps): React.JSX.Element {
           </Text>
 
           <Group justify="flex-end">
-            <Button variant="default">Cancel·lar</Button>
-            <Button onClick={() => console.log('Desar')}>Desar</Button>
+            <Button variant="default">{t('comu.cancellar')}</Button>
+            <Button onClick={() => console.log(t('comu.desar'))}>{t('comu.desar')}</Button>
           </Group>
+
+          <Stack gap="md">
+            <Text>{t('proves.canviIdioma')}</Text>
+            <SelectorIdioma />
+            <DatePickerInput label={t('proves.dataPicker')} value={data} onChange={setData} />
+          </Stack>
         </Stack>
       </Paper>
 

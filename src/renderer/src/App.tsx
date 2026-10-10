@@ -1,4 +1,4 @@
-import { Button, Stack, Text } from '@mantine/core'
+import { Button, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import ProvesMantine from './ProvesMantine'
@@ -6,9 +6,10 @@ import Lloguers from './lloguers'
 
 function App(): React.JSX.Element {
   const { t } = useTranslation()
+  const opcioIni = 'Lloguers' as 'Inici' | 'Proves' | 'Lloguers'
 
-  const [mostrarProves, setMostrarProves] = useState(false)
-  const [mostrarLloguers, setMostrarLloguers] = useState(true)
+  const [mostrarProves, setMostrarProves] = useState(opcioIni === 'Proves')
+  const [mostrarLloguers, setMostrarLloguers] = useState(opcioIni === 'Lloguers')
 
   if (mostrarProves) {
     return <ProvesMantine onTornar={() => setMostrarProves(false)} />
@@ -20,10 +21,8 @@ function App(): React.JSX.Element {
 
   return (
     <Stack p="lg" gap="lg">
-      <Text>{t('app.titol')}</Text>
-
-      <Button onClick={() => setMostrarProves(true)}>Obrir proves de Mantine</Button>
-      <Button onClick={() => setMostrarLloguers(true)}>{t('menu.immobles')}</Button>
+      <Button onClick={() => setMostrarProves(true)}>{t('proves.titol')}</Button>
+      <Button onClick={() => setMostrarLloguers(true)}>{t('app.titol')}</Button>
     </Stack>
   )
 }

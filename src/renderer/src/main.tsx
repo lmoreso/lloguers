@@ -3,7 +3,6 @@ import './assets/main.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { MantineProvider } from '@mantine/core'
-import { DatesProvider } from '@mantine/dates'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
 import '@mantine/core/styles.css'
@@ -15,6 +14,7 @@ import 'dayjs/locale/ca'
 import 'dayjs/locale/es'
 import App from './App'
 import i18n from './i18n'
+import DatesAmbIdioma from './components/DatesAmbIdioma'
 
 async function arrencar(): Promise<void> {
   // L'idioma es llegeix de ~/Lloguers/config.json abans de pintar res.
@@ -25,13 +25,12 @@ async function arrencar(): Promise<void> {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <MantineProvider>
-        {/* Locale de dates fix de moment; es connectarà a l'idioma al pas 9g */}
-        <DatesProvider settings={{ locale: 'ca' }}>
+        <DatesAmbIdioma>
           <ModalsProvider>
             <Notifications />
             <App />
           </ModalsProvider>
-        </DatesProvider>
+        </DatesAmbIdioma>
       </MantineProvider>
     </StrictMode>
   )

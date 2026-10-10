@@ -123,10 +123,12 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
   una taula més avançada.
 - Seguir sempre la documentació de la **versió instal·lada** (les versions majors han canviat
   coses; evitar tutorials antics).
-- **Dates**: a la BD són text ISO `AAAA-MM-DD`. Convertir entre `Date` i string només al límit
-  del formulari, **sense `toISOString()`** (passa per UTC i pot desplaçar el dia). Formatar amb
-  dayjs en hora local.
-- **Errors de la BD** (triggers, `CHECK`): el Main els converteix en un codi (vegeu "Multiidioma");
+- **Dates**: a la BD són text ISO `AAAA-MM-DD`. `DatePickerInput` (Mantine 9.7.1) treballa directament amb
+  aquest text (`value: string | null`), així que **no cal convertir** entre `Date` i string als formularis.
+  Mai usar `toISOString()` (passa per UTC i pot desplaçar el dia). Per a "avui" o per fer càlculs, dayjs en
+  hora local: `dayjs().format('YYYY-MM-DD')`. El format que veu l'usuari es controla amb `valueFormat`.
+  Si s'usa un altre component de dates (`DateInput`, `DateTimePicker`...), comprovar-ne el tipus del valor.
+  - **Errors de la BD** (triggers, `CHECK`): el Main els converteix en un codi (vegeu "Multiidioma");
   el Renderer el tradueix amb `t('errors.<CODI>')` i el mostra amb `@mantine/notifications` o com
   a error del camp amb `form.setErrors`.
 
@@ -158,14 +160,25 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 - **Estructura**:
 
 ```
-  src/renderer/src/i18n/
-  ├── index.ts   ← inicialització d'i18next
-  ├── ca.json    ← idioma de referència (tipat)
-  └── es.json
+  src/renderer/src/
+  ├── i18n/
+  │   ├── index.ts          ← inicialització d'i18next
+  │   ├── i18next.d.ts      ← tipatge de les claus a partir de ca.json
+  │   ├── ca.json           ← idioma de referència (tipat)
+  │   └── es.json
+  └── components/
+      ├── SelectorIdioma.tsx
+      └── DatesAmbIdioma.tsx
 ```
 - **Quan es munta**: just abans de la primera pantalla (llista + formulari d'`inquilins`), per no
   haver de refer textos escrits a mà. No depèn de `better-sqlite3` ni de les migracions.
 - **Instal·lació**: `npm install i18next react-i18next`.
+- **Afegir un text nou**, sempre en tres passos: (1) la clau a `ca.json`, (2) la mateixa clau a
+  `es.json`, (3) `t('camí.de.la.clau')` al component. Mai escriure textos a mà dins d'un component.
+  Només `ca.json` es valida: si falta una clau a `es.json`, no hi ha error i es veu el text en català.
+  Comprovació de claus iguals (necessita `jq`), des de `src/renderer/src/i18n/`:
+  `diff <(jq -r 'paths(scalars) | join(".")' ca.json | sort) <(jq -r 'paths(scalars) | join(".")' es.json | sort) && echo "claus iguals"`.
+  Les claus dels errors (`errors.<CODI>`) han de coincidir amb els valors de `CodiError`.
 
 ## Pròxims passos
 
@@ -189,12 +202,20 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 7. [x] Commit.
 8. [x] Prova d'empaquetat anticipada (`npm run build:unpack`): vegeu el pas 19.
 
-### Fase C: base de la UI
-8. Instal·lar Mantine i complements; `MantineProvider`, `DatesProvider`, `Notifications`, `ModalsProvider`.
-9. i18n: `i18next`, `ca.json`, `es.json`, claus tipades i selector d'idioma connectat a `config`.
+#### Fase C: base de la UI
+8. [x] Mantine 9.7.1 instal·lat (`core`, `hooks`, `form`, `dates`, `notifications`, `modals`, més `dayjs`).
+   Tots els paquets de Mantine han d'anar a la **mateixa versió**. Providers muntats a `main.tsx`:
+   `MantineProvider`, `DatesAmbIdioma`, `ModalsProvider` i `Notifications`.
+9. [x] i18n: `i18next` + `react-i18next`, `ca.json`, `es.json`, claus tipades des de `ca.json`.
+   L'idioma es llegeix de `config.json` a `main.tsx` abans de pintar. `SelectorIdioma` desa i canvia
+   l'idioma sense recarregar; `DatesAmbIdioma` fa que el locale de les dates segueixi l'idioma actiu.
 10. `react-router-dom` i disseny general (menú: Immobles, Inquilins, Contractes, Configuració, Quant a).
-11. Utilitats: conversió `Date` ↔ ISO sense `toISOString()`, i helper `CodiError` → `t('errors.X')` → notificació.
+    El selector d'idioma, ara provisional a `lloguers.tsx`, passa a la pantalla de Configuració.
+11. Utilitats: helper `CodiError` → `t('errors.X')` → notificació. (La conversió `Date` ↔ ISO ja no cal:
+    `DatePickerInput` treballa amb text `AAAA-MM-DD`.)
 12. Commit.
+- `App.tsx` només tria entre pantalles (`ProvesMantine` o `lloguers.tsx`); no s'hi escriu lògica.
+  La pantalla principal de l'app és `src/renderer/src/lloguers.tsx`.
 
 ### Fase D: pantalles
 13. Inquilins: llista + formulari. Valida Mantine (decisió definitiva).
