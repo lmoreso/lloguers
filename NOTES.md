@@ -100,6 +100,11 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 - Els **tipus compartits** (`Immoble`, `ImmobleDades`, `Resultat<T>`...) viuen a `src/shared/tipus.ts`,
   perquè el Renderer no hagi d'importar de `src/main/` (que carrega `better-sqlite3` i `electron`).
   `src/shared/**/*` és a l'`include` de `tsconfig.node.json` i `tsconfig.web.json`.
+- **ESLint `react-hooks/set-state-in-effect`**: no es pot cridar una funció que fa `setState` dins d'un
+  `useEffect`. Es llegeix amb `.then()` dins mateix de l'efecte, amb un indicador `cancelat`, i es recarrega
+  amb un comptador (`versio`) a les dependències.
+- **Formularis en modal**: el formulari es munta només mentre el modal és obert, així sempre comença net
+  i no cal cap `reset`. Els camps de text buits es desen com a `NULL` (`buitANull`).  
 
 ## Diferències amb la guia
 
@@ -110,13 +115,13 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 5. La guia declara `window.api` a un `electron.d.ts` a l'arrel; aquí es declara a
    `src/preload/index.d.ts`, que la plantilla ja inclou a `tsconfig.web.json`.
 
-## Llibreria d'UI (decisió provisional)
+## Llibreria d'UI (decisió definitiva)
 
 - **Mantine** com a llibreria de components, escollida per davant de Fluent UI v9 i MUI.
   Motiu: formularis, dates, modals i notificacions venen integrats i gratuïts, i el
   tipat TypeScript és bo. L'usuari coneix Fluent UI, però no és un requisit.
-- Estat: **provisional**. Es validarà amb la primera pantalla (llista + formulari d'`inquilins`).
-  Si no convenç, canviar de llibreria en aquest punt costa poc.
+- Estat: **definitiva**. Validada amb la pantalla d'`inquilins` (llista, formulari en modal, validació,
+  confirmació d'eliminació i notificacions).
 - Paquets previstos: `@mantine/core`, `@mantine/hooks`, `@mantine/form`, `@mantine/dates`
   (amb `dayjs`), `@mantine/notifications` i `@mantine/modals`.
 - Complements: `react-router-dom` per a la navegació; `TanStack Table` només si fa falta
@@ -218,7 +223,8 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
   La pantalla principal de l'app és `src/renderer/src/lloguers.tsx`.
 
 ### Fase D: pantalles
-13. Inquilins: llista + formulari. Valida Mantine (decisió definitiva).
+13. [x] Inquilins: llista + formulari en modal, validació (nom o cognoms), eliminació amb confirmació.
+    Valida Mantine (decisió definitiva). Pantalles a `src/renderer/src/pantalles/`.
 14. Immobles: llista + formulari per seccions (adreça, cadastre, certificat energètic, cèdula);
     avís de caducitats properes.
 15. Contractes (backend): CRUD, comprovar els triggers de solapament amb dades de prova.

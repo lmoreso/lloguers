@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button, Group, Modal, Table, Text, Title } from '@mantine/core'
+import { modals } from '@mantine/modals'
+import { notifications } from '@mantine/notifications'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import FormulariInquili from './FormulariInquili'
@@ -34,6 +36,22 @@ function Inquilins(): React.JSX.Element {
     setVersio((v) => v + 1)
   }
 
+  function demanarEliminar(i: Inquili): void {
+    const nom = [i.nom, i.cognoms].filter(Boolean).join(' ') || t('inquilins.senseNom')
+    modals.openConfirmModal({
+      title: t('inquilins.eliminar.titol'),
+      children: <Text size="sm">{t('inquilins.eliminar.confirmacio', { nom })}</Text>,
+      labels: { confirm: t('comu.eliminar'), cancel: t('comu.cancellar') },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        const resposta = await window.api.inquilins.eliminar(i.id)
+        if (!esOk(resposta)) return
+        notifications.show({ color: 'green', message: t('inquilins.eliminat') })
+        setVersio((v) => v + 1)
+      }
+    })
+  }
+
   return (
     <>
       <Group justify="space-between" mb="md">
@@ -54,6 +72,7 @@ function Inquilins(): React.JSX.Element {
               <Table.Th>{t('inquilins.camps.telefon')}</Table.Th>
               <Table.Th>{t('inquilins.camps.wassap')}</Table.Th>
               <Table.Th>{t('inquilins.camps.bizum')}</Table.Th>
+              <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -65,6 +84,21 @@ function Inquilins(): React.JSX.Element {
                 <Table.Td>{i.telefon_1}</Table.Td>
                 <Table.Td>{siNo(i.ck_tel1_wassap)}</Table.Td>
                 <Table.Td>{siNo(i.ck_tel1_bizum)}</Table.Td>
+                <Table.Td>
+                  <Group gap="xs" wrap="nowrap">
+                    <Button size="xs" variant="subtle" onClick={() => setModal({ inquili: i })}>
+                      {t('comu.editar')}
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      color="red"
+                      onClick={() => demanarEliminar(i)}
+                    >
+                      {t('comu.eliminar')}
+                    </Button>
+                  </Group>
+                </Table.Td>{' '}
               </Table.Tr>
             ))}
           </Table.Tbody>
