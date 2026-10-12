@@ -2,6 +2,11 @@
   "app": {
     "titol": "Alquileres"
   },
+  "idiomaNom": "Castellano",  
+  "seleccioIdioma": {
+    "titol": "Elige el idioma",
+    "confirmar": "Continuar"
+  },  
   "menu": {
     "immobles": "Inmuebles",
     "inquilins": "Inquilinos",
@@ -31,11 +36,7 @@
   },
   "configuracio": {
     "titol": "Configuración",
-    "idioma": "Idioma",
-    "idiomes": {
-      "ca": "Català",
-      "es": "Castellano"
-    }
+    "idioma": "Idioma"
   },
   "quantA": {
     "titol": "Acerca de",

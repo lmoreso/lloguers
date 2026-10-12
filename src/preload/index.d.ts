@@ -5,7 +5,8 @@ import type {
   ImmobleDades,
   Inquili,
   InquiliDades,
-  Resultat
+  Resultat,
+  ConfigObtinguda
 } from '../shared/tipus'
 
 declare global {
@@ -27,7 +28,7 @@ declare global {
         eliminar: (id: number) => Promise<Resultat<void>>
       }
       config: {
-        obtenir: () => Promise<Resultat<Config>>
+        obtenir: () => Promise<Resultat<ConfigObtinguda>>
         desar: (config: Config) => Promise<Resultat<void>>
       }
     }

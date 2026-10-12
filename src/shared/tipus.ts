@@ -39,12 +39,20 @@ export interface Inquili {
 // Camps editables al formulari (sense id)
 export type InquiliDades = Omit<Inquili, 'id'>
 
-// Idiomes de la interfície. Afegir-ne un de nou = ampliar aquesta unió i crear el JSON.
-export type Idioma = 'ca' | 'es'
+// Idiomes de la interfície. Afegir-ne un de nou: afegir-lo aquí, crear el JSON
+// i registrar-lo a i18n/index.ts (vegeu "Afegir un idioma nou" a NOTES.md).
+export const IDIOMES = ['ca', 'es'] as const
+export type Idioma = (typeof IDIOMES)[number]
 
 // Contingut de ~/Lloguers/config.json
 export interface Config {
   idioma: Idioma
+}
+
+// Resposta de config:obtenir: la configuració, més si ve del fitxer (confirmat)
+// o és l'idioma per defecte (no confirmat).
+export interface ConfigObtinguda extends Config {
+  confirmat: boolean
 }
 
 // Codis d'error estables que el Main retorna al Renderer.

@@ -69,6 +69,7 @@ const docsDir = path.join(DADES, 'documents')
 | `inquilins` | Inquilins: nom, cognoms, NIF, telèfon i indicadors WhatsApp/Bizum (`ck_tel1_wassap`, `ck_tel1_bizum`). |
 | `contractes` | Històric de contractes. Clau pròpia `id`. FK a `inmobles` i `inquilins`. |
 | `documents_contracte` | Documents adjunts d'un contracte (0..N). FK amb `ON DELETE CASCADE`. |
+| `tipus_document` | Tipus de document: `nom` (dada de l'usuari) i `classe` (codi intern que el programa coneix). |
 
 Els `CREATE TABLE` definitius són a `001_inicial.sql` (bolcat amb `sqlite3 lloguers.sqlite ".schema"`).
 Se n'ha **eliminat la línia `CREATE TABLE sqlite_sequence`**: és una taula interna que SQLite crea
@@ -87,6 +88,102 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 - `documents_contracte.data_document` és la data del document en si (signatura, rebut...), opcional,
   i diferent d'`afegit_el` (quan es va pujar a l'app).
 - `contractes` ja **no** té `ruta_contracte`: s'ha substituït per `documents_contracte`.
+
+## Contractes: disseny funcional
+
+### Model
+- Un contracte lliga un **immoble** amb un **inquilí** (i un segon inquilí opcional). Un immoble té molts
+  contractes al llarg del temps, mai solapats.
+- **No hi ha pròrroga.** El contracte continua vigent passada la `d_fi_prevista`. Quan acaba de debò, es tanca
+  (`data_fi`) i, si cal, es crea un contracte nou pel mateix inquilí, que es gestiona com si fos un altre
+  (fiança nova, sense relació amb l'anterior). El contracte tancat conserva la gestió de la devolució de la fiança.
+- Totes les dades de fiança i de devolució són a `contractes`; els fitxers, a `documents_contracte`.
+  El contracte **no** guarda l'`id` de cap document.
+
+### Columnes noves de `contractes` (migració 002)
+| Grup | Columnes |
+|---|---|
+| Segon inquilí | `id_inquili_2` (opcional, FK a `inquilins`) |
+| Lloguer | `lloguer_inicial` (ja hi és), `lloguer_actual` (obligatori), `data_ultima_revisio` (obligatòria, ISO) |
+| Fiança | `fianca_import`, `fianca_nc` (registre INCASOL, p. ex. `NC 0230241403599`), `fianca_data_model2` (gravació a l'INCASOL), `fianca_data_ingres`, `fianca_data_notificacio` (l'INCASOL notifica el pagament), `fianca_num_registre` (el de la notificació) |
+| Devolució | `devolucio_data_sollicitud`, `devolucio_data_cobrament` (l'INCASOL paga), `devolucio_import` (retornat a l'inquilí), `devolucio_motiu` (text lliure: per què s'ha retornat sencera o no) |
+
+Imports (`lloguer_*`, `fianca_import`, `devolucio_import`) com a `NUMERIC`. Tot el que no s'ha dit obligatori és
+opcional (`NULL`). Noms de columna sense accents ni `ç`. Les columnes de devolució es creen ja a la migració 002,
+tot i que la pantalla es faci més tard (la taula és buida: no costa res i evita tocar-la un altre cop).
+
+### Regles de la BD (`CHECK`)
+- `id_inquili_2` ha de ser diferent d'`id_inquili`.
+- `fianca_nc` i `fianca_data_model2`: **o les dues o cap**. `fianca_num_registre` i `fianca_data_notificacio`:
+  **o les dues o cap**. El document adjunt no és obligatori; la pantalla avisa si hi ha la data i falta el document.
+- `fianca_data_ingres` és independent de les altres dates.
+- Les dades de devolució només es poden informar amb el contracte tancat (`data_fi` informada).
+- `data_ultima_revisio >= data_inici`. Totes les dates noves, ISO validat amb `CHECK (date(x) = x)`.
+
+### Lloguer actual i revisió
+- Al crear un contracte, el Main fixa `lloguer_actual = lloguer_inicial` i `data_ultima_revisio = data_inici`
+  (el formulari de creació no els demana). Un trigger no pot fer-ho: la columna `NOT NULL` fallaria abans.
+- Mentre `data_ultima_revisio = data_inici` (mai revisat), editar `data_inici` o `lloguer_inicial` arrossega
+  els dos camps. Un cop revisat, són independents. (Cas límit assumit: una revisió feta el mateix dia que
+  `data_inici` no es distingeix de "mai revisat".)
+- `lloguer_actual` i `data_ultima_revisio` només els canvia l'acció **Revisar lloguer**, que demana l'import i
+  la data **alhora**. L'import pot ser igual (lloguer congelat). Al formulari d'edició són de només lectura.
+
+### Avisos (només contractes vigents, `data_fi` buida)
+| Avís | Quan |
+|---|---|
+| Fi prevista | A **90 dies** de `d_fi_prevista`, i **també un cop passada** (sense pròrroga, és l'única senyal) |
+| Revisió de lloguer | A **30 dies** de l'aniversari de l'última revisió (`data_ultima_revisio` + 1 any), i **també un cop passat** |
+
+Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. Es compara només el dia, en hora local.
+
+### Interfície
+- S'hi entra **des d'Immobles**, amb un botó per fila (`/immobles/:id/contractes`). Llista dels contractes d'aquell
+  immoble, l'últim primer (`data_inici` descendent), amb el nom dels inquilins (`JOIN` al Main) i una etiqueta
+  *vigent* / *tancat*. L'`INNER JOIN` amb `inquilins` no perd cap contracte (`NOT NULL` + clau forana).
+- "Afegir" porta l'immoble ja posat i **no modificable**; tampoc es pot canviar en editar.
+- Formulari en pantalla pròpia amb seccions (dades, fiança, devolució), com Immobles.
+- Editar un contracte **tancat** demana confirmació. Eliminar sempre en demana, i el text avisa que s'esborren
+  la fiança i els documents adjunts (fitxers inclosos).
+- Accions sobre el contracte: **Tancar** (demana `data_fi`, `>= data_inici`) i **Revisar lloguer**.
+- El menú **Contractes vigents** (amb els avisos) està decidit però **fora de l'abast de la fase 1**.
+  El filtre per immoble del backend serà un paràmetre opcional perquè ho permeti.
+
+### Tipus de document: taula `tipus_document`
+- `tipus_document(id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, classe TEXT NOT NULL, afegit_el, ultima_mod)`,
+  amb els triggers d'auditoria com la resta de taules. `documents_contracte.id_tipus` hi és clau forana
+  (substitueix el `tipus` amb `CHECK`; sense `ON DELETE CASCADE`, així no es pot esborrar un tipus en ús).
+  La migració 002 la crea **buida**: el sembrat el fa l'app.
+- **`classe`** és un codi intern d'una llista tancada al codi (`src/shared/tipus.ts`): `contracte`, `annex`,
+  `fianca_model2`, `fianca_notificacio`, `fianca_model3`, `rebut`, `altres`. **No es valida a la BD** (afegir-ne
+  una exigiria reconstruir la taula): ho valida el **Main**, i la UI només ofereix un desplegable.
+- La lògica del programa mira sempre la **classe**, mai l'`id` ni el `nom`. Dos tipus poden compartir classe.
+- `nom` és dada de l'usuari i no es tradueix. Les descripcions de cada classe en tots els idiomes són als JSON
+  (`documents.classes.<classe>`) i serveixen per sembrar i pel desplegable.
+- **Sembrat:** a cada arrencada, amb l'idioma ja definitiu i abans de pintar l'app, el Renderer envia al Main el
+  nom traduït de cada classe; el Main insereix un tipus per cada classe que **no en tingui cap** (idempotent).
+  Així cada classe amb lògica té sempre almenys un tipus. Els noms queden en l'idioma del primer arrencat.
+- La pantalla per crear i editar tipus (a Configuració) **no és a la fase 1**.
+
+### Migració 002
+- **Reconstrueix** `contractes` i `documents_contracte` (estan buides; cal verificar-ho abans) i crea
+  `tipus_document`: SQLite no permet afegir `CHECK` entre columnes amb `ALTER`.
+- Ordre: esborrar primer `documents_contracte` i després `contractes`; crear `tipus_document`, `contractes` i
+  `documents_contracte`. Cal **recrear els índexs i els triggers** d'aquestes taules (solapament, `afegit_el`,
+  `ultima_mod`) i afegir-ne per a `tipus_document`.
+
+### Fases
+1. **Fase 1:** dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i
+   Revisar lloguer, avisos i documents amb la taula de tipus.
+2. **Fase 2:** devolució de la fiança (model 3).
+3. **Fase 3:** canvi de signants (annex), correcció de l'immoble d'un contracte i menú Contractes vigents.
+
+### Pendent per a més endavant
+- **Corregir l'immoble** d'un contracte mal assignat: ara només es pot eliminar i recrear, i això perd els documents.
+  Una correcció d'una data de revisió ha de poder retrocedir.
+- **Canvi de signants:** de moment s'edita `id_inquili` / `id_inquili_2` i es puja l'annex. No es guarda qui hi havia abans.
+- **Revisions de lloguer:** no hi ha historial; només el valor actual i la data de l'última.
+- Pantalla per crear i editar tipus de document.
 
 ## Notes per a l'app
 
@@ -144,51 +241,111 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 
 ## Multiidioma (i18n)
 
-- **Idiomes**: català (`ca`, idioma de referència) i castellà (`es`). Afegir-ne més = crear un JSON nou.
-- **Llibreria**: `i18next` + `react-i18next` (al Renderer). Tipat TypeScript de les claus a partir de `ca.json`.
+Resum: la interfície és en català i castellà, i es poden afegir més idiomes sense tocar la lògica. L'idioma es
+tria el primer cop que s'obre l'app i es guarda a `~/Lloguers/config.json`.
+
+### Principis
+
 - **Només es tradueix la interfície**, no la BD. Taules i columnes es queden en català.
-  Els valors enumerats (p. ex. `documents_contracte.tipus`: `contracte`, `annex`, `fiança`...)
-  són **claus internes**; a la pantalla es mostren amb `t('documents.tipus.<valor>')`.
-- **Errors de la BD → codis.** El Main captura les excepcions dels triggers i dels `CHECK` i retorna
-  un **codi** estable per IPC (p. ex. `CONTRACTE_SOLAPAT`), mai el text de SQLite. El Renderer el
-  tradueix amb `t('errors.<CODI>')`. Així no cal editar migracions ja aplicades.
-  - Resposta de tots els handlers: `Resultat<T> = { ok: true; dades: T } | { ok: false; error: CodiError }`
-    (tipus a `src/shared/tipus.ts`).
-  - Codis inicials: `CONTRACTE_SOLAPAT`, `FK_VIOLADA`, `CHECK_VIOLAT`, `DESCONEGUT`.
-- **Dates i números**: a la BD, ISO `AAAA-MM-DD`. Es formaten només a la interfície segons el
-  locale actiu (dayjs o `Intl`). Mantine: `DatesProvider` amb els locales `dayjs/locale/ca` i
-  `dayjs/locale/es`.
-- **Idioma triat**: es guarda a `~/Lloguers/config.json` (a la mateixa carpeta que la BD, així
-  entra a les còpies de seguretat). Valor per defecte: `app.getLocale()` del sistema, amb
-  *fallback* a `ca` si no és `ca` ni `es`.
-  - Format previst: `{ "idioma": "ca" }`.
-  - Llegir/escriure des del **Main Process** (IPC: `config:obtenir`, `config:desar`);
-    exposar-ho via preload i declarar els tipus a `src/preload/index.d.ts`.
-  - Si el fitxer no existeix o és invàlid, usar el valor per defecte i crear-lo.
-- **Textos del Main Process** (diàlegs natius com `dialog.showOpenDialog`, menú): el Renderer passa
-  els títols ja traduïts quan crida el diàleg. Si es fa un menú natiu, caldrà traduir-lo al Main.
-- **Estructura**:
+- **Idioma de referència**: català (`ca`). `ca.json` dona el tipat de les claus; `es.json` ha de tenir les mateixes.
+- **Llibreria**: `i18next` + `react-i18next`, només al Renderer. El Main no té traduccions.
+- **Llista d'idiomes**: una sola constant, `IDIOMES`, a `src/shared/tipus.ts`
+  (`export const IDIOMES = ['ca', 'es'] as const`). El tipus `Idioma` se'n deriva, i tant el Main
+  (per validar) com el Renderer (per als selectors) la fan servir.
+- **Nom de cada idioma**: cada JSON porta una clau `idiomaNom` amb el nom de l'idioma **en el seu propi idioma**
+  ("Català", "Castellano"). Els selectors el llegeixen del recurs de cada idioma
+  (`i18n.getFixedT(codi)('idiomaNom')`), no de l'idioma actiu. Substitueix les claus `configuracio.idiomes.*`.
+- **Valors enumerats de la BD** (com la `classe` dels tipus de document): són **claus internes**; a la pantalla
+  es mostren amb `t('documents.classes.<classe>')`.
+
+### Afegir un text nou
+
+Sempre en tres passos: (1) la clau a `ca.json`, (2) la mateixa clau a `es.json`, (3) `t('camí.de.la.clau')`
+al component. Mai escriure textos a mà dins d'un component.
+
+Només `ca.json` es valida: si falta una clau a `es.json`, no hi ha error i es veu el text en català.
+Comprovació de claus iguals (necessita `jq`), des de `src/renderer/src/i18n/`:
+
+```bash
+diff <(jq -r 'paths(scalars) | join(".")' ca.json | sort) <(jq -r 'paths(scalars) | join(".")' es.json | sort) && echo "claus iguals"
+```
+
+Les claus dels errors (`errors.<CODI>`) han de coincidir amb els valors de `CodiError`.
+
+### Afegir un idioma nou
+
+1. Crear el JSON (copiant `ca.json`, amb `idiomaNom` i tots els textos traduïts).
+2. Afegir-lo als `resources` d'`i18n/index.ts`.
+3. Afegir el codi a `IDIOMES` (`src/shared/tipus.ts`).
+4. Afegir el locale de dayjs a `main.tsx` (`import 'dayjs/locale/xx'`), per als calendaris.
+
+### Idioma triat i primer arrencament
+
+**On es guarda**: `~/Lloguers/config.json`, a la mateixa carpeta que la BD (així entra a les còpies de
+seguretat). Format: `{ "idioma": "ca" }`. Es llegeix i s'escriu només des del **Main**, per IPC
+(`config:obtenir`, `config:desar`); el Main valida l'idioma amb `IDIOMES` abans d'escriure.
+
+**Què fa l'app en arrencar**, en aquest ordre, abans de pintar res:
+
+1. El Renderer (a `main.tsx`) demana la configuració amb `config:obtenir`.
+2. El Main respon `{ idioma, confirmat }`:
+   - Si `config.json` existeix i és vàlid: `confirmat = true` i l'idioma del fitxer.
+   - Si no existeix o és invàlid: `confirmat = false` i l'idioma per defecte. **El Main no escriu res.**
+3. **Idioma per defecte**: la part d'idioma de `app.getLocale()` (p. ex. `es-ES` → `es`) si és a `IDIOMES`;
+   si no, `ca`.
+4. Si `confirmat = false`, el Renderer mostra la **pantalla de selecció d'idioma** (vegeu a sota). Només quan
+   l'usuari confirma es crida `config:desar`.
+5. Amb l'idioma ja definitiu, el Renderer fa `i18n.changeLanguage`.
+6. Es fa el **sembrat dels tipus de document** (vegeu "Contractes: disseny funcional").
+7. Es pinta l'app.
+
+**Pantalla de selecció d'idioma**:
+- Una llista de botons, un per idioma, cadascun amb el seu `idiomaNom`. Surt preseleccionat l'idioma per defecte.
+- El **títol i el botó de confirmar** surten en l'idioma ressaltat. Canvia en memòria en seleccionar-ne un altre;
+  no es desa res fins a confirmar. No hi ha cap text en tots els idiomes alhora, perquè la llista ha de poder créixer.
+
+**Registre a la consola** (mentre es depura):
+- El Main escriu a la **terminal** (la de `npm run dev`): l'idioma que detecta del sistema, si l'app el té,
+  si `config.json` existia i era vàlid, i l'idioma resultant amb l'estat confirmat o no.
+- El Renderer escriu a la consola de les **DevTools**: si mostra la pantalla i què tria l'usuari.
+
+**Per provar-ho**: esborrar `~/Lloguers/config.json` a mà reprodueix el primer arrencament. La detecció de
+l'idioma del sistema no es pot provar canviant el SO; els logs diuen què detecta `app.getLocale()`.
+
+### Errors de la BD → codis
+
+El Main captura les excepcions dels triggers i dels `CHECK` i retorna un **codi** estable per IPC
+(p. ex. `CONTRACTE_SOLAPAT`), mai el text de SQLite. El Renderer el tradueix amb `t('errors.<CODI>')`.
+Així no cal editar migracions ja aplicades.
+
+- Resposta de tots els handlers: `Resultat<T> = { ok: true; dades: T } | { ok: false; error: CodiError }`
+  (tipus a `src/shared/tipus.ts`).
+- Codis inicials: `CONTRACTE_SOLAPAT`, `FK_VIOLADA`, `CHECK_VIOLAT`, `DESCONEGUT`.
+
+### Dates i números
+
+A la BD, ISO `AAAA-MM-DD`. Es formaten només a la interfície segons el locale actiu (dayjs o `Intl`).
+Mantine: `DatesAmbIdioma` (embolcalla `DatesProvider`) amb els locales `dayjs/locale/ca` i `dayjs/locale/es`.
+
+### Textos del Main Process
+
+Els diàlegs natius (com `dialog.showOpenDialog`) reben els títols **ja traduïts** del Renderer. Si es fa un menú
+natiu, caldrà traduir-lo al Main.
+
+### Estructura
 
 ```
-  src/renderer/src/
-  ├── i18n/
-  │   ├── index.ts          ← inicialització d'i18next
-  │   ├── i18next.d.ts      ← tipatge de les claus a partir de ca.json
-  │   ├── ca.json           ← idioma de referència (tipat)
-  │   └── es.json
-  └── components/
-      ├── SelectorIdioma.tsx
-      └── DatesAmbIdioma.tsx
+src/renderer/src/
+├── i18n/
+│   ├── index.ts          ← inicialització d'i18next
+│   ├── i18next.d.ts      ← tipatge de les claus a partir de ca.json
+│   ├── ca.json           ← idioma de referència (tipat)
+│   └── es.json
+└── components/
+    ├── SelectorIdioma.tsx    ← selector (Configuració)
+    ├── SeleccioIdioma.tsx    ← pantalla del primer arrencament
+    └── DatesAmbIdioma.tsx
 ```
-- **Quan es munta**: just abans de la primera pantalla (llista + formulari d'`inquilins`), per no
-  haver de refer textos escrits a mà. No depèn de `better-sqlite3` ni de les migracions.
-- **Instal·lació**: `npm install i18next react-i18next`.
-- **Afegir un text nou**, sempre en tres passos: (1) la clau a `ca.json`, (2) la mateixa clau a
-  `es.json`, (3) `t('camí.de.la.clau')` al component. Mai escriure textos a mà dins d'un component.
-  Només `ca.json` es valida: si falta una clau a `es.json`, no hi ha error i es veu el text en català.
-  Comprovació de claus iguals (necessita `jq`), des de `src/renderer/src/i18n/`:
-  `diff <(jq -r 'paths(scalars) | join(".")' ca.json | sort) <(jq -r 'paths(scalars) | join(".")' es.json | sort) && echo "claus iguals"`.
-  Les claus dels errors (`errors.<CODI>`) han de coincidir amb els valors de `CodiError`.
 
 ## Pròxims passos
 
@@ -233,12 +390,22 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 14. [x] Immobles: llista, formulari per seccions en pantalla pròpia (`/immobles/nou`, `/immobles/:id`),
     eliminació amb confirmació i avís de caducitats (certificat i cèdula) a 60 dies
     (`DIES_AVIS` a `src/renderer/src/utils/caducitat.ts`). El dia de caducitat el document encara és vigent.
-15. Contractes (backend): CRUD, comprovar els triggers de solapament amb dades de prova.
-16. Contractes (UI): selectors d'immoble i inquilí, gestió de `CONTRACTE_SOLAPAT`,
-    marca de contracte vigent (`data_fi` buida).
-17. Documents (backend): diàleg d'adjuntar, còpia a `documents/<id_contracte>/`,
-    validació de ruta, obrir amb `shell.openPath()`, esborrar també el fitxer.
-18. Documents (UI): pestanya dins del contracte.
+15. Contractes (backend), en quatre blocs:
+    - [x] **15a.** Idioma al primer arrencament (vegeu "Multiidioma"): `IDIOMES` a `tipus.ts`, `config:obtenir`
+      sense escriure i amb l'estat de confirmació, pantalla de selecció, logs. Independent de les taules.
+    - [ ] **15b.** Migració `002_...sql`: reconstrucció de `contractes` i `documents_contracte`, `tipus_document`.
+      Abans, comprovar que les dues taules són buides. Provar-la amb una instal·lació des de zero.
+    - [ ] **15c.** Classes i sembrat de tipus de document: llista de classes a `tipus.ts`, claus
+      `documents.classes.*` als JSON, IPC de sembrat, validació de classes al Main.
+    - [ ] **15d.** Tipus `Contracte`, `ContracteDades`, `ContracteLlistat`; `src/main/contractes.ts` (CRUD, `JOIN`
+      amb `inquilins`, regles del lloguer i la revisió); handlers IPC, preload i `index.d.ts`. Provar els
+      triggers de solapament (dia final inclusiu, `data_fi` buida) i els `CHECK` nous des de les DevTools.
+      Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*` que usa `traduirError`.
+      Provar `FK_VIOLADA` en eliminar un immoble o un inquilí amb contractes.
+16. Contractes (UI, fase 1): vegeu "Contractes: disseny funcional > Interfície".
+17. Documents (backend): diàleg d'adjuntar, còpia a `documents/<id_contracte>/`, validació de ruta,
+    obrir amb `shell.openPath()`, esborrar també el fitxer. El tipus es tria d'`tipus_document`.
+18. Documents (UI): pestanya dins del contracte; avisos de la fiança si hi ha la data i falta el document.
 
 ### Fase E: distribució
 19. Empaquetat. Fet i verificat amb `build:unpack` i un `HOME` buit (instal·lació des de zero):

@@ -7,28 +7,61 @@ import '@mantine/core/styles.css'
 // Els estils de dates i notificacions van després dels de core.
 import '@mantine/dates/styles.css'
 import '@mantine/notifications/styles.css'
-// Locales de dayjs per als components de dates (ca i es, com preveu NOTES.md).
+// Locales de dayjs per als components de dates.
 import 'dayjs/locale/ca'
 import 'dayjs/locale/es'
 import App from './App'
-import i18n from './i18n'
 import DatesAmbIdioma from './components/DatesAmbIdioma'
+import SeleccioIdioma from './components/SeleccioIdioma'
+import i18n from './i18n'
+import type { Idioma } from '../../shared/tipus'
 
 async function arrencar(): Promise<void> {
-  // L'idioma es llegeix de ~/Lloguers/config.json abans de pintar res.
+  // 1. Es demana la configuració al Main abans de pintar res.
   const resposta = await window.api.config.obtenir()
-  const idioma = resposta.ok ? resposta.dades.idioma : 'ca'
+  console.log('[idioma] Configuració rebuda del Main:', resposta)
+
+  let idioma: Idioma = 'ca'
+  let confirmat = true
+  if (resposta.ok) {
+    idioma = resposta.dades.idioma
+    confirmat = resposta.dades.confirmat
+  } else {
+    // Si no es pot llegir, s'arrenca en català sense preguntar (desar tampoc funcionaria).
+    console.error('[idioma] No s\'ha pogut llegir la configuració:', resposta.error)
+  }
   await i18n.changeLanguage(idioma)
 
-  createRoot(document.getElementById('root')!).render(
+  const arrel = createRoot(document.getElementById('root')!)
+
+  function pintarApp(): void {
+    // 15c: aquí, abans de pintar, el sembrat dels tipus de document.
+    arrel.render(
+      <StrictMode>
+        <MantineProvider>
+          <DatesAmbIdioma>
+            <ModalsProvider>
+              <Notifications />
+              <App />
+            </ModalsProvider>
+          </DatesAmbIdioma>
+        </MantineProvider>
+      </StrictMode>
+    )
+  }
+
+  if (confirmat) {
+    pintarApp()
+    return
+  }
+
+  // 2. Primer arrencament: es pregunta l'idioma abans de pintar l'app.
+  console.log(`[idioma] Es mostra la pantalla de selecció (per defecte "${idioma}")`)
+  arrel.render(
     <StrictMode>
       <MantineProvider>
-        <DatesAmbIdioma>
-          <ModalsProvider>
-            <Notifications />
-            <App />
-          </ModalsProvider>
-        </DatesAmbIdioma>
+        <Notifications />
+        <SeleccioIdioma inicial={idioma} onConfirmat={pintarApp} />
       </MantineProvider>
     </StrictMode>
   )

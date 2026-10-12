@@ -5,7 +5,8 @@ import type {
   ImmobleDades,
   Inquili,
   InquiliDades,
-  Resultat
+  Resultat,
+  ConfigObtinguda
 } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -32,7 +33,7 @@ const api = {
     eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('inquilins:eliminar', id)
   },
   config: {
-    obtenir: (): Promise<Resultat<Config>> => ipcRenderer.invoke('config:obtenir'),
+    obtenir: (): Promise<Resultat<ConfigObtinguda>> => ipcRenderer.invoke('config:obtenir'),
     desar: (config: Config): Promise<Resultat<void>> => ipcRenderer.invoke('config:desar', config)
   }
 }

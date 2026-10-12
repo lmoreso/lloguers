@@ -2,6 +2,11 @@
   "app": {
     "titol": "Lloguers"
   },
+  "idiomaNom": "Català",
+  "seleccioIdioma": {
+    "titol": "Tria l'idioma",
+    "confirmar": "Continuar"
+  },    
   "menu": {
     "immobles": "Immobles",
     "inquilins": "Inquilins",
@@ -31,11 +36,7 @@
   },
   "configuracio": {
     "titol": "Configuració",
-    "idioma": "Idioma",
-    "idiomes": {
-      "ca": "Català",
-      "es": "Castellano"
-    }
+    "idioma": "Idioma"
   },
   "quantA": {
     "titol": "Quant a",
