@@ -44,6 +44,29 @@ export type InquiliDades = Omit<Inquili, 'id'>
 export const IDIOMES = ['ca', 'es'] as const
 export type Idioma = (typeof IDIOMES)[number]
 
+// Classes internes de document: la llista tancada que el programa coneix (la lògica de la fiança
+// busca sempre per classe, mai per nom ni per id). No es valida a la BD: ho fa el Main.
+// Afegir-ne una és codi nou: aquí, a documents.classes dels JSON i a la lògica que la usi.
+export const CLASSES_DOCUMENT = [
+  'contracte',
+  'annex',
+  'fianca_model2',
+  'fianca_notificacio',
+  'fianca_model3',
+  'rebut',
+  'altres'
+] as const
+export type ClasseDocument = (typeof CLASSES_DOCUMENT)[number]
+
+export interface TipusDocument {
+  id: number
+  nom: string
+  classe: ClasseDocument
+}
+
+// Nom de cada classe en l'idioma actiu: el Renderer l'envia al Main per sembrar.
+export type NomsClasses = Record<ClasseDocument, string>
+
 // Contingut de ~/Lloguers/config.json
 export interface Config {
   idioma: Idioma

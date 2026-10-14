@@ -111,6 +111,17 @@
       "avis_other": "{{count}} immobles amb documents caducats o a punt de caducar."
     }    
   },  
+    "documents": {
+    "classes": {
+      "contracte": "Contracte",
+      "annex": "Annex",
+      "fianca_model2": "Fiança – Model 2",
+      "fianca_notificacio": "Fiança – Notificació de pagament de l'INCASOL",
+      "fianca_model3": "Fiança – Model 3 (devolució)",
+      "rebut": "Rebut",
+      "altres": "Altres"
+    }
+  },
   "proves" :{
         "titol": "Proves de Mantine",
         "dataPicker": "Sel·lecciona una data",

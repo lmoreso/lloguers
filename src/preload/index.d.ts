@@ -6,7 +6,9 @@ import type {
   Inquili,
   InquiliDades,
   Resultat,
-  ConfigObtinguda
+  ConfigObtinguda,
+  NomsClasses,
+  TipusDocument
 } from '../shared/tipus'
 
 declare global {
@@ -30,6 +32,10 @@ declare global {
       config: {
         obtenir: () => Promise<Resultat<ConfigObtinguda>>
         desar: (config: Config) => Promise<Resultat<void>>
+      }
+      tipusDocument: {
+        obtenir: () => Promise<Resultat<TipusDocument[]>>
+        sembrar: (noms: NomsClasses) => Promise<Resultat<number>>
       }
     }
   }

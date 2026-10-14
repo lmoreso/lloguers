@@ -6,7 +6,9 @@ import type {
   Inquili,
   InquiliDades,
   Resultat,
-  ConfigObtinguda
+  ConfigObtinguda,
+  NomsClasses,
+  TipusDocument
 } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -35,6 +37,11 @@ const api = {
   config: {
     obtenir: (): Promise<Resultat<ConfigObtinguda>> => ipcRenderer.invoke('config:obtenir'),
     desar: (config: Config): Promise<Resultat<void>> => ipcRenderer.invoke('config:desar', config)
+  },
+  tipusDocument: {
+    obtenir: (): Promise<Resultat<TipusDocument[]>> => ipcRenderer.invoke('tipusDocument:obtenir'),
+    sembrar: (noms: NomsClasses): Promise<Resultat<number>> =>
+      ipcRenderer.invoke('tipusDocument:sembrar', noms)
   }
 }
 

@@ -111,6 +111,17 @@
       "avis_other": "{{count}} inmuebles con documentos caducados o a punto de caducar."
     }        
   },  
+    "documents": {
+    "classes": {
+      "contracte": "Contrato",
+      "annex": "Anexo",
+      "fianca_model2": "Fianza – Modelo 2",
+      "fianca_notificacio": "Fianza – Notificación de pago del INCASOL",
+      "fianca_model3": "Fianza – Modelo 3 (devolución)",
+      "rebut": "Recibo",
+      "altres": "Otros"
+    }
+  },
   "proves" :{
         "titol": "Pruebas de Mantine",
         "dataPicker": "Selecciona una fecha",
