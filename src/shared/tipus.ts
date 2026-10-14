@@ -39,6 +39,54 @@ export interface Inquili {
 // Camps editables al formulari (sense id)
 export type InquiliDades = Omit<Inquili, 'id'>
 
+export interface Contracte {
+  id: number
+  id_inmoble: number
+  data_inici: string // ISO AAAA-MM-DD
+  data_fi: string | null // null = contracte vigent
+  id_inquili: number
+  id_inquili_2: number | null
+  d_fi_prevista: string // ISO AAAA-MM-DD
+  lloguer_inicial: number
+  lloguer_actual: number
+  data_ultima_revisio: string // ISO AAAA-MM-DD
+  fianca_import: number | null
+  fianca_nc: string | null
+  fianca_data_model2: string | null
+  fianca_data_ingres: string | null
+  fianca_data_notificacio: string | null
+  fianca_num_registre: string | null
+  devolucio_data_sollicitud: string | null
+  devolucio_data_cobrament: string | null
+  devolucio_import: number | null
+  devolucio_motiu: string | null
+  comentaris: string | null
+}
+
+// Camps editables al formulari de la fase 1. Queden fora:
+// - `lloguer_actual` i `data_ultima_revisio`: només els canvia l'acció Revisar lloguer
+//   (al crear, el Main els fixa a partir de `lloguer_inicial` i `data_inici`).
+// - Les dades de devolució: tenen el seu propi flux a la fase 2.
+export type ContracteDades = Omit<
+  Contracte,
+  | 'id'
+  | 'lloguer_actual'
+  | 'data_ultima_revisio'
+  | 'devolucio_data_sollicitud'
+  | 'devolucio_data_cobrament'
+  | 'devolucio_import'
+  | 'devolucio_motiu'
+>
+
+// Fila del llistat: el contracte més els noms dels inquilins (JOIN al Main).
+// El llistat és sempre d'un sol immoble, així que l'adreça no cal.
+export interface ContracteLlistat extends Contracte {
+  inquili_nom: string | null
+  inquili_cognoms: string | null
+  inquili2_nom: string | null // null si no hi ha segon inquilí
+  inquili2_cognoms: string | null
+}
+
 // Idiomes de la interfície. Afegir-ne un de nou: afegir-lo aquí, crear el JSON
 // i registrar-lo a i18n/index.ts (vegeu "Afegir un idioma nou" a NOTES.md).
 export const IDIOMES = ['ca', 'es'] as const
