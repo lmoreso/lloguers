@@ -395,7 +395,7 @@ src/renderer/src/
       sense escriure i amb l'estat de confirmació, pantalla de selecció, logs. Independent de les taules.
     - [x] **15b.** Migració `002_...sql`: reconstrucció de `contractes` i `documents_contracte`, `tipus_document`.
       Abans, comprovar que les dues taules són buides. Provar-la amb una instal·lació des de zero.
-    - [ ] **15c.** Classes i sembrat de tipus de document: llista de classes a `tipus.ts`, claus
+    - [x] **15c.** Classes i sembrat de tipus de document: llista de classes a `tipus.ts`, claus
       `documents.classes.*` als JSON, IPC de sembrat, validació de classes al Main.
     - [ ] **15d.** Tipus `Contracte`, `ContracteDades`, `ContracteLlistat`; `src/main/contractes.ts` (CRUD, `JOIN`
       amb `inquilins`, regles del lloguer i la revisió); handlers IPC, preload i `index.d.ts`. Provar els
