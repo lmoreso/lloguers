@@ -393,7 +393,7 @@ src/renderer/src/
 15. Contractes (backend), en quatre blocs:
     - [x] **15a.** Idioma al primer arrencament (vegeu "Multiidioma"): `IDIOMES` a `tipus.ts`, `config:obtenir`
       sense escriure i amb l'estat de confirmació, pantalla de selecció, logs. Independent de les taules.
-    - [ ] **15b.** Migració `002_...sql`: reconstrucció de `contractes` i `documents_contracte`, `tipus_document`.
+    - [x] **15b.** Migració `002_...sql`: reconstrucció de `contractes` i `documents_contracte`, `tipus_document`.
       Abans, comprovar que les dues taules són buides. Provar-la amb una instal·lació des de zero.
     - [ ] **15c.** Classes i sembrat de tipus de document: llista de classes a `tipus.ts`, claus
       `documents.classes.*` als JSON, IPC de sembrat, validació de classes al Main.
@@ -416,5 +416,5 @@ src/renderer/src/
     - [x] `snap` tret de `linux.target` (necessita `snapcraft`).
     - [ ] `better-sqlite3` 13 porta els binaris a `prebuilds/<plataforma>.node`; només ens cal `linux-x64`.
       Opcional: excloure la resta per reduir la mida.
-    - [ ] Revisar `appId`, `maintainer` i el bloc `publish` (apunta a `example.com`).
-20. `npm run build:linux` (`.deb` / AppImage) i prova al portàtil Mint.
+    - [x] Revisar `appId`, `maintainer` i el bloc `publish` (apunta a `example.com`).
+20. [x]`npm run build:linux` (`.deb` / AppImage) i prova al portàtil Mint.
