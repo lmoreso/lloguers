@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.lmoreso.lloguers
 productName: lloguers
 directories:
   buildResources: build
@@ -31,11 +31,8 @@ linux:
   target:
     - AppImage
     - deb
-  maintainer: electronjs.org
+  maintainer: 'Lluis Moreso Bosch <lmoreso@yahoo.com>'
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
