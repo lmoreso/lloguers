@@ -8,7 +8,10 @@ import type {
   Resultat,
   ConfigObtinguda,
   NomsClasses,
-  TipusDocument
+  TipusDocument,
+  Contracte,
+  ContracteDades,
+  ContracteLlistat
 } from '../shared/tipus'
 
 declare global {
@@ -36,6 +39,19 @@ declare global {
       tipusDocument: {
         obtenir: () => Promise<Resultat<TipusDocument[]>>
         sembrar: (noms: NomsClasses) => Promise<Resultat<number>>
+      }
+      contractes: {
+        obtenir: (idInmoble: number) => Promise<Resultat<ContracteLlistat[]>>
+        obtenirUn: (id: number) => Promise<Resultat<Contracte | null>>
+        crear: (dades: ContracteDades) => Promise<Resultat<Contracte>>
+        actualitzar: (id: number, dades: ContracteDades) => Promise<Resultat<void>>
+        eliminar: (id: number) => Promise<Resultat<void>>
+        tancar: (id: number, dataFi: string) => Promise<Resultat<void>>
+        revisarLloguer: (
+          id: number,
+          lloguerNou: number,
+          dataRevisio: string
+        ) => Promise<Resultat<void>>
       }
     }
   }
