@@ -3,6 +3,9 @@
 -- Reconstrueix contractes i documents_contracte (buides en aplicar-la): SQLite no permet
 -- afegir CHECK entre columnes amb ALTER. En esborrar una taula s'esborren també els seus
 -- índexs i triggers, que es tornen a crear aquí.
+-- Els CHECK de dates fan servir `IS` i no `=`: date() retorna NULL per a un text que no entén
+-- ('2025-13-45', '2025-1-1') i un CHECK només falla quan dona 0, no NULL. Amb `IS`, NULL IS 'text'
+-- dona 0 i la data es rebutja.
 
 DROP TABLE documents_contracte;
 DROP TABLE contractes;
@@ -20,22 +23,22 @@ CREATE TABLE tipus_document (
 CREATE TABLE contractes (
     id                         INTEGER PRIMARY KEY AUTOINCREMENT,
     id_inmoble                 INTEGER NOT NULL,
-    data_inici                 TEXT NOT NULL CHECK (date(data_inici) = data_inici),
-    data_fi                    TEXT CHECK (data_fi IS NULL OR date(data_fi) = data_fi),
+    data_inici                 TEXT NOT NULL CHECK (date(data_inici) IS data_inici),
+    data_fi                    TEXT CHECK (data_fi IS NULL OR date(data_fi) IS data_fi),
     id_inquili                 INTEGER NOT NULL,
     id_inquili_2               INTEGER,
-    d_fi_prevista              TEXT NOT NULL CHECK (date(d_fi_prevista) = d_fi_prevista),
+    d_fi_prevista              TEXT NOT NULL CHECK (date(d_fi_prevista) IS d_fi_prevista),
     lloguer_inicial            NUMERIC NOT NULL,
     lloguer_actual             NUMERIC NOT NULL,
-    data_ultima_revisio        TEXT NOT NULL CHECK (date(data_ultima_revisio) = data_ultima_revisio),
+    data_ultima_revisio        TEXT NOT NULL CHECK (date(data_ultima_revisio) IS data_ultima_revisio),
     fianca_import              NUMERIC,
     fianca_nc                  TEXT,
-    fianca_data_model2         TEXT CHECK (fianca_data_model2 IS NULL OR date(fianca_data_model2) = fianca_data_model2),
-    fianca_data_ingres         TEXT CHECK (fianca_data_ingres IS NULL OR date(fianca_data_ingres) = fianca_data_ingres),
-    fianca_data_notificacio    TEXT CHECK (fianca_data_notificacio IS NULL OR date(fianca_data_notificacio) = fianca_data_notificacio),
+    fianca_data_model2         TEXT CHECK (fianca_data_model2 IS NULL OR date(fianca_data_model2) IS fianca_data_model2),
+    fianca_data_ingres         TEXT CHECK (fianca_data_ingres IS NULL OR date(fianca_data_ingres) IS fianca_data_ingres),
+    fianca_data_notificacio    TEXT CHECK (fianca_data_notificacio IS NULL OR date(fianca_data_notificacio) IS fianca_data_notificacio),
     fianca_num_registre        TEXT,
-    devolucio_data_sollicitud  TEXT CHECK (devolucio_data_sollicitud IS NULL OR date(devolucio_data_sollicitud) = devolucio_data_sollicitud),
-    devolucio_data_cobrament   TEXT CHECK (devolucio_data_cobrament IS NULL OR date(devolucio_data_cobrament) = devolucio_data_cobrament),
+    devolucio_data_sollicitud  TEXT CHECK (devolucio_data_sollicitud IS NULL OR date(devolucio_data_sollicitud) IS devolucio_data_sollicitud),
+    devolucio_data_cobrament   TEXT CHECK (devolucio_data_cobrament IS NULL OR date(devolucio_data_cobrament) IS devolucio_data_cobrament),
     devolucio_import           NUMERIC,
     devolucio_motiu            TEXT,
     comentaris                 TEXT,
@@ -67,7 +70,7 @@ CREATE TABLE documents_contracte (
     ruta          TEXT NOT NULL,
     afegit_el     TEXT NOT NULL DEFAULT (datetime('now')),
     comentaris    TEXT,
-    data_document TEXT CHECK (data_document IS NULL OR date(data_document) = data_document),
+    data_document TEXT CHECK (data_document IS NULL OR date(data_document) IS data_document),
     ultima_mod    TEXT,
     FOREIGN KEY (id_contracte) REFERENCES contractes(id) ON DELETE CASCADE,
     -- Sense ON DELETE: no es pot esborrar un tipus de document en ús.

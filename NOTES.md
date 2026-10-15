@@ -47,7 +47,8 @@ const docsDir = path.join(DADES, 'documents')
 ## Convencions de la BD
 
 - `PRAGMA foreign_keys = ON` a **cada connexió** (i `journal_mode = WAL`).
-- Dates com a text ISO `AAAA-MM-DD`, validades amb `CHECK (date(x) = x)`.
+- Dates com a text ISO `AAAA-MM-DD`, validades amb `CHECK (date(x) IS x)`. **`IS` i no `=`**: `date()` retorna
+  `NULL` per a un text que no entén, i un `CHECK` només falla quan dona 0, no `NULL`.
 - Booleans com a `INTEGER` 0/1 amb `CHECK (x IN (0,1))`.
 - Imports i superfícies: `NUMERIC`. Punt decimal.
 - `afegit_el` i `ultima_mod` a **totes** les taules, en **UTC** (`datetime('now')`), mantinguts per
@@ -60,6 +61,9 @@ const docsDir = path.join(DADES, 'documents')
   (`001_inicial.sql`, `002_...sql`, ...). No editar mai una migració ja aplicada.
   La BD original (migrada de Base) es va marcar amb `PRAGMA user_version = 1` **sense executar**
   `001_inicial.sql`, perquè ja tenia aquest esquema. Una instal·lació nova la executarà normalment.
+  **Excepció:** la `002` es va editar (`date(x) = x` → `IS`) abans que cap instal·lació real la fes servir;
+  només s'havia aplicat a bases de dades de desenvolupament, que es van restaurar a la versió 1.
+  No és un costum: la regla d'avui és no editar mai una migració ja aplicada.
 
 ## Taules
 
@@ -118,7 +122,7 @@ tot i que la pantalla es faci més tard (la taula és buida: no costa res i evit
   **o les dues o cap**. El document adjunt no és obligatori; la pantalla avisa si hi ha la data i falta el document.
 - `fianca_data_ingres` és independent de les altres dates.
 - Les dades de devolució només es poden informar amb el contracte tancat (`data_fi` informada).
-- `data_ultima_revisio >= data_inici`. Totes les dates noves, ISO validat amb `CHECK (date(x) = x)`.
+- `data_ultima_revisio >= data_inici`. Totes les dates noves, ISO validat amb `CHECK (date(x) IS x)`.
 
 ### Lloguer actual i revisió
 - Al crear un contracte, el Main fixa `lloguer_actual = lloguer_inicial` i `data_ultima_revisio = data_inici`
@@ -397,7 +401,7 @@ src/renderer/src/
       Abans, comprovar que les dues taules són buides. Provar-la amb una instal·lació des de zero.
     - [x] **15c.** Classes i sembrat de tipus de document: llista de classes a `tipus.ts`, claus
       `documents.classes.*` als JSON, IPC de sembrat, validació de classes al Main.
-    - [ ] **15d.** Tipus `Contracte`, `ContracteDades`, `ContracteLlistat`; `src/main/contractes.ts` (CRUD, `JOIN`
+    - [x] **15d.** Tipus `Contracte`, `ContracteDades`, `ContracteLlistat`; `src/main/contractes.ts` (CRUD, `JOIN`
       amb `inquilins`, regles del lloguer i la revisió); handlers IPC, preload i `index.d.ts`. Provar els
       triggers de solapament (dia final inclusiu, `data_fi` buida) i els `CHECK` nous des de les DevTools.
       Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*` que usa `traduirError`.
