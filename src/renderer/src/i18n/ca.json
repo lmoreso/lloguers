@@ -6,7 +6,7 @@
   "seleccioIdioma": {
     "titol": "Tria l'idioma",
     "confirmar": "Continuar"
-  },    
+  },
   "menu": {
     "immobles": "Immobles",
     "inquilins": "Inquilins",
@@ -26,7 +26,7 @@
     "no": "No",
     "carregant": "Carregant…",
     "obligatori": "Aquest camp és obligatori.",
-    "tornar": "Tornar"    
+    "tornar": "Tornar"
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
@@ -63,7 +63,7 @@
     },
     "validacio": {
       "nomOCognoms": "Cal omplir el nom o els cognoms."
-    }    
+    }
   },
   "immobles": {
     "nou": "Nou immoble",
@@ -109,9 +109,9 @@
       "aviat": "caduca aviat",
       "avis_one": "{{count}} immoble amb documents caducats o a punt de caducar.",
       "avis_other": "{{count}} immobles amb documents caducats o a punt de caducar."
-    }    
-  },  
-    "documents": {
+    }
+  },
+  "documents": {
     "classes": {
       "contracte": "Contracte",
       "annex": "Annex",
@@ -122,10 +122,27 @@
       "altres": "Altres"
     }
   },
-  "proves" :{
-        "titol": "Proves de Mantine",
-        "dataPicker": "Sel·lecciona una data",
-        "canviIdioma": "Sel·lecciona un idioma",
-        "tornar": "Tornar a l'inici"
+  "contractes": {
+    "titol": "Contractes",
+    "titolImmoble": "Contractes de {{adreca}}",
+    "buit": "Aquest immoble encara no té cap contracte.",
+    "estat": {
+      "vigent": "Vigent",
+      "tancat": "Tancat"
+    },
+    "camps": {
+      "dataInici": "Inici",
+      "dataFi": "Fi",
+      "dFiPrevista": "Fi prevista",
+      "inquilins": "Inquilins",
+      "lloguerActual": "Lloguer actual",
+      "estat": "Estat"
+    }
+  },
+  "proves": {
+    "titol": "Proves de Mantine",
+    "dataPicker": "Sel·lecciona una data",
+    "canviIdioma": "Sel·lecciona un idioma",
+    "tornar": "Tornar a l'inici"
   }
 }

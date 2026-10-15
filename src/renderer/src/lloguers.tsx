@@ -5,11 +5,11 @@ import SelectorIdioma from './components/SelectorIdioma'
 import Inquilins from './pantalles/Inquilins'
 import Immobles from './pantalles/Immobles'
 import FitxaImmoble from './pantalles/FitxaImmoble'
+import Contractes from './pantalles/Contractes'
 
 const SECCIONS = [
   { ruta: '/immobles', clau: 'menu.immobles' },
   { ruta: '/inquilins', clau: 'menu.inquilins' },
-  { ruta: '/contractes', clau: 'menu.contractes' },
   { ruta: '/configuracio', clau: 'menu.configuracio' },
   { ruta: '/quant-a', clau: 'menu.quantA' }
 ] as const
@@ -41,8 +41,8 @@ function Estructura(): React.JSX.Element {
           <Route path="/immobles" element={<Immobles />} />
           <Route path="/immobles/nou" element={<FitxaImmoble key="nou" />} />
           <Route path="/immobles/:id" element={<FitxaImmoble key="edicio" />} />
+          <Route path="/immobles/:id/contractes" element={<Contractes />} />
           <Route path="/inquilins" element={<Inquilins />} />
-          <Route path="/contractes" element={<Title order={2}>{t('menu.contractes')}</Title>} />
           <Route
             path="/configuracio"
             element={

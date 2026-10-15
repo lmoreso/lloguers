@@ -24,40 +24,40 @@
 
 ### VM de desenvolupament
 
-| Element | Valor |
-|---|---|
-| SO | Ubuntu Cinnamon 26.04 (VM) sobre amfitrió Ubuntu 24.04 |
-| Usuari / host | `lluismb@UbuntuKvm` |
-| Carpeta del projecte | `~/Projectes/Lloguers/lloguers/` |
-| Carpeta de dades | `~/Lloguers/` (**L majúscula**; conté `lloguers.sqlite`, `config.json` i `documents/`) |
-| Node.js | v24.21.0 (instal·lat amb nvm, `nvm install --lts`) |
-| npm | 11.19.0 |
-| g++ / make | 15.2.0 / 4.4.1 |
-| Electron | 39.8.10 |
-| Vite | 7.3.7 |
-| electron-builder | 26.15.3 |
-| `better-sqlite3` | 13.0.3 |
-| React | 19.3.0 |
-| Mantine (`core`, `hooks`, `form`, `dates`, `notifications`, `modals`) | 9.7.1 (**totes la mateixa versió**) |
-| `react-router-dom` | 7.18.4 |
-| `i18next` + `react-i18next` | instal·lats (versió a `package.json`) |
-| `dayjs` | instal·lat (per a `@mantine/dates` i els càlculs de dates) |
-| Repositori | `https://github.com/lmoreso/lloguers`, branca `main` |
+| Element                                                               | Valor                                                                                  |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| SO                                                                    | Ubuntu Cinnamon 26.04 (VM) sobre amfitrió Ubuntu 24.04                                 |
+| Usuari / host                                                         | `lluismb@UbuntuKvm`                                                                    |
+| Carpeta del projecte                                                  | `~/Projectes/Lloguers/lloguers/`                                                       |
+| Carpeta de dades                                                      | `~/Lloguers/` (**L majúscula**; conté `lloguers.sqlite`, `config.json` i `documents/`) |
+| Node.js                                                               | v24.21.0 (instal·lat amb nvm, `nvm install --lts`)                                     |
+| npm                                                                   | 11.19.0                                                                                |
+| g++ / make                                                            | 15.2.0 / 4.4.1                                                                         |
+| Electron                                                              | 39.8.10                                                                                |
+| Vite                                                                  | 7.3.7                                                                                  |
+| electron-builder                                                      | 26.15.3                                                                                |
+| `better-sqlite3`                                                      | 13.0.3                                                                                 |
+| React                                                                 | 19.3.0                                                                                 |
+| Mantine (`core`, `hooks`, `form`, `dates`, `notifications`, `modals`) | 9.7.1 (**totes la mateixa versió**)                                                    |
+| `react-router-dom`                                                    | 7.18.4                                                                                 |
+| `i18next` + `react-i18next`                                           | instal·lats (versió a `package.json`)                                                  |
+| `dayjs`                                                               | instal·lat (per a `@mantine/dates` i els càlculs de dates)                             |
+| Repositori                                                            | `https://github.com/lmoreso/lloguers`, branca `main`                                   |
 
 ### Portàtil Linux Mint (verificat el 14-10-2026)
 
-| Element | Valor |
-|---|---|
-| SO | Linux Mint 22.3 (Zena), base Ubuntu 24.04, x86_64 |
-| Usuari / host | `lluismb@LENOVO-LLUIS` |
-| g++ / make / git | 13.3.0 / 4.3 / 2.43.0 |
-| Node.js / npm | v24.21.0 / 11.19.0 (nvm, `nvm install --lts`; idèntics a la VM) |
-| VS Code | 1.141.1 (`.deb` oficial; extensions ESLint 3.0.34 i Prettier 12.4.0) |
-| GitHub | clau SSH ed25519 (`~/.ssh/id_ed25519`); clonat amb `git@github.com:lmoreso/lloguers.git` |
-| Carpeta del projecte | `~/Projectes/Lloguers/lloguers/` |
-| Carpeta de dades | `~/Lloguers/` creada per l'app (**BD de proves**, sense dades reals) |
-| `sqlite3` / DB Browser | instal·lats amb `sudo apt install -y sqlite3 sqlitebrowser` |
-| `jq` | instal·lat el 15-10-2026 (cal per a la comprovació de claus d'i18n) |
+| Element                | Valor                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| SO                     | Linux Mint 22.3 (Zena), base Ubuntu 24.04, x86_64                                        |
+| Usuari / host          | `lluismb@LENOVO-LLUIS`                                                                   |
+| g++ / make / git       | 13.3.0 / 4.3 / 2.43.0                                                                    |
+| Node.js / npm          | v24.21.0 / 11.19.0 (nvm, `nvm install --lts`; idèntics a la VM)                          |
+| VS Code                | 1.141.1 (`.deb` oficial; extensions ESLint 3.0.34 i Prettier 12.4.0)                     |
+| GitHub                 | clau SSH ed25519 (`~/.ssh/id_ed25519`); clonat amb `git@github.com:lmoreso/lloguers.git` |
+| Carpeta del projecte   | `~/Projectes/Lloguers/lloguers/`                                                         |
+| Carpeta de dades       | `~/Lloguers/` creada per l'app (**BD de proves**, sense dades reals)                     |
+| `sqlite3` / DB Browser | instal·lats amb `sudo apt install -y sqlite3 sqlitebrowser`                              |
+| `jq`                   | instal·lat el 15-10-2026 (cal per a la comprovació de claus d'i18n)                      |
 
 Com es va instal·lar (ordre seguit):
 
@@ -140,7 +140,7 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 - **15d, backend de Contractes.** Tipus `Contracte`, `ContracteDades` (sense `lloguer_actual`, `data_ultima_revisio` ni
   devolució), `ContracteLlistat` (amb els dos inquilins); `src/main/contractes.ts` (CRUD, `JOIN` + `LEFT JOIN`, accions
   `tancarContracte` i `revisarLloguer`) i `src/main/ipc/contractes.ts`. En crear, el Main fixa `lloguer_actual =
-  lloguer_inicial` i `data_ultima_revisio = data_inici`; en actualitzar, `id_inmoble` s'ignora i, mentre no s'ha revisat mai,
+lloguer_inicial` i `data_ultima_revisio = data_inici`; en actualitzar, `id_inmoble` s'ignora i, mentre no s'ha revisat mai,
   s'arrossega el lloguer i la data. Provat des de les DevTools: solapament (vigent, dia final inclusiu, `UPDATE`),
   els `CHECK` (4 casos), `FK_VIOLADA` en eliminar immoble o inquilins amb contractes, arrossegament, Revisar lloguer,
   Tancar (data anterior a l'inici, `null`), i el llistat amb segon inquilí. Files de prova esborrades.
@@ -182,7 +182,7 @@ Al portàtil (14-10-2026):
 
 1. Claus de text (`contractes.*`) i botó "Contractes" a cada fila d'Immobles, amb la ruta `/immobles/:id/contractes`.
    Treure l'entrada provisional "Contractes" del menú (s'hi entra només des d'Immobles; el menú "Contractes vigents" és de la fase 3).
-2. Llista de contractes de l'immoble (l'últim primer, nom dels dos inquilins, etiqueta *vigent* / *tancat*).
+2. Llista de contractes de l'immoble (l'últim primer, nom dels dos inquilins, etiqueta _vigent_ / _tancat_).
 3. Formulari en pantalla pròpia, per seccions (dades, fiança): immoble fix i no modificable, selector d'inquilí cercable i segon
    inquilí opcional; `lloguer_actual` i `data_ultima_revisio` de només lectura en editar. Les dades de devolució NO hi són (fase 2).
 4. Accions **Tancar** (demana `data_fi`) i **Revisar lloguer** (import i data alhora; l'import pot ser igual).

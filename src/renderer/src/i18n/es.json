@@ -2,11 +2,11 @@
   "app": {
     "titol": "Alquileres"
   },
-  "idiomaNom": "Castellano",  
+  "idiomaNom": "Castellano",
   "seleccioIdioma": {
     "titol": "Elige el idioma",
     "confirmar": "Continuar"
-  },  
+  },
   "menu": {
     "immobles": "Inmuebles",
     "inquilins": "Inquilinos",
@@ -26,7 +26,7 @@
     "no": "No",
     "carregant": "Cargando…",
     "obligatori": "Este campo es obligatorio.",
-    "tornar": "Volver"    
+    "tornar": "Volver"
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El período se solapa con otro contrato de este inmueble.",
@@ -63,7 +63,7 @@
     },
     "validacio": {
       "nomOCognoms": "Hay que rellenar el nombre o los apellidos."
-    }    
+    }
   },
   "immobles": {
     "nou": "Nuevo inmueble",
@@ -109,9 +109,9 @@
       "aviat": "caduca pronto",
       "avis_one": "{{count}} inmueble con documentos caducados o a punto de caducar.",
       "avis_other": "{{count}} inmuebles con documentos caducados o a punto de caducar."
-    }        
-  },  
-    "documents": {
+    }
+  },
+  "documents": {
     "classes": {
       "contracte": "Contrato",
       "annex": "Anexo",
@@ -122,11 +122,27 @@
       "altres": "Otros"
     }
   },
-  "proves" :{
-        "titol": "Pruebas de Mantine",
-        "dataPicker": "Selecciona una fecha",
-        "canviIdioma": "Selecciona el idioma",
-        "tornar": "Volver al Inicio"
+  "contractes": {
+    "titol": "Contratos",
+    "titolImmoble": "Contratos de {{adreca}}",
+    "buit": "Este inmueble todavía no tiene ningún contrato.",
+    "estat": {
+      "vigent": "Vigente",
+      "tancat": "Cerrado"
+    },
+    "camps": {
+      "dataInici": "Inicio",
+      "dataFi": "Fin",
+      "dFiPrevista": "Fin previsto",
+      "inquilins": "Inquilinos",
+      "lloguerActual": "Alquiler actual",
+      "estat": "Estado"
+    }
+  },
+  "proves": {
+    "titol": "Pruebas de Mantine",
+    "dataPicker": "Selecciona una fecha",
+    "canviIdioma": "Selecciona el idioma",
+    "tornar": "Volver al Inicio"
   }
-
 }

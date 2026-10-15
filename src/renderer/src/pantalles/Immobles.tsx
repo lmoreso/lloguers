@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { ActionIcon, Alert, Badge, Button, Group, Table, Text, Title, Tooltip } from '@mantine/core'
-import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { estatCaducitat } from '../utils/caducitat'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
@@ -8,11 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import type { Immoble } from '../../../shared/tipus'
-
-// "Carrer Major 12, 3r 2a": la porta és opcional.
-function adreca(i: Immoble): string {
-  return `${i.via} ${i.num_via}, ${i.pis}${i.porta ? ` ${i.porta}` : ''}`
-}
+import { IconFileText, IconPencil, IconTrash } from '@tabler/icons-react'
+import { adreca } from '../utils/adreca'
 
 const DOCUMENTS = [
   { clau: 'certificat', camp: 'cert_en_caduc' },
@@ -109,6 +105,14 @@ function Immobles(): React.JSX.Element {
                 </Table.Td>
                 <Table.Td>
                   <Group gap="xs" wrap="nowrap">
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      leftSection={<IconFileText size={16} />}
+                      onClick={() => navigate(`/immobles/${i.id}/contractes`)}
+                    >
+                      {t('contractes.titol')}
+                    </Button>
                     <Tooltip label={t('comu.editar')}>
                       <ActionIcon
                         variant="subtle"

@@ -33,8 +33,8 @@ Tot penja d'una sola carpeta, per facilitar còpies de seguretat i portabilitat:
 ```
 
 ```ts
-const DADES   = path.join(app.getPath('home'), 'Lloguers')
-const dbPath  = path.join(DADES, 'lloguers.sqlite')
+const DADES = path.join(app.getPath('home'), 'Lloguers')
+const dbPath = path.join(DADES, 'lloguers.sqlite')
 const docsDir = path.join(DADES, 'documents')
 ```
 
@@ -67,13 +67,13 @@ const docsDir = path.join(DADES, 'documents')
 
 ## Taules
 
-| Taula | Descripció |
-|---|---|
-| `inmobles` | Immobles: adreça, referència cadastral, superfícies, certificat energètic i cèdula d'habitabilitat (registre, data, caducitat). |
-| `inquilins` | Inquilins: nom, cognoms, NIF, telèfon i indicadors WhatsApp/Bizum (`ck_tel1_wassap`, `ck_tel1_bizum`). |
-| `contractes` | Històric de contractes. Clau pròpia `id`. FK a `inmobles` i `inquilins`. |
-| `documents_contracte` | Documents adjunts d'un contracte (0..N). FK amb `ON DELETE CASCADE`. |
-| `tipus_document` | Tipus de document: `nom` (dada de l'usuari) i `classe` (codi intern que el programa coneix). |
+| Taula                 | Descripció                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `inmobles`            | Immobles: adreça, referència cadastral, superfícies, certificat energètic i cèdula d'habitabilitat (registre, data, caducitat). |
+| `inquilins`           | Inquilins: nom, cognoms, NIF, telèfon i indicadors WhatsApp/Bizum (`ck_tel1_wassap`, `ck_tel1_bizum`).                          |
+| `contractes`          | Històric de contractes. Clau pròpia `id`. FK a `inmobles` i `inquilins`.                                                        |
+| `documents_contracte` | Documents adjunts d'un contracte (0..N). FK amb `ON DELETE CASCADE`.                                                            |
+| `tipus_document`      | Tipus de document: `nom` (dada de l'usuari) i `classe` (codi intern que el programa coneix).                                    |
 
 Els `CREATE TABLE` definitius són a `001_inicial.sql` (bolcat amb `sqlite3 lloguers.sqlite ".schema"`).
 Se n'ha **eliminat la línia `CREATE TABLE sqlite_sequence`**: és una taula interna que SQLite crea
@@ -96,6 +96,7 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
 ## Contractes: disseny funcional
 
 ### Model
+
 - Un contracte lliga un **immoble** amb un **inquilí** (i un segon inquilí opcional). Un immoble té molts
   contractes al llarg del temps, mai solapats.
 - **No hi ha pròrroga.** El contracte continua vigent passada la `d_fi_prevista`. Quan acaba de debò, es tanca
@@ -105,18 +106,20 @@ sola per als `AUTOINCREMENT`, i intentar crear-la fa fallar la migració.
   El contracte **no** guarda l'`id` de cap document.
 
 ### Columnes noves de `contractes` (migració 002)
-| Grup | Columnes |
-|---|---|
-| Segon inquilí | `id_inquili_2` (opcional, FK a `inquilins`) |
-| Lloguer | `lloguer_inicial` (ja hi és), `lloguer_actual` (obligatori), `data_ultima_revisio` (obligatòria, ISO) |
-| Fiança | `fianca_import`, `fianca_nc` (registre INCASOL, p. ex. `NC 0230241403599`), `fianca_data_model2` (gravació a l'INCASOL), `fianca_data_ingres`, `fianca_data_notificacio` (l'INCASOL notifica el pagament), `fianca_num_registre` (el de la notificació) |
-| Devolució | `devolucio_data_sollicitud`, `devolucio_data_cobrament` (l'INCASOL paga), `devolucio_import` (retornat a l'inquilí), `devolucio_motiu` (text lliure: per què s'ha retornat sencera o no) |
+
+| Grup          | Columnes                                                                                                                                                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Segon inquilí | `id_inquili_2` (opcional, FK a `inquilins`)                                                                                                                                                                                                             |
+| Lloguer       | `lloguer_inicial` (ja hi és), `lloguer_actual` (obligatori), `data_ultima_revisio` (obligatòria, ISO)                                                                                                                                                   |
+| Fiança        | `fianca_import`, `fianca_nc` (registre INCASOL, p. ex. `NC 0230241403599`), `fianca_data_model2` (gravació a l'INCASOL), `fianca_data_ingres`, `fianca_data_notificacio` (l'INCASOL notifica el pagament), `fianca_num_registre` (el de la notificació) |
+| Devolució     | `devolucio_data_sollicitud`, `devolucio_data_cobrament` (l'INCASOL paga), `devolucio_import` (retornat a l'inquilí), `devolucio_motiu` (text lliure: per què s'ha retornat sencera o no)                                                                |
 
 Imports (`lloguer_*`, `fianca_import`, `devolucio_import`) com a `NUMERIC`. Tot el que no s'ha dit obligatori és
 opcional (`NULL`). Noms de columna sense accents ni `ç`. Les columnes de devolució es creen ja a la migració 002,
 tot i que la pantalla es faci més tard (la taula és buida: no costa res i evita tocar-la un altre cop).
 
 ### Regles de la BD (`CHECK`)
+
 - `id_inquili_2` ha de ser diferent d'`id_inquili`.
 - `fianca_nc` i `fianca_data_model2`: **o les dues o cap**. `fianca_num_registre` i `fianca_data_notificacio`:
   **o les dues o cap**. El document adjunt no és obligatori; la pantalla avisa si hi ha la data i falta el document.
@@ -125,6 +128,7 @@ tot i que la pantalla es faci més tard (la taula és buida: no costa res i evit
 - `data_ultima_revisio >= data_inici`. Totes les dates noves, ISO validat amb `CHECK (date(x) IS x)`.
 
 ### Lloguer actual i revisió
+
 - Al crear un contracte, el Main fixa `lloguer_actual = lloguer_inicial` i `data_ultima_revisio = data_inici`
   (el formulari de creació no els demana). Un trigger no pot fer-ho: la columna `NOT NULL` fallaria abans.
 - Mentre `data_ultima_revisio = data_inici` (mai revisat), editar `data_inici` o `lloguer_inicial` arrossega
@@ -134,17 +138,19 @@ tot i que la pantalla es faci més tard (la taula és buida: no costa res i evit
   la data **alhora**. L'import pot ser igual (lloguer congelat). Al formulari d'edició són de només lectura.
 
 ### Avisos (només contractes vigents, `data_fi` buida)
-| Avís | Quan |
-|---|---|
-| Fi prevista | A **90 dies** de `d_fi_prevista`, i **també un cop passada** (sense pròrroga, és l'única senyal) |
+
+| Avís               | Quan                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| Fi prevista        | A **90 dies** de `d_fi_prevista`, i **també un cop passada** (sense pròrroga, és l'única senyal)             |
 | Revisió de lloguer | A **30 dies** de l'aniversari de l'última revisió (`data_ultima_revisio` + 1 any), i **també un cop passat** |
 
 Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. Es compara només el dia, en hora local.
 
 ### Interfície
+
 - S'hi entra **des d'Immobles**, amb un botó per fila (`/immobles/:id/contractes`). Llista dels contractes d'aquell
   immoble, l'últim primer (`data_inici` descendent), amb el nom dels inquilins (`JOIN` al Main) i una etiqueta
-  *vigent* / *tancat*. L'`INNER JOIN` amb `inquilins` no perd cap contracte (`NOT NULL` + clau forana).
+  _vigent_ / _tancat_. L'`INNER JOIN` amb `inquilins` no perd cap contracte (`NOT NULL` + clau forana).
 - "Afegir" porta l'immoble ja posat i **no modificable**; tampoc es pot canviar en editar.
 - Formulari en pantalla pròpia amb seccions (dades, fiança, devolució), com Immobles.
 - Editar un contracte **tancat** demana confirmació. Eliminar sempre en demana, i el text avisa que s'esborren
@@ -154,6 +160,7 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
   El filtre per immoble del backend serà un paràmetre opcional perquè ho permeti.
 
 ### Tipus de document: taula `tipus_document`
+
 - `tipus_document(id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, classe TEXT NOT NULL, afegit_el, ultima_mod)`,
   amb els triggers d'auditoria com la resta de taules. `documents_contracte.id_tipus` hi és clau forana
   (substitueix el `tipus` amb `CHECK`; sense `ON DELETE CASCADE`, així no es pot esborrar un tipus en ús).
@@ -170,6 +177,7 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
 - La pantalla per crear i editar tipus (a Configuració) **no és a la fase 1**.
 
 ### Migració 002
+
 - **Reconstrueix** `contractes` i `documents_contracte` (estan buides; cal verificar-ho abans) i crea
   `tipus_document`: SQLite no permet afegir `CHECK` entre columnes amb `ALTER`.
 - Ordre: esborrar primer `documents_contracte` i després `contractes`; crear `tipus_document`, `contractes` i
@@ -177,12 +185,14 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
   `ultima_mod`) i afegir-ne per a `tipus_document`.
 
 ### Fases
+
 1. **Fase 1:** dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i
    Revisar lloguer, avisos i documents amb la taula de tipus.
 2. **Fase 2:** devolució de la fiança (model 3).
 3. **Fase 3:** canvi de signants (annex), correcció de l'immoble d'un contracte i menú Contractes vigents.
 
 ### Pendent per a més endavant
+
 - **Corregir l'immoble** d'un contracte mal assignat: ara només es pot eliminar i recrear, i això perd els documents.
   Una correcció d'una data de revisió ha de poder retrocedir.
 - **Canvi de signants:** de moment s'edita `id_inquili` / `id_inquili_2` i es puja l'annex. No es guarda qui hi havia abans.
@@ -205,13 +215,13 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
   `useEffect`. Es llegeix amb `.then()` dins mateix de l'efecte, amb un indicador `cancelat`, i es recarrega
   amb un comptador (`versio`) a les dependències.
 - **Formularis en modal**: el formulari es munta només mentre el modal és obert, així sempre comença net
-  i no cal cap `reset`. Els camps de text buits es desen com a `NULL` (`buitANull`).  
+  i no cal cap `reset`. Els camps de text buits es desen com a `NULL` (`buitANull`).
 - **Formularis llargs**: pantalla pròpia amb ruta (`/x/nou`, `/x/:id`), no modal. La fitxa carrega les dades i
   **després** munta el formulari, que agafa els valors inicials sense `reset`. A les rutes, una `key` diferent
   per a "nou" i "edició" perquè React no reutilitzi l'estat.
 - **Números al formulari**: camp de text amb `inputMode="decimal"` que accepta coma o punt; es converteix amb
   `aNumero()` i a la BD sempre va amb punt. Els camps buits es desen com a `NULL` (`buitANull`).
-  
+
 ## Diferències amb la guia
 
 1. La guia desa la BD a `app.getPath('userData')`; aquí s'usa `~/Lloguers/` (vegeu més amunt).
@@ -240,8 +250,8 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
   hora local: `dayjs().format('YYYY-MM-DD')`. El format que veu l'usuari es controla amb `valueFormat`.
   Si s'usa un altre component de dates (`DateInput`, `DateTimePicker`...), comprovar-ne el tipus del valor.
   - **Errors de la BD** (triggers, `CHECK`): el Main els converteix en un codi (vegeu "Multiidioma");
-  el Renderer el tradueix amb `t('errors.<CODI>')` i el mostra amb `@mantine/notifications` o com
-  a error del camp amb `form.setErrors`.
+    el Renderer el tradueix amb `t('errors.<CODI>')` i el mostra amb `@mantine/notifications` o com
+    a error del camp amb `form.setErrors`.
 
 ## Multiidioma (i18n)
 
@@ -304,11 +314,13 @@ seguretat). Format: `{ "idioma": "ca" }`. Es llegeix i s'escriu només des del *
 7. Es pinta l'app.
 
 **Pantalla de selecció d'idioma**:
+
 - Una llista de botons, un per idioma, cadascun amb el seu `idiomaNom`. Surt preseleccionat l'idioma per defecte.
 - El **títol i el botó de confirmar** surten en l'idioma ressaltat. Canvia en memòria en seleccionar-ne un altre;
   no es desa res fins a confirmar. No hi ha cap text en tots els idiomes alhora, perquè la llista ha de poder créixer.
 
 **Registre a la consola** (mentre es depura):
+
 - El Main escriu a la **terminal** (la de `npm run dev`): l'idioma que detecta del sistema, si l'app el té,
   si `config.json` existia i era vàlid, i l'idioma resultant amb l'estat confirmat o no.
 - El Renderer escriu a la consola de les **DevTools**: si mostra la pantalla i què tria l'usuari.
@@ -354,71 +366,77 @@ src/renderer/src/
 ## Pròxims passos
 
 ### Fase A: base (feta)
+
 - [x] Projecte electron-vite, `better-sqlite3` compilat contra Electron.
 - [x] `database.ts` amb connexió i migracions; BD existent a `user_version = 1`.
 - [x] Tipus compartits a `src/shared/tipus.ts` (`Immoble`, `ImmobleDades`).
 - [x] `src/main/inmobles.ts` (CRUD).
 
 ### Fase B: backend al Main Process (feta)
+
 1. [x] Codis d'error: `Resultat<T>` amb `error: CodiError` i `src/main/errors.ts` amb `traduirError(e)`
-   i `executar(op)`, que converteix qualsevol operació en un `Resultat<T>`.
-   **Pendent de verificar amb un cas real** que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*`
-   (es farà al pas 15, amb contractes).
+       i `executar(op)`, que converteix qualsevol operació en un `Resultat<T>`.
+       **Pendent de verificar amb un cas real** que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*`
+       (es farà al pas 15, amb contractes).
 2. [x] Handlers IPC d'`inmobles` (`src/main/ipc/inmobles.ts`) i registre a `index.ts`.
 3. [x] Preload + `window.api.inmobles` tipat a `src/preload/index.d.ts`.
 4. [x] Prova des de les DevTools: `inmobles.obtenir()` retorna els immobles migrats, sense camps d'auditoria.
 5. [x] Mateixa cadena per a `inquilins`. `ck_tel1_*` són `boolean` al tipus; la conversió 0/1 ↔ boolean
-   es fa només a `src/main/inquilins.ts`. Provats crear, actualitzar i eliminar.
+       es fa només a `src/main/inquilins.ts`. Provats crear, actualitzar i eliminar.
 6. [x] `config.ts` i IPC `config:obtenir` / `config:desar`. El Main valida l'idioma abans d'escriure.
 7. [x] Commit.
 8. [x] Prova d'empaquetat anticipada (`npm run build:unpack`): vegeu el pas 19.
 
 #### Fase C: base de la UI
+
 8. [x] Mantine 9.7.1 instal·lat (`core`, `hooks`, `form`, `dates`, `notifications`, `modals`, més `dayjs`).
-   Tots els paquets de Mantine han d'anar a la **mateixa versió**. Providers muntats a `main.tsx`:
-   `MantineProvider`, `DatesAmbIdioma`, `ModalsProvider` i `Notifications`.
+       Tots els paquets de Mantine han d'anar a la **mateixa versió**. Providers muntats a `main.tsx`:
+       `MantineProvider`, `DatesAmbIdioma`, `ModalsProvider` i `Notifications`.
 9. [x] i18n: `i18next` + `react-i18next`, `ca.json`, `es.json`, claus tipades des de `ca.json`.
-   L'idioma es llegeix de `config.json` a `main.tsx` abans de pintar. `SelectorIdioma` desa i canvia
-   l'idioma sense recarregar; `DatesAmbIdioma` fa que el locale de les dates segueixi l'idioma actiu.
+       L'idioma es llegeix de `config.json` a `main.tsx` abans de pintar. `SelectorIdioma` desa i canvia
+       l'idioma sense recarregar; `DatesAmbIdioma` fa que el locale de les dates segueixi l'idioma actiu.
 10. `react-router-dom` i disseny general (menú: Immobles, Inquilins, Contractes, Configuració, Quant a).
     El selector d'idioma, ara provisional a `lloguers.tsx`, passa a la pantalla de Configuració.
 11. Utilitats: helper `CodiError` → `t('errors.X')` → notificació. (La conversió `Date` ↔ ISO ja no cal:
     `DatePickerInput` treballa amb text `AAAA-MM-DD`.)
 12. Commit.
+
 - `App.tsx` només tria entre pantalles (`ProvesMantine` o `lloguers.tsx`); no s'hi escriu lògica.
   La pantalla principal de l'app és `src/renderer/src/lloguers.tsx`.
 
 ### Fase D: pantalles
+
 13. [x] Inquilins: llista + formulari en modal, validació (nom o cognoms), eliminació amb confirmació.
-    Valida Mantine (decisió definitiva). Pantalles a `src/renderer/src/pantalles/`.
+        Valida Mantine (decisió definitiva). Pantalles a `src/renderer/src/pantalles/`.
 14. [x] Immobles: llista, formulari per seccions en pantalla pròpia (`/immobles/nou`, `/immobles/:id`),
-    eliminació amb confirmació i avís de caducitats (certificat i cèdula) a 60 dies
-    (`DIES_AVIS` a `src/renderer/src/utils/caducitat.ts`). El dia de caducitat el document encara és vigent.
+        eliminació amb confirmació i avís de caducitats (certificat i cèdula) a 60 dies
+        (`DIES_AVIS` a `src/renderer/src/utils/caducitat.ts`). El dia de caducitat el document encara és vigent.
 15. Contractes (backend), en quatre blocs:
     - [x] **15a.** Idioma al primer arrencament (vegeu "Multiidioma"): `IDIOMES` a `tipus.ts`, `config:obtenir`
-      sense escriure i amb l'estat de confirmació, pantalla de selecció, logs. Independent de les taules.
+          sense escriure i amb l'estat de confirmació, pantalla de selecció, logs. Independent de les taules.
     - [x] **15b.** Migració `002_...sql`: reconstrucció de `contractes` i `documents_contracte`, `tipus_document`.
-      Abans, comprovar que les dues taules són buides. Provar-la amb una instal·lació des de zero.
+          Abans, comprovar que les dues taules són buides. Provar-la amb una instal·lació des de zero.
     - [x] **15c.** Classes i sembrat de tipus de document: llista de classes a `tipus.ts`, claus
-      `documents.classes.*` als JSON, IPC de sembrat, validació de classes al Main.
+          `documents.classes.*` als JSON, IPC de sembrat, validació de classes al Main.
     - [x] **15d.** Tipus `Contracte`, `ContracteDades`, `ContracteLlistat`; `src/main/contractes.ts` (CRUD, `JOIN`
-      amb `inquilins`, regles del lloguer i la revisió); handlers IPC, preload i `index.d.ts`. Provar els
-      triggers de solapament (dia final inclusiu, `data_fi` buida) i els `CHECK` nous des de les DevTools.
-      Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*` que usa `traduirError`.
-      Provar `FK_VIOLADA` en eliminar un immoble o un inquilí amb contractes.
+          amb `inquilins`, regles del lloguer i la revisió); handlers IPC, preload i `index.d.ts`. Provar els
+          triggers de solapament (dia final inclusiu, `data_fi` buida) i els `CHECK` nous des de les DevTools.
+          Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*` que usa `traduirError`.
+          Provar `FK_VIOLADA` en eliminar un immoble o un inquilí amb contractes.
 16. Contractes (UI, fase 1): vegeu "Contractes: disseny funcional > Interfície".
 17. Documents (backend): diàleg d'adjuntar, còpia a `documents/<id_contracte>/`, validació de ruta,
     obrir amb `shell.openPath()`, esborrar també el fitxer. El tipus es tria d'`tipus_document`.
 18. Documents (UI): pestanya dins del contracte; avisos de la fiança si hi ha la data i falta el document.
 
 ### Fase E: distribució
+
 19. Empaquetat. Fet i verificat amb `build:unpack` i un `HOME` buit (instal·lació des de zero):
     - [x] Migracions incrustades al codi amb `import.meta.glob(..., { query: '?raw', eager: true })`
-      a `database.ts` (ja no es llegeixen del disc).
+          a `database.ts` (ja no es llegeixen del disc).
     - [x] `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`. Ha de ser **un sol text**,
-      no una llista (la validació d'electron-builder la rebutja).
+          no una llista (la validació d'electron-builder la rebutja).
     - [x] `snap` tret de `linux.target` (necessita `snapcraft`).
     - [ ] `better-sqlite3` 13 porta els binaris a `prebuilds/<plataforma>.node`; només ens cal `linux-x64`.
-      Opcional: excloure la resta per reduir la mida.
+          Opcional: excloure la resta per reduir la mida.
     - [x] Revisar `appId`, `maintainer` i el bloc `publish` (apunta a `example.com`).
 20. [x]`npm run build:linux` (`.deb` / AppImage) i prova al portàtil Mint.
