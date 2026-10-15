@@ -10,12 +10,15 @@
 - Idioma de la conversa: **català**.
 - Editor: VS Code (veu els errors de TypeScript, ESLint i Prettier directament; no cal demanar-li que els enganxi tots si ho té net, però `npm run typecheck` és útil després de tocar `tsconfig`, `.d.ts` o el preload).
 - Control de versions: Git + compte de GitHub (ja configurat a la VM i al portàtil). L'usuari fa ell mateix els commits; se li proposa el missatge i se li recorda mirar el `git status` abans de `git add -A`.
-- Quan una ordre no mostra res si va bé, o una sortida arriba tallada, demanar-ne la part que falta en lloc de suposar-la.
+- **Treballa en dos ordinadors** (VM i portàtil Mint) amb GitHub com a única font de veritat: abans de deixar-ne un, `commit` i `push`; en arribar a l'altre, `git pull`. **Les BD no se sincronitzen** (cada màquina té la seva).
+- Quan una ordre no mostra res si va bé, o una sortida arriba tallada, demanar-ne la part que falta en lloc de suposar-la. Si l'usuari enganxa només una ordre sense la sortida, demanar la sortida.
 - Les proves del backend es fan des de les DevTools (`F12` > Console) amb `window.api.*`; les de la UI, a l'app. L'usuari comprova la BD amb `sqlite3`.
 - Les files de prova s'anomenen `PROVA` perquè es localitzin i s'esborrin; **no s'esborra mai cap dels immobles ni inquilins migrats de Base**.
 - **No es toca `App.tsx`** (decisió de l'usuari): només tria entre `ProvesMantine` i `lloguers.tsx`. La pantalla principal és `src/renderer/src/lloguers.tsx`.
 - La documentació de Mantine que s'ha pogut consultar arriba fins a la v8; l'API de la 9.7.1 (`useForm`, `DatePickerInput`, `Fieldset`, `SimpleGrid`, `modals.openConfirmModal`...) ha funcionat tal com es coneixia, però cal vigilar el `typecheck` en cada component nou.
-- **Quan s'enganxen sortides al terminal, no enganxar mai línies que comencin amb `>`** (p. ex. `> lloguers@1.0.0 dev`): el shell les interpreta com una redirecció i crea fitxers buits amb aquests noms (`electron-vite`, `lloguers@1.0.0`). Tampoc enganxar dues ordres amb un `|` entre elles: la segona rep la sortida de la primera.
+- **Quan s'enganxen sortides al terminal, no enganxar mai línies que comencin amb `>`** (p. ex. `> lloguers@1.0.0 dev`): el shell les interpreta com una redirecció i crea fitxers buits amb aquests noms. Tampoc enganxar dues ordres amb un `|` entre elles.
+- La CLI `sqlite3` arrenca amb les **claus foranes desactivades** i continua executant després d'un error (cal `-bail` en provar migracions). Per tant una prova amb la CLI valida l'SQL, no el comportament amb `foreign_keys = ON` de l'app.
+- Les migracions es proven **sempre sobre còpies** (`/tmp/...`) i en dos escenaris: la BD real copiada i una instal·lació des de zero (001 + 002...). Després, l'app amb un `HOME` fals i, només al final, la BD real amb una còpia de seguretat fresca.
 
 ## Entorn (verificat)
 
@@ -52,54 +55,53 @@
 | VS Code | 1.141.1 (`.deb` oficial; extensions ESLint 3.0.34 i Prettier 12.4.0) |
 | GitHub | clau SSH ed25519 (`~/.ssh/id_ed25519`); clonat amb `git@github.com:lmoreso/lloguers.git` |
 | Carpeta del projecte | `~/Projectes/Lloguers/lloguers/` |
-| Carpeta de dades | `~/Lloguers/` creada per l'app (BD començada de zero) |
+| Carpeta de dades | `~/Lloguers/` creada per l'app (**BD de proves**, sense dades reals) |
 | `sqlite3` / DB Browser | instal·lats amb `sudo apt install -y sqlite3 sqlitebrowser` |
+| `jq` | instal·lat el 15-10-2026 (cal per a la comprovació de claus d'i18n) |
 
 Com es va instal·lar (ordre seguit):
 
 1. `sudo apt install -y build-essential python3 make g++ git curl`.
 2. nvm (`curl ... nvm-sh/nvm/master/install.sh | bash`) i `nvm install --lts`.
 3. VS Code (`.deb` amb `sudo apt install ./fitxer.deb`; l'avís `N: La baixada es duu a terme fora de l'entorn segur...` és inofensiu) i extensions amb `code --install-extension`.
-4. Git: nom i correu ja configurats; `git config --global init.defaultBranch main`. Clau SSH: `ssh-keygen -t ed25519 -C "lmoreso@yahoo.com"`, afegida a <https://github.com/settings/keys>, i comprovada amb `ssh -T git@github.com`. No cal iniciar sessió a GitHub des de VS Code.
-5. `git clone`, `npm install`. `npm install-scripts ls` **no mostra res pendent**: les aprovacions viatgen amb el repositori. `better-sqlite3` porta `prebuilds/linux-x64.node` i Electron es descarrega bé.
+4. Git: nom i correu ja configurats; `git config --global init.defaultBranch main`. Clau SSH: `ssh-keygen -t ed25519 -C "lmoreso@yahoo.com"`, afegida a <https://github.com/settings/keys>, i comprovada amb `ssh -T git@github.com`.
+5. `git clone`, `npm install`. `npm install-scripts ls` **no mostra res pendent**: les aprovacions viatgen amb el repositori.
 6. `chrome-sandbox` de `node_modules/electron/dist/` (`chown root:root` + `chmod 4755`), vegeu la incidència 2.
-7. `npm run dev`: l'app crea `~/Lloguers/` i la BD, aplica `001` i `002` (`user_version = 2`, taules `contractes`, `documents_contracte`, `inmobles`, `inquilins`, `tipus_document`), mostra la pantalla de selecció d'idioma i desa `config.json`.
+7. `npm run dev`: l'app crea `~/Lloguers/` i la BD, aplica `001` i `002` (`user_version = 2`), mostra la pantalla de selecció d'idioma i desa `config.json` en confirmar.
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D fins al pas 14 (Inquilins i Immobles completes) i els blocs 15a i 15b fets; prova d'empaquetat al portàtil feta.**
-
-Cal verificar al codi si els blocs **15c** (classes i sembrat de tipus de document) i **15d** (backend de Contractes) ja estan fets: el repositori anava per davant d'aquest fitxer (vegeu "Pròxim pas").
+**Fases A, B i C fetes; Fase D feta fins al pas 15 (backend de Contractes completat i provat).** Toca el **pas 16**: UI de Contractes.
 
 ### Fase A: base (feta)
 
 Projecte electron-vite (`react` + TypeScript), `better-sqlite3` compilat contra Electron, `database.ts` amb connexió
 (`journal_mode = WAL`, `foreign_keys = ON`) i migracions incrustades al codi amb `import.meta.glob`. BD existent
 (migrada de Base) marcada `user_version = 1` **sense executar** `001_inicial.sql`. Còpies de seguretat a `~/Lloguers/`
-(`.bak`, `.bak2`), fora del repositori. cSpell desactivat al projecte.
+(`*.bak*`, fora del repositori); la còpia `lloguers.dades.migrada_001.sqlite.bak` (versió 1, amb les dades reals) serveix per
+tornar a provar la migració 002 des de la BD real. cSpell desactivat al projecte.
 
 ### Fase B: backend al Main Process (feta)
 
-- `src/shared/tipus.ts`: `Immoble`, `ImmobleDades`, `Inquili`, `InquiliDades`, `Idioma`, `Config`,
+- `src/shared/tipus.ts`: `Immoble`, `ImmobleDades`, `Inquili`, `InquiliDades`, `Idioma`, `Config`, `ConfigObtinguda`,
   `CodiError` (`CONTRACTE_SOLAPAT` | `FK_VIOLADA` | `CHECK_VIOLAT` | `DESCONEGUT`) i `Resultat<T>`. Cap tipus inclou
   `afegit_el` ni `ultima_mod`.
 - `src/main/errors.ts`: `traduirError(e)` i `executar(op)`. `src/main/{inmobles,inquilins,config}.ts` i
   `src/main/ipc/{inmobles,inquilins,config}.ts`, registrats a `index.ts`. A `inquilins` la conversió `0/1/NULL` ↔
   `boolean` dels indicadors `ck_tel1_*` es fa només al Main.
-- Preload i `src/preload/index.d.ts` amb `window.api.inmobles`, `.inquilins` i `.config` (cal duplicar la forma de
-  l'objecte `api` als dos fitxers cada cop que s'hi afegeix un mètode).
-- Provat des de les DevTools (lectura, crear, actualitzar, eliminar, config i rebuig d'un idioma invàlid).
+- Preload i `src/preload/index.d.ts` amb `window.api.*` (cal duplicar la forma de l'objecte `api` als dos fitxers cada cop que
+  s'hi afegeix un mètode). Ara hi ha `inmobles`, `inquilins`, `config`, `tipusDocument` i `contractes`.
+- Els tres codis `SQLITE_CONSTRAINT_*` que usa `traduirError` **estan verificats amb casos reals**: `_TRIGGER` →
+  `CONTRACTE_SOLAPAT`, `_CHECK` → `CHECK_VIOLAT` i `_FOREIGNKEY` → `FK_VIOLADA`.
 
 ### Fase C: base de la UI (feta)
 
 - Mantine 9.7.1 (decisió **definitiva**), providers a `main.tsx`: `MantineProvider`, `DatesAmbIdioma`, `ModalsProvider`
   i `Notifications`, amb els estils de `core`, `dates` i `notifications` i els locales de dayjs `ca` i `es`.
-- i18n: `src/renderer/src/i18n/{index.ts,i18next.d.ts,ca.json,es.json}`; claus tipades des de `ca.json`. L'idioma es llegeix
-  de `config.json` a `main.tsx` abans de pintar. Components `SelectorIdioma` (desa i canvia sense recarregar) i
-  `DatesAmbIdioma` (el locale de les dates segueix l'idioma).
+- i18n: `src/renderer/src/i18n/{index.ts,i18next.d.ts,ca.json,es.json}`; claus tipades des de `ca.json`. Components
+  `SelectorIdioma`, `SeleccioIdioma` i `DatesAmbIdioma` a `src/renderer/src/components/`.
 - `react-router-dom` amb **`HashRouter`** (l'app empaquetada es carrega des de `file://`) i menú lateral amb `AppShell`:
-  Immobles, Inquilins, Contractes, Configuració i Quant a. El selector d'idioma és a Configuració.
-  Contractes i Quant a només tenen un títol provisional.
+  Immobles, Inquilins, Contractes, Configuració i Quant a. Contractes i Quant a només tenen un títol provisional.
 - `src/renderer/src/utils/resultat.ts`: `esOk(resposta)` (notifica l'error traduït amb `t('errors.<CODI>')` i retorna
   `false` si ha fallat) i `notificarError`.
 - Neteja del CSS de la plantilla: eliminats `main.css`, `base.css`, `Versions.tsx` i els SVG de demostració.
@@ -110,19 +112,38 @@ Projecte electron-vite (`react` + TypeScript), `better-sqlite3` compilat contra 
 - **Inquilins** (`src/renderer/src/pantalles/{Inquilins,FormulariInquili}.tsx`): taula, alta i edició en modal,
   validació (cal nom o cognoms), eliminació amb confirmació (`modals.openConfirmModal`) i notificacions.
 - **Immobles** (`{Immobles,FitxaImmoble,FormulariImmoble}.tsx`): llista; formulari en pantalla pròpia amb quatre seccions
-  (`/immobles/nou`, `/immobles/:id`); camps obligatoris validats; superfícies amb coma o punt; dates amb
-  `DatePickerInput` (treballa directament amb text `AAAA-MM-DD`, **no cal conversió `Date`**); eliminació amb
-  confirmació; avís de caducitats (certificat i cèdula) a **60 dies** (`DIES_AVIS` a `utils/caducitat.ts`; el dia de
-  caducitat el document encara és vigent).
-- Provat tot amb files `PROVA` i comprovat a la BD (`NULL` en camps buits, camps d'auditoria omplerts pels triggers).
-  Les dates d'auditoria són en UTC (a Barcelona es veuen 1 o 2 hores menys al `sqlite3`); correcte, es convertiran a hora
+  (`/immobles/nou`, `/immobles/:id`); dates amb `DatePickerInput` (treballa amb text `AAAA-MM-DD`, **no cal conversió `Date`**);
+  eliminació amb confirmació; avís de caducitats (certificat i cèdula) a **60 dies** (`DIES_AVIS` a `utils/caducitat.ts`).
+- Les dates d'auditoria són en UTC (a Barcelona es veuen 1 o 2 hores menys al `sqlite3`); correcte, es convertiran a hora
   local només quan es mostrin a la UI.
-- **15a (idioma al primer arrencament): fet.** Confirmat pels logs d'arrencada (`[idioma] config.json no existeix; per defecte
-  "ca" (no confirmat, no s'escriu res)`), per la pantalla de selecció que es mostra i per l'últim commit
-  "Idioma al primer arrencament: confirmació, pantalla de selecció i logs".
-- **15b (migració 002): feta.** Confirmat pel log `Migració aplicada: 002_contractes_documents.sql`, per `user_version = 2`
-  amb la taula `tipus_document` present i pel commit "Migració 002: contractes ampliats, tipus_document i documents amb tipus".
-- L'eliminació d'un immoble o inquilí **amb contractes** (error `FK_VIOLADA`) encara no s'ha pogut provar: no hi ha contractes.
+
+**Pas 15: Contractes (backend), complet.**
+
+- **15a, idioma al primer arrencament.** `IDIOMES` (constant única a `tipus.ts`, `Idioma` en deriva) i `idiomaNom` a cada JSON.
+  `config:obtenir` retorna `{ idioma, confirmat }` i **no escriu res**: si `config.json` no existeix o és invàlid retorna
+  l'idioma del sistema (`app.getLocale()`, fallback `ca`) com a no confirmat. Si no és confirmat, `main.tsx` mostra
+  `SeleccioIdioma` (un botó per idioma pel seu nom propi; títol i botó en l'idioma ressaltat; només es desa en confirmar).
+  Logs `[idioma]` a la terminal (Main) i a les DevTools (Renderer). Provat: fitxer vàlid, absent i amb `"fr"`.
+  `app.getLocale()` retorna `"ca"` a la VM i al portàtil; la branca "idioma del sistema no suportat" no s'ha pogut provar.
+- **15b, migració 002** (`contractes` i `documents_contracte` reconstruïdes, `tipus_document` nova, índexs i triggers
+  recreats: **3 índexs, 5 taules, 11 triggers**). Columnes noves de `contractes`: `id_inquili_2`, `lloguer_actual`,
+  `data_ultima_revisio`, fiança (6 camps), devolució (4 camps). `CHECK`s: parelles de fiança, devolució només amb
+  contracte tancat, `id_inquili_2 <> id_inquili`, `data_ultima_revisio >= data_inici`.
+  **Excepció a la regla "no editar mai una migració aplicada":** la 002 es va editar perquè el `CHECK (date(x) = x)` no
+  rebutja dates mal escrites (`date()` dona `NULL` i un `CHECK` només falla amb 0); ara és `date(x) IS x`. Només s'havia
+  aplicat a BD de desenvolupament, restaurades a la versió 1. A la VM es va restaurar la còpia `001` i l'app va tornar a
+  aplicar la 002 corregida: 4 immobles i 4 inquilins intactes, 0 contractes, 7 tipus, i un `INSERT` amb `'2025-1-1'` falla.
+- **15c, tipus de document.** `CLASSES_DOCUMENT` (7 classes) i `ClasseDocument` a `tipus.ts`; claus `documents.classes.*` als
+  JSON; `src/main/tipusDocument.ts` i IPC (`tipusDocument:obtenir`, `tipusDocument:sembrar`). Sembrat a `main.tsx`
+  (`pintarApp`), amb l'idioma ja definitiu: insereix un tipus per cada classe que no en tingui cap (idempotent, per
+  classe), amb validació al Main. Provat: sembrat, idempotència, sembrat d'una sola classe i idioma triat.
+- **15d, backend de Contractes.** Tipus `Contracte`, `ContracteDades` (sense `lloguer_actual`, `data_ultima_revisio` ni
+  devolució), `ContracteLlistat` (amb els dos inquilins); `src/main/contractes.ts` (CRUD, `JOIN` + `LEFT JOIN`, accions
+  `tancarContracte` i `revisarLloguer`) i `src/main/ipc/contractes.ts`. En crear, el Main fixa `lloguer_actual =
+  lloguer_inicial` i `data_ultima_revisio = data_inici`; en actualitzar, `id_inmoble` s'ignora i, mentre no s'ha revisat mai,
+  s'arrossega el lloguer i la data. Provat des de les DevTools: solapament (vigent, dia final inclusiu, `UPDATE`),
+  els `CHECK` (4 casos), `FK_VIOLADA` en eliminar immoble o inquilins amb contractes, arrossegament, Revisar lloguer,
+  Tancar (data anterior a l'inici, `null`), i el llistat amb segon inquilí. Files de prova esborrades.
 
 ### Fase E: empaquetat (feta al portàtil)
 
@@ -136,59 +157,41 @@ Al portàtil (14-10-2026):
 - `electron-builder.yml`: `appId: com.lmoreso.lloguers`, `maintainer: 'Lluis Moreso Bosch <lmoreso@yahoo.com>'`
   i bloc `publish` **eliminat** (no hi ha `electron-updater` ni `autoUpdater` al codi). Resta igual: `asarUnpack` en un sol
   text, `linux.target` = `AppImage` + `deb`, `npmRebuild: false`.
-- `package-lock.json`: l'`npm install` va afegir `"hasInstallScript": true` a `better-sqlite3` (sense canvi de versió); commitejat.
 - `npm run build:linux` genera `dist/lloguers_1.0.0_amd64.deb` (98 MB) i `dist/lloguers-1.0.0.AppImage` (126 MB).
   `dist/` ja és ignorat per `.gitignore`.
 - **Prova del `.deb`**: s'instal·la a `/opt/lloguers` amb `sudo apt install ./dist/lloguers_1.0.0_amd64.deb`, s'executa
-  amb `lloguers`, llegeix `config.json` (`"ca" (confirmat)`) i va permetre crear un inquilí. Desinstal·lat després
-  (`apt remove`; `dpkg -l` mostra l'estat `rc`, restes de configuració; `sudo apt purge lloguers` el treu de la llista).
-- **Prova de l'AppImage**: `./dist/lloguers-1.0.0.AppImage` arrenca sense errors de FUSE ni de sandbox.
-- **Observació sobre el `chrome-sandbox`**: el del `.deb` instal·lat (`/opt/lloguers/chrome-sandbox`) té mode `-rwxr-xr-x`,
-  **sense SUID**, i l'app va arrencar igualment a Mint 22.3. No s'ha investigat el motiu (pot ser que el sistema permeti la
-  sandbox per espais de noms d'usuari, però no està verificat). A la VM sí que va caldre el SUID. Si falla en un altre equip
-  amb l'error del SUID, aplicar l'arreglat de la incidència 2 sobre `/opt/lloguers/chrome-sandbox`, o valorar un script `afterInstall`.
+  amb `lloguers` i va funcionar. **Desinstal·lat** després. L'app empaquetada i `npm run dev` comparteixen `~/Lloguers/`.
+- **Prova de l'AppImage**: arrenca sense errors de FUSE ni de sandbox.
+- **Observació sobre el `chrome-sandbox`**: el del `.deb` instal·lat té mode `-rwxr-xr-x`, **sense SUID**, i l'app va arrencar
+  igualment a Mint 22.3. No s'ha investigat el motiu. A la VM sí que va caldre el SUID. Si falla en un altre equip,
+  aplicar l'arreglat de la incidència 2 sobre `/opt/lloguers/chrome-sandbox`, o valorar un script `afterInstall`.
 
 ### Pendent de confirmar
 
-- **Commit** d'aquest `PROGRES.md` i dels canvis a `NOTES.md` (passos 15a, 15b, 19 i 20), i `git push`.
-- Pujar les dues versions noves al projecte de Claude (**tots dos alhora**, perquè no es desquadrin).
-- No s'ha vist la sortida del `cmp` de la còpia `lloguers.sqlite.bak2`.
-- Aplicar a `NOTES.md` les dues lliçons del pas 14 (formularis llargs i números al formulari) si no s'han fet ja.
-- El portàtil té un inquilí de prova a la seva BD (que és només de proves).
+- **Commit** de l'edició de la 002 (`IS` en lloc d'`=`) i dels canvis a `NOTES.md`; i `git push`. No consta que s'hagi fet.
+- Aplicar a `NOTES.md`: marcar el **15d** com a fet; corregir `CHECK (date(x) = x)` → `IS` als tres llocs (convencions de la BD,
+  regles de contractes) i afegir l'excepció de la 002 al punt de les migracions.
+- **Portàtil**: `git pull`, `npm install`, `npm install-scripts ls`, i **esborrar la seva BD de proves** (té la 002 antiga i
+  contractes de prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`, esborrar `-wal`/`-shm` i arrencar
+  perquè l'app la creï amb la 001 + 002. Comprovar `user_version = 2`, 7 tipus, 3/5/11 i que `'2025-1-1'` es rebutja.
+- Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
 
 ## Pròxim pas
 
-**Primer, verificar què hi ha fet de 15c i 15d al codi** (el repositori anava per davant d'aquest fitxer), per exemple:
+**Fase D, pas 16: Contractes (UI, fase 1)** (vegeu `NOTES.md`, "Contractes: disseny funcional > Interfície"). Proposta de trossos:
 
-```bash
-git log --oneline -15
-ls src/main src/main/ipc
-grep -n "classe\|CLASSES" src/shared/tipus.ts
-```
+1. Claus de text (`contractes.*`) i botó "Contractes" a cada fila d'Immobles, amb la ruta `/immobles/:id/contractes`.
+   Treure l'entrada provisional "Contractes" del menú (s'hi entra només des d'Immobles; el menú "Contractes vigents" és de la fase 3).
+2. Llista de contractes de l'immoble (l'últim primer, nom dels dos inquilins, etiqueta *vigent* / *tancat*).
+3. Formulari en pantalla pròpia, per seccions (dades, fiança): immoble fix i no modificable, selector d'inquilí cercable i segon
+   inquilí opcional; `lloguer_actual` i `data_ultima_revisio` de només lectura en editar. Les dades de devolució NO hi són (fase 2).
+4. Accions **Tancar** (demana `data_fi`) i **Revisar lloguer** (import i data alhora; l'import pot ser igual).
+5. Confirmació en editar un contracte tancat; eliminar amb confirmació que avisa que s'esborren fiança i documents.
+6. Avisos de fi prevista (90 dies, també un cop passada) i de revisió de lloguer (30 dies abans de l'aniversari, també passat),
+   només per a contractes vigents, amb constants a `utils/caducitat.ts`.
 
-Segons el resultat, es continua amb el que falti.
-
-**15c: classes i sembrat de tipus de document** (vegeu `NOTES.md`): llista de classes a `tipus.ts`, claus `documents.classes.*`
-als JSON, IPC de sembrat, validació de classes al Main.
-
-**15d: Contractes (backend).**
-
-- Tipus a `src/shared/tipus.ts`: `Contracte`, `ContracteDades` i `ContracteLlistat` (sense `afegit_el` ni `ultima_mod`),
-  amb els camps nous de la migració 002 (segon inquilí, `lloguer_actual`, `data_ultima_revisio`, fiança, devolució).
-- `src/main/contractes.ts` (CRUD amb `SELECT` de columnes explícites, `JOIN` amb `inquilins`, regles del lloguer i la
-  revisió), `src/main/ipc/contractes.ts`, registre a `index.ts`, preload i `index.d.ts`.
-- **Provar els triggers de solapament amb dades de prova**, des de les DevTools: dos contractes de la mateixa finca amb períodes
-  que se solapen (ha de sortir `CONTRACTE_SOLAPAT`); el dia final és inclusiu (un contracte que acaba el 31-03 permet que el
-  següent comenci l'01-04); `data_fi` buida es tracta com `9999-12-31`; el solapament amb un `UPDATE` també ha de fallar.
-- **Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*`** que usa `traduirError`
-  (`..._TRIGGER` → `CONTRACTE_SOLAPAT`, `..._FOREIGNKEY` → `FK_VIOLADA`, `..._CHECK` → `CHECK_VIOLAT`). Si no coincideixen,
-  `CONTRACTE_SOLAPAT` no es detectarà. Provar també els `CHECK` de dates i els nous (`id_inquili_2 <> id_inquili`,
-  parelles de fiança, devolució només amb contracte tancat, `data_ultima_revisio >= data_inici`).
-- Provar que eliminar un immoble o un inquilí amb contractes dona `FK_VIOLADA`.
-- Esborrar les files de prova al final.
-
-Després: Contractes (UI, pas 16), Documents (backend i UI, passos 17 i 18) i el que quedi de la Fase E
-(opcional: excloure els binaris de `better-sqlite3` d'altres plataformes).
+Després: Documents (backend i UI, passos 17 i 18), Fase 2 (devolució de la fiança) i Fase 3 (canvi de signants, correcció de
+l'immoble d'un contracte, menú Contractes vigents).
 
 ## Versions reals vs. la guia
 
@@ -218,10 +221,9 @@ npm install-scripts approve better-sqlite3
 npm install-scripts deny electron-winstaller   # només per a Windows, no el necessitem
 ```
 
-Les aprovacions viatgen amb el repositori: en clonar-lo al portàtil, `npm install-scripts ls` ja no mostrava res pendent
-i no va caldre repetir-les. Si algun cop `better-sqlite3` no queda compilat, forçar-ho amb `npm rebuild better-sqlite3`
-(compila contra el Node del sistema; el `postinstall` de la plantilla s'encarrega de la versió d'Electron).
-Després de cada `npm install` de paquets nous, executar `npm install-scripts ls`.
+Les aprovacions viatgen amb el repositori. Si algun cop `better-sqlite3` no queda compilat, forçar-ho amb
+`npm rebuild better-sqlite3` (compila contra el Node del sistema; el `postinstall` de la plantilla s'encarrega de la
+versió d'Electron). Després de cada `npm install` de paquets nous, executar `npm install-scripts ls`.
 
 ### 2. Error de sandbox en arrencar Electron
 
@@ -235,7 +237,7 @@ sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
 
 Es perd si es reinstal·la Electron (p. ex. `rm -rf node_modules` + `npm install`). Cal repetir-ho llavors.
 S'ha aplicat també al portàtil. L'app empaquetada a `dist/linux-unpacked/` necessita el mateix sobre el seu propi
-`chrome-sandbox`. Vegeu l'observació de la Fase E sobre el `.deb` instal·lat.
+`chrome-sandbox`.
 
 ### 3. Error TypeScript 4023 a `database.ts`
 
@@ -257,12 +259,12 @@ Solució: eliminar `baseUrl` i posar la ruta de `paths` relativa (`"./src/render
 `configuration.asarUnpack.1 should be a string`: la validació només accepta **un sol text**, no una llista.
 Solució: `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`.
 Si un canvi a aquest fitxer no té efecte, comprovar-ho amb `grep -n asarUnpack electron-builder.yml`
-(una vegada es va malmetre en editar-lo i va caldre substituir-lo sencer; el fitxer acaba sense salt de línia final).
+(una vegada es va malmetre en editar-lo i va caldre substituir-lo sencer).
 
-### 6. Missatges de `libva` / `vaInitialize` a la terminal
+### 6. Missatges de `libva` / `vaInitialize` i d'`Autofill` a la terminal
 
-Venen de la GPU virtual de la VM (`virtio_gpu`): Chromium no pot usar l'acceleració de vídeo i renderitza per programari.
-Són inofensius. Si molesten, `app.disableHardwareAcceleration()` al Main.
+Els de `libva` venen de la GPU virtual de la VM (`virtio_gpu`): Chromium renderitza per programari. Els d'`Autofill.enable` /
+`Autofill.setAddresses` són soroll de les DevTools. Tots són inofensius. Si molesten, `app.disableHardwareAcceleration()`.
 
 ### 7. El `Modal` de Mantine només mostrava el fons gris
 
@@ -284,23 +286,45 @@ En un cas semblant, abans de forçar cal mirar `git log --oneline --graph --all`
 
 ### 10. Fitxers buits `electron-vite` i `lloguers@1.0.0` a l'arrel
 
-Apareixen a `git status` com a no seguits. Són el resultat d'enganxar al terminal línies de sortida que comencen amb `>`
-(`> lloguers@1.0.0 dev`, `> electron-vite dev`): el shell les executa com una redirecció. Solució: `rm electron-vite lloguers@1.0.0`
-(comprovant abans amb `ls -l` que fan 0 bytes).
+Són el resultat d'enganxar al terminal línies de sortida que comencen amb `>`: el shell les executa com una redirecció.
+Solució: `rm electron-vite lloguers@1.0.0` (comprovant abans amb `ls -l` que fan 0 bytes).
+
+### 11. `CHECK (date(x) = x)` no rebutja dates mal escrites
+
+`date('2025-13-45')` i `date('2025-1-1')` retornen `NULL`; `NULL = 'text'` és `NULL` i un `CHECK` només falla quan val 0.
+Solució: `CHECK (date(x) IS x)` (per a dates opcionals, `x IS NULL OR date(x) IS x`). Aplicat a la migració 002.
+`inmobles` té dates sense cap `CHECK`; no es va tocar (conté dades reals i el selector de dates ja protegeix l'app).
+
+### 12. La comprovació de claus d'i18n diu `claus iguals` sense `jq`
+
+Si `jq` no és instal·lat, els dos costats del `diff` surten buits i la comprovació sempre dona `claus iguals`.
+Solució: `sudo apt install -y jq`. Convé veure que no surt cap "No s'ha trobat l'ordre".
+
+### 13. El terminal "es queda penjat" després d'un `git diff`
+
+És el paginador de Git (`less`): prem `q`. Per desactivar-lo: `git config --global core.pager cat`.
+
+### 14. Dos ordinadors desquadrats (`git pull` rebutjat per fitxers modificats)
+
+`git fetch` + `git status -sb` diu quants commits va endarrerit el local (`[darrere N]`); `git diff origin/main --stat` mostra
+com a esborrat tot el que l'altre ordinador ha afegit (no és una pèrdua). Per posar-se al dia sense perdre res:
+`git stash`, `git pull`, comparar amb `git diff stash@{0} -- <fitxers>` i, si no hi ha res propi, `git stash drop`.
 
 ## Altres pendents
 
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD
-  (p. ex. l'idioma invàlid). Només cosmètic; ajustar el text si molesta.
+  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`). Només cosmètic.
 - Configuració només té el selector d'idioma, i Quant a només el títol (la versió es pot llegir de `package.json`).
-- `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren (`App.tsx.bak` es va fer fora de
-  Git: comprovar-ho amb `git status` abans de `git add -A`).
+- `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren.
+- Pantalla per crear i editar tipus de document (a Configuració): fora de la fase 1.
+- Fase 2: devolució de la fiança (model 3). Fase 3: canvi de signants (annex), correcció de l'immoble d'un contracte
+  (ara només es pot eliminar i recrear, i això perd els documents), menú "Contractes vigents", historial de revisions.
+- `eliminarContracte` encara no esborra els fitxers del disc (no n'hi ha cap fins al pas 17).
 - Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida.
 
 ## Git
 
-- Repositori **ja iniciat i enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). A la VM, fet per l'usuari; al portàtil,
-  clonat per SSH. Últim estat verificat al portàtil (14-10-2026): `## main...origin/main`, net, amb els commits
-  "package-lock: marca hasInstallScript a better-sqlite3", "Migració 002: contractes ampliats, tipus_document i documents amb tipus"
-  i "Idioma al primer arrencament: confirmació, pantalla de selecció i logs", més el de `electron-builder.yml`
-  (proves d'empaquetat al portàtil Mint).
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim estat verificat a la VM (15-10-2026): al dia amb
+  `origin/main` al commit `04c0206` ("Contractes: backend (tipus, CRUD, accions Tancar i Revisar lloguer, IPC); proves parcials"),
+  precedit per "Sembrat dels tipus de document a l'arrencada" i "Tipus de document: classes, sembrat i IPC". Després d'això
+  s'ha editat la migració 002 i `NOTES.md`; **falta el commit** (vegeu "Pendent de confirmar").
