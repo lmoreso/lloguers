@@ -29,6 +29,7 @@
     "@mantine/hooks": "^9.7.1",
     "@mantine/modals": "^9.7.1",
     "@mantine/notifications": "^9.7.1",
+    "@tabler/icons-react": "^3.49.0",
     "better-sqlite3": "^13.0.3",
     "dayjs": "^1.11.23",
     "i18next": "^26.4.2",

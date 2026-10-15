@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, Group, Modal, Table, Text, Title } from '@mantine/core'
+import { ActionIcon, Button, Group, Modal, Table, Text, Title, Tooltip } from '@mantine/core'
+import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { useTranslation } from 'react-i18next'
@@ -86,19 +87,27 @@ function Inquilins(): React.JSX.Element {
                 <Table.Td>{siNo(i.ck_tel1_bizum)}</Table.Td>
                 <Table.Td>
                   <Group gap="xs" wrap="nowrap">
-                    <Button size="xs" variant="subtle" onClick={() => setModal({ inquili: i })}>
-                      {t('comu.editar')}
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="subtle"
-                      color="red"
-                      onClick={() => demanarEliminar(i)}
-                    >
-                      {t('comu.eliminar')}
-                    </Button>
+                    <Tooltip label={t('comu.editar')}>
+                      <ActionIcon
+                        variant="subtle"
+                        aria-label={t('comu.editar')}
+                        onClick={() => setModal({ inquili: i })}
+                      >
+                        <IconPencil size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label={t('comu.eliminar')}>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        aria-label={t('comu.eliminar')}
+                        onClick={() => demanarEliminar(i)}
+                      >
+                        <IconTrash size={18} />
+                      </ActionIcon>
+                    </Tooltip>
                   </Group>
-                </Table.Td>{' '}
+                </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>
