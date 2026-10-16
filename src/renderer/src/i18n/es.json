@@ -176,7 +176,16 @@
     "eliminar": {
       "titol": "Eliminar contrato",
       "confirmacio": "¿Seguro que quieres eliminar el contrato de {{inquilins}} (inicio {{inici}})? Se borrarán también la fianza y los documentos adjuntos. Esta acción no se puede deshacer."
-    }    
+    },
+    "accions": {
+      "tancar": "Cerrar contrato",
+      "revisarLloguer": "Revisar alquiler"
+    },
+    "tancar": {
+      "titol": "Cerrar contrato",
+      "dataFi": "Fecha de fin",
+      "fet": "Contrato cerrado."
+    }        
   },
   "proves": {
     "titol": "Pruebas de Mantine",

@@ -176,7 +176,16 @@
     "eliminar": {
       "titol": "Eliminar contracte",
       "confirmacio": "Segur que vols eliminar el contracte de {{inquilins}} (inici {{inici}})? S'esborraran també la fiança i els documents adjunts. Aquesta acció no es pot desfer."
-    }    
+    },
+    "accions": {
+      "tancar": "Tancar contracte",
+      "revisarLloguer": "Revisar lloguer"
+    },
+    "tancar": {
+      "titol": "Tancar contracte",
+      "dataFi": "Data de fi",
+      "fet": "Contracte tancat."
+    }        
   },
   "proves": {
     "titol": "Proves de Mantine",

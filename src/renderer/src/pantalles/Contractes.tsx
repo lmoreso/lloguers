@@ -8,7 +8,8 @@ import { formatData } from '../utils/dates'
 import { esOk } from '../utils/resultat'
 import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
 import { notifications } from '@mantine/notifications'
-import { IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
+import TancarContracte from './TancarContracte'
 
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
 function Contractes(): React.JSX.Element {
@@ -83,6 +84,13 @@ function Contractes(): React.JSX.Element {
     })
   }
 
+  function tancar(c: ContracteLlistat): void {
+    modals.open({
+      title: t('contractes.tancar.titol'),
+      children: <TancarContracte contracte={c} onTancat={() => setVersio((v) => v + 1)} />
+    })
+  }
+
   return (
     <>
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
@@ -136,6 +144,17 @@ function Contractes(): React.JSX.Element {
                     <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
                     <Table.Td>
                       <Group gap="xs" wrap="nowrap">
+                        {c.data_fi === null && (
+                          <Tooltip label={t('contractes.accions.tancar')}>
+                            <ActionIcon
+                              variant="subtle"
+                              aria-label={t('contractes.accions.tancar')}
+                              onClick={() => tancar(c)}
+                            >
+                              <IconLock size={18} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
                         <Tooltip label={t('comu.editar')}>
                           <ActionIcon
                             variant="subtle"
