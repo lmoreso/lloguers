@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import type { Immoble, ImmobleDades } from '../../../shared/tipus'
+import { aNumero, buitANull } from '../utils/formulari'
 
 // Els camps de text són sempre string al formulari; a la BD els buits són NULL.
 // Les dates són text ISO AAAA-MM-DD (o null), tal com les desa la BD.
@@ -27,15 +28,6 @@ interface Valors {
   ced_hab_reg: string
   ced_hab_data: string | null
   ced_hab_caduc: string | null
-}
-
-const buitANull = (s: string): string | null => s.trim() || null
-
-// Accepta coma o punt decimal; a la BD sempre punt. Retorna null si és buit o no és un número.
-function aNumero(s: string): number | null {
-  const net = s.trim().replace(',', '.')
-  const n = Number(net)
-  return net !== '' && Number.isFinite(n) ? n : null
 }
 
 function FormulariImmoble({ immoble }: { immoble: Immoble | null }): React.JSX.Element {

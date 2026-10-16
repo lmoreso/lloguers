@@ -26,7 +26,8 @@
     "no": "No",
     "carregant": "Carregant…",
     "obligatori": "Aquest camp és obligatori.",
-    "tornar": "Tornar"
+    "tornar": "Tornar",
+    "capResultat": "Cap resultat"    
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
@@ -125,18 +126,51 @@
   "contractes": {
     "titol": "Contractes",
     "titolImmoble": "Contractes de {{adreca}}",
+    "nou": "Nou contracte",
+    "editar": "Editar contracte",
     "buit": "Aquest immoble encara no té cap contracte.",
+    "noTrobat": "No s'ha trobat aquest contracte.",    
+    "desat": "Contracte desat.",
     "estat": {
       "vigent": "Vigent",
       "tancat": "Tancat"
     },
+    "seccions": {
+      "dades": "Dades del contracte",
+      "lloguer": "Lloguer",
+      "fianca": "Fiança"
+    },
     "camps": {
+      "estat": "Estat",
+      "immoble": "Immoble",
       "dataInici": "Inici",
       "dataFi": "Fi",
       "dFiPrevista": "Fi prevista",
       "inquilins": "Inquilins",
+      "inquili": "Inquilí",
+      "inquili2": "Segon inquilí (opcional)",
+      "lloguerInicial": "Lloguer inicial",
       "lloguerActual": "Lloguer actual",
-      "estat": "Estat"
+      "dataUltimaRevisio": "Última revisió",
+      "comentaris": "Comentaris",
+      "fiancaImport": "Import de la fiança",
+      "fiancaNc": "NC (registre INCASOL)",
+      "fiancaDataModel2": "Data del model 2",
+      "fiancaDataIngres": "Data de l'ingrés",
+      "fiancaDataNotificacio": "Data de la notificació",
+      "fiancaNumRegistre": "Núm. de registre de la notificació"
+    },
+    "cercarInquili": "Cerca un inquilí…",
+    "validacio": {
+      "dataFiAnterior": "La data de fi no pot ser anterior a l'inici.",
+      "fiPrevistaAnterior": "La fi prevista no pot ser anterior a l'inici.",
+      "mateixInquili": "El segon inquilí ha de ser diferent del primer.",
+      "parellaModel2": "El NC i la data del model 2 s'han d'informar junts.",
+      "parellaNotificacio": "El número de registre i la data de la notificació s'han d'informar junts."
+    },
+    "editarTancat": {
+      "titol": "Contracte tancat",
+      "text": "Aquest contracte ja està tancat. Segur que el vols modificar?"
     }
   },
   "proves": {

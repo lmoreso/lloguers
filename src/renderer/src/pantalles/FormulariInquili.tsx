@@ -4,15 +4,13 @@ import { notifications } from '@mantine/notifications'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import type { Inquili, InquiliDades } from '../../../shared/tipus'
+import { buitANull } from '../utils/formulari'
 
 interface Props {
   inquili: Inquili | null // null = nou inquilí
   onTancar: () => void
   onDesat: () => void
 }
-
-// Els camps de text del formulari són sempre string; a la BD els buits són NULL.
-const buitANull = (s: string): string | null => s.trim() || null
 
 function FormulariInquili({ inquili, onTancar, onDesat }: Props): React.JSX.Element {
   const { t } = useTranslation()

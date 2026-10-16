@@ -26,7 +26,8 @@
     "no": "No",
     "carregant": "Cargando…",
     "obligatori": "Este campo es obligatorio.",
-    "tornar": "Volver"
+    "tornar": "Volver",
+    "capResultat": "Sin resultados"    
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El período se solapa con otro contrato de este inmueble.",
@@ -125,18 +126,51 @@
   "contractes": {
     "titol": "Contratos",
     "titolImmoble": "Contratos de {{adreca}}",
+    "nou": "Nuevo contrato",
+    "editar": "Editar contrato",
     "buit": "Este inmueble todavía no tiene ningún contrato.",
+    "noTrobat": "No se ha encontrado este contrato.",    
+    "desat": "Contrato guardado.",
     "estat": {
       "vigent": "Vigente",
       "tancat": "Cerrado"
     },
+    "seccions": {
+      "dades": "Datos del contrato",
+      "lloguer": "Alquiler",
+      "fianca": "Fianza"
+    },
     "camps": {
+      "estat": "Estado",
+      "immoble": "Inmueble",
       "dataInici": "Inicio",
       "dataFi": "Fin",
       "dFiPrevista": "Fin previsto",
       "inquilins": "Inquilinos",
+      "inquili": "Inquilino",
+      "inquili2": "Segundo inquilino (opcional)",
+      "lloguerInicial": "Alquiler inicial",
       "lloguerActual": "Alquiler actual",
-      "estat": "Estado"
+      "dataUltimaRevisio": "Última revisión",
+      "comentaris": "Comentarios",
+      "fiancaImport": "Importe de la fianza",
+      "fiancaNc": "NC (registro INCASOL)",
+      "fiancaDataModel2": "Fecha del modelo 2",
+      "fiancaDataIngres": "Fecha del ingreso",
+      "fiancaDataNotificacio": "Fecha de la notificación",
+      "fiancaNumRegistre": "N.º de registro de la notificación"
+    },
+    "cercarInquili": "Busca un inquilino…",
+    "validacio": {
+      "dataFiAnterior": "La fecha de fin no puede ser anterior al inicio.",
+      "fiPrevistaAnterior": "El fin previsto no puede ser anterior al inicio.",
+      "mateixInquili": "El segundo inquilino debe ser distinto del primero.",
+      "parellaModel2": "El NC y la fecha del modelo 2 deben informarse juntos.",
+      "parellaNotificacio": "El número de registro y la fecha de la notificación deben informarse juntos."
+    },
+    "editarTancat": {
+      "titol": "Contrato cerrado",
+      "text": "Este contrato ya está cerrado. ¿Seguro que quieres modificarlo?"
     }
   },
   "proves": {
