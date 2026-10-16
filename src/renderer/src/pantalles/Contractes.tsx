@@ -8,7 +8,8 @@ import { formatData } from '../utils/dates'
 import { esOk } from '../utils/resultat'
 import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
 import { notifications } from '@mantine/notifications'
-import { IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconCurrencyEuro, IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
+import RevisarLloguer from './RevisarLloguer'
 import TancarContracte from './TancarContracte'
 
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
@@ -91,6 +92,13 @@ function Contractes(): React.JSX.Element {
     })
   }
 
+  function revisar(c: ContracteLlistat): void {
+    modals.open({
+      title: t('contractes.revisar.titol'),
+      children: <RevisarLloguer contracte={c} onRevisat={() => setVersio((v) => v + 1)} />
+    })
+  }
+
   return (
     <>
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
@@ -144,6 +152,17 @@ function Contractes(): React.JSX.Element {
                     <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
                     <Table.Td>
                       <Group gap="xs" wrap="nowrap">
+                        {c.data_fi === null && (
+                          <Tooltip label={t('contractes.accions.revisarLloguer')}>
+                            <ActionIcon
+                              variant="subtle"
+                              aria-label={t('contractes.accions.revisarLloguer')}
+                              onClick={() => revisar(c)}
+                            >
+                              <IconCurrencyEuro size={18} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
                         {c.data_fi === null && (
                           <Tooltip label={t('contractes.accions.tancar')}>
                             <ActionIcon

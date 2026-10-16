@@ -166,7 +166,8 @@
       "fiPrevistaAnterior": "El fin previsto no puede ser anterior al inicio.",
       "mateixInquili": "El segundo inquilino debe ser distinto del primero.",
       "parellaModel2": "El NC y la fecha del modelo 2 deben informarse juntos.",
-      "parellaNotificacio": "El número de registro y la fecha de la notificación deben informarse juntos."
+      "parellaNotificacio": "El número de registro y la fecha de la notificación deben informarse juntos.",
+      "revisioAnterior": "La fecha de la revisión no puede ser anterior al inicio del contrato."      
     },
     "editarTancat": {
       "titol": "Contrato cerrado",
@@ -181,6 +182,13 @@
       "tancar": "Cerrar contrato",
       "revisarLloguer": "Revisar alquiler"
     },
+    "revisar": {
+      "titol": "Revisar alquiler",
+      "lloguerNou": "Nuevo alquiler",
+      "data": "Fecha de la revisión",
+      "actual": "Alquiler actual: {{lloguer}} (última revisión: {{data}})",
+      "fet": "Alquiler revisado."
+    },    
     "tancar": {
       "titol": "Cerrar contrato",
       "dataFi": "Fecha de fin",

@@ -166,7 +166,8 @@
       "fiPrevistaAnterior": "La fi prevista no pot ser anterior a l'inici.",
       "mateixInquili": "El segon inquilí ha de ser diferent del primer.",
       "parellaModel2": "El NC i la data del model 2 s'han d'informar junts.",
-      "parellaNotificacio": "El número de registre i la data de la notificació s'han d'informar junts."
+      "parellaNotificacio": "El número de registre i la data de la notificació s'han d'informar junts.",
+      "revisioAnterior": "La data de la revisió no pot ser anterior a l'inici del contracte."      
     },
     "editarTancat": {
       "titol": "Contracte tancat",
@@ -180,6 +181,13 @@
     "accions": {
       "tancar": "Tancar contracte",
       "revisarLloguer": "Revisar lloguer"
+    },
+    "revisar": {
+      "titol": "Revisar lloguer",
+      "lloguerNou": "Nou lloguer",
+      "data": "Data de la revisió",
+      "actual": "Lloguer actual: {{lloguer}} (última revisió: {{data}})",
+      "fet": "Lloguer revisat."
     },
     "tancar": {
       "titol": "Tancar contracte",
