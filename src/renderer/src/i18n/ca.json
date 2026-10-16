@@ -171,7 +171,12 @@
     "editarTancat": {
       "titol": "Contracte tancat",
       "text": "Aquest contracte ja està tancat. Segur que el vols modificar?"
-    }
+    },
+    "eliminat": "Contracte eliminat.",
+    "eliminar": {
+      "titol": "Eliminar contracte",
+      "confirmacio": "Segur que vols eliminar el contracte de {{inquilins}} (inici {{inici}})? S'esborraran també la fiança i els documents adjunts. Aquesta acció no es pot desfer."
+    }    
   },
   "proves": {
     "titol": "Proves de Mantine",

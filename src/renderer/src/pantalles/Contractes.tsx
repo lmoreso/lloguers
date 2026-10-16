@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { ActionIcon, Badge, Button, Group, Table, Text, Title, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
-import { IconPencil } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
 import { formatData } from '../utils/dates'
 import { esOk } from '../utils/resultat'
 import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
+import { notifications } from '@mantine/notifications'
+import { IconPencil, IconTrash } from '@tabler/icons-react'
 
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
 function Contractes(): React.JSX.Element {
@@ -17,6 +18,8 @@ function Contractes(): React.JSX.Element {
   const [immoble, setImmoble] = useState<Immoble | null>(null)
   const [contractes, setContractes] = useState<ContracteLlistat[]>([])
   const [carregant, setCarregant] = useState(true)
+  // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
+  const [versio, setVersio] = useState(0)
 
   useEffect(() => {
     let cancelat = false
@@ -33,7 +36,7 @@ function Contractes(): React.JSX.Element {
     return () => {
       cancelat = true
     }
-  }, [id])
+  }, [id, versio])
 
   const nomInquili = (nom: string | null, cognoms: string | null): string =>
     [nom, cognoms].filter(Boolean).join(' ') || t('inquilins.senseNom')
@@ -54,6 +57,29 @@ function Contractes(): React.JSX.Element {
       children: <Text size="sm">{t('contractes.editarTancat.text')}</Text>,
       labels: { confirm: t('comu.editar'), cancel: t('comu.cancellar') },
       onConfirm: anar
+    })
+  }
+
+  function demanarEliminar(c: ContracteLlistat): void {
+    const inquilins = [
+      nomInquili(c.inquili_nom, c.inquili_cognoms),
+      ...(c.id_inquili_2 !== null ? [nomInquili(c.inquili2_nom, c.inquili2_cognoms)] : [])
+    ].join(' / ')
+    modals.openConfirmModal({
+      title: t('contractes.eliminar.titol'),
+      children: (
+        <Text size="sm">
+          {t('contractes.eliminar.confirmacio', { inquilins, inici: formatData(c.data_inici) })}
+        </Text>
+      ),
+      labels: { confirm: t('comu.eliminar'), cancel: t('comu.cancellar') },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        const resposta = await window.api.contractes.eliminar(c.id)
+        if (!esOk(resposta)) return
+        notifications.show({ color: 'green', message: t('contractes.eliminat') })
+        setVersio((v) => v + 1)
+      }
     })
   }
 
@@ -117,6 +143,16 @@ function Contractes(): React.JSX.Element {
                             onClick={() => editar(c)}
                           >
                             <IconPencil size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label={t('comu.eliminar')}>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            aria-label={t('comu.eliminar')}
+                            onClick={() => demanarEliminar(c)}
+                          >
+                            <IconTrash size={18} />
                           </ActionIcon>
                         </Tooltip>
                       </Group>
