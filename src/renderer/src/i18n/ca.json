@@ -122,7 +122,14 @@
       "fianca_model3": "Fiança – Model 3 (devolució)",
       "rebut": "Rebut",
       "altres": "Altres"
-    }
+    },
+    "buit": "Aquest contracte encara no té cap document.",
+    "camps": {
+      "tipus": "Tipus",
+      "fitxer": "Fitxer",
+      "data": "Data del document",
+      "comentaris": "Comentaris"
+    }    
   },
   "contractes": {
     "titol": "Contractes",
@@ -136,6 +143,10 @@
       "vigent": "Vigent",
       "tancat": "Tancat"
     },
+    "pestanyes": {
+      "dades": "Dades",
+      "documents": "Documents"
+    },    
     "seccions": {
       "dades": "Dades del contracte",
       "lloguer": "Lloguer",

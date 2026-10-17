@@ -1,20 +1,20 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 import type {
   Config,
-  Immoble,
-  ImmobleDades,
-  Inquili,
-  InquiliDades,
-  Resultat,
   ConfigObtinguda,
-  NomsClasses,
-  TipusDocument,
   Contracte,
   ContracteDades,
   ContracteLlistat,
   DocumentContracte,
   DocumentDades,
-  DocumentLlistat
+  DocumentLlistat,
+  Immoble,
+  ImmobleDades,
+  Inquili,
+  InquiliDades,
+  NomsClasses,
+  Resultat,
+  TipusDocument
 } from '../shared/tipus'
 
 declare global {
@@ -55,17 +55,17 @@ declare global {
           lloguerNou: number,
           dataRevisio: string
         ) => Promise<Resultat<void>>
-        documents: {
-          obtenir: (idContracte: number) => Promise<Resultat<DocumentLlistat[]>>
-          adjuntar: (
-            idContracte: number,
-            idTipus: number,
-            titolDialeg: string
-          ) => Promise<Resultat<DocumentContracte[]>>
-          actualitzar: (id: number, dades: DocumentDades) => Promise<Resultat<void>>
-          eliminar: (id: number) => Promise<Resultat<void>>
-          obrir: (id: number) => Promise<Resultat<void>>
-        }
+      }
+      documents: {
+        obtenir: (idContracte: number) => Promise<Resultat<DocumentLlistat[]>>
+        adjuntar: (
+          idContracte: number,
+          idTipus: number,
+          titolDialeg: string
+        ) => Promise<Resultat<DocumentContracte[]>>
+        actualitzar: (id: number, dades: DocumentDades) => Promise<Resultat<void>>
+        eliminar: (id: number) => Promise<Resultat<void>>
+        obrir: (id: number) => Promise<Resultat<void>>
       }
     }
   }

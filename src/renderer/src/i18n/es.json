@@ -122,7 +122,14 @@
       "fianca_model3": "Fianza – Modelo 3 (devolución)",
       "rebut": "Recibo",
       "altres": "Otros"
-    }
+    },
+    "buit": "Este contrato todavía no tiene ningún documento.",
+    "camps": {
+      "tipus": "Tipo",
+      "fitxer": "Archivo",
+      "data": "Fecha del documento",
+      "comentaris": "Comentarios"
+    }    
   },
   "contractes": {
     "titol": "Contratos",
@@ -136,6 +143,10 @@
       "vigent": "Vigente",
       "tancat": "Cerrado"
     },
+    "pestanyes": {
+      "dades": "Datos",
+      "documents": "Documentos"
+    },    
     "seccions": {
       "dades": "Datos del contrato",
       "lloguer": "Alquiler",

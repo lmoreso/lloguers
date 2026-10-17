@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, Text, Title } from '@mantine/core'
+import { Button, Tabs, Text, Title } from '@mantine/core'
+import DocumentsContracte from './DocumentsContracte'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -73,7 +74,23 @@ function FitxaContracte(): React.JSX.Element {
           <Text c="dimmed" mb="md">
             {adreca(immoble)}
           </Text>
-          <FormulariContracte immoble={immoble} contracte={contracte} inquilins={inquilins} />
+          {contracte === null ? (
+            <FormulariContracte immoble={immoble} contracte={null} inquilins={inquilins} />
+          ) : (
+            // Els panells es mantenen muntats: canviar de pestanya no esborra el que s'ha escrit al formulari.
+            <Tabs defaultValue="dades" keepMounted>
+              <Tabs.List mb="md">
+                <Tabs.Tab value="dades">{t('contractes.pestanyes.dades')}</Tabs.Tab>
+                <Tabs.Tab value="documents">{t('contractes.pestanyes.documents')}</Tabs.Tab>
+              </Tabs.List>
+              <Tabs.Panel value="dades">
+                <FormulariContracte immoble={immoble} contracte={contracte} inquilins={inquilins} />
+              </Tabs.Panel>
+              <Tabs.Panel value="documents">
+                <DocumentsContracte contracte={contracte} />
+              </Tabs.Panel>
+            </Tabs>
+          )}
         </>
       )}
     </>
