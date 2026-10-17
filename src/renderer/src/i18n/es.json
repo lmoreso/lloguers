@@ -123,6 +123,12 @@
       "rebut": "Recibo",
       "altres": "Otros"
     },
+    "adjuntar": {
+      "boto": "Adjuntar",
+      "dialeg": "Elige los documentos a adjuntar"
+    },
+    "adjuntats_one": "{{count}} documento adjuntado.",
+    "adjuntats_other": "{{count}} documentos adjuntados.",    
     "buit": "Este contrato todavía no tiene ningún documento.",
     "camps": {
       "tipus": "Tipo",
