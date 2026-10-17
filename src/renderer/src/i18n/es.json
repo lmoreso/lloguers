@@ -158,6 +158,7 @@
       "fiancaDataModel2": "Fecha del modelo 2",
       "fiancaDataIngres": "Fecha del ingreso",
       "fiancaDataNotificacio": "Fecha de la notificación",
+      "avisos": "Avisos",      
       "fiancaNumRegistre": "N.º de registro de la notificación"
     },
     "cercarInquili": "Busca un inquilino…",
@@ -188,7 +189,17 @@
       "data": "Fecha de la revisión",
       "actual": "Alquiler actual: {{lloguer}} (última revisión: {{data}})",
       "fet": "Alquiler revisado."
-    },    
+    },
+    "avisos": {
+      "fi": {
+        "caducat": "Fin previsto pasado",
+        "aviat": "Fin previsto próximo"
+      },
+      "revisio": {
+        "caducat": "Revisión pendiente",
+        "aviat": "Revisión próxima"
+      }
+    },        
     "tancar": {
       "titol": "Cerrar contrato",
       "dataFi": "Fecha de fin",

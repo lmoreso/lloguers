@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActionIcon, Badge, Button, Group, Table, Text, Title, Tooltip } from '@mantine/core'
+import { ActionIcon, Badge, Button, Group, Stack, Table, Text, Title, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,23 @@ import { notifications } from '@mantine/notifications'
 import { IconCurrencyEuro, IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
 import RevisarLloguer from './RevisarLloguer'
 import TancarContracte from './TancarContracte'
+import {
+  aniversariRevisio,
+  DIES_AVIS_FI,
+  DIES_AVIS_REVISIO,
+  estatCaducitat
+} from '../utils/caducitat'
+
+// Avisos d'un contracte. Només els vigents (sense data de fi) en tenen.
+function avisos(c: ContracteLlistat): { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] {
+  if (c.data_fi !== null) return []
+  const llista: { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] = []
+  const fi = estatCaducitat(c.d_fi_prevista, DIES_AVIS_FI)
+  if (fi) llista.push({ clau: 'fi', estat: fi })
+  const revisio = estatCaducitat(aniversariRevisio(c.data_ultima_revisio), DIES_AVIS_REVISIO)
+  if (revisio) llista.push({ clau: 'revisio', estat: revisio })
+  return llista
+}
 
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
 function Contractes(): React.JSX.Element {
@@ -125,7 +142,8 @@ function Contractes(): React.JSX.Element {
                   <Table.Th>{t('contractes.camps.dFiPrevista')}</Table.Th>
                   <Table.Th>{t('contractes.camps.inquilins')}</Table.Th>
                   <Table.Th>{t('contractes.camps.lloguerActual')}</Table.Th>
-                  <Table.Th />
+                  <Table.Th>{t('contractes.camps.avisos')}</Table.Th>
+                  <Table.Th colSpan={4} />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -151,49 +169,62 @@ function Contractes(): React.JSX.Element {
                     </Table.Td>
                     <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
                     <Table.Td>
-                      <Group gap="xs" wrap="nowrap">
-                        {c.data_fi === null && (
-                          <Tooltip label={t('contractes.accions.revisarLloguer')}>
-                            <ActionIcon
-                              variant="subtle"
-                              aria-label={t('contractes.accions.revisarLloguer')}
-                              onClick={() => revisar(c)}
-                            >
-                              <IconCurrencyEuro size={18} />
-                            </ActionIcon>
-                          </Tooltip>
-                        )}
-                        {c.data_fi === null && (
-                          <Tooltip label={t('contractes.accions.tancar')}>
-                            <ActionIcon
-                              variant="subtle"
-                              aria-label={t('contractes.accions.tancar')}
-                              onClick={() => tancar(c)}
-                            >
-                              <IconLock size={18} />
-                            </ActionIcon>
-                          </Tooltip>
-                        )}
-                        <Tooltip label={t('comu.editar')}>
+                      <Stack gap={4} align="flex-start">
+                        {avisos(c).map((a) => (
+                          <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
+                            {t(`contractes.avisos.${a.clau}.${a.estat}`)}
+                          </Badge>
+                        ))}
+                      </Stack>
+                    </Table.Td>
+                    <Table.Td style={{ width: 1 }}>
+                      {c.data_fi === null && (
+                        <Tooltip label={t('contractes.accions.revisarLloguer')}>
                           <ActionIcon
                             variant="subtle"
-                            aria-label={t('comu.editar')}
-                            onClick={() => editar(c)}
+                            aria-label={t('contractes.accions.revisarLloguer')}
+                            onClick={() => revisar(c)}
                           >
-                            <IconPencil size={18} />
+                            <IconCurrencyEuro size={18} />
                           </ActionIcon>
                         </Tooltip>
-                        <Tooltip label={t('comu.eliminar')}>
+                      )}
+                    </Table.Td>
+                    <Table.Td style={{ width: 1 }}>
+                      {c.data_fi === null && (
+                        <Tooltip label={t('contractes.accions.tancar')}>
                           <ActionIcon
                             variant="subtle"
-                            color="red"
-                            aria-label={t('comu.eliminar')}
-                            onClick={() => demanarEliminar(c)}
+                            aria-label={t('contractes.accions.tancar')}
+                            onClick={() => tancar(c)}
                           >
-                            <IconTrash size={18} />
+                            <IconLock size={18} />
                           </ActionIcon>
                         </Tooltip>
-                      </Group>
+                      )}
+                    </Table.Td>
+                    <Table.Td style={{ width: 1 }}>
+                      <Tooltip label={t('comu.editar')}>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={t('comu.editar')}
+                          onClick={() => editar(c)}
+                        >
+                          <IconPencil size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Table.Td>
+                    <Table.Td style={{ width: 1 }}>
+                      <Tooltip label={t('comu.eliminar')}>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          aria-label={t('comu.eliminar')}
+                          onClick={() => demanarEliminar(c)}
+                        >
+                          <IconTrash size={18} />
+                        </ActionIcon>
+                      </Tooltip>
                     </Table.Td>
                   </Table.Tr>
                 ))}

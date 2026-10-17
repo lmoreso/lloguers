@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react'
-import { ActionIcon, Alert, Badge, Button, Group, Table, Text, Title, Tooltip } from '@mantine/core'
+import {
+  ActionIcon,
+  Alert,
+  Badge,
+  Button,
+  Group,
+  Stack,
+  Table,
+  Text,
+  Title,
+  Tooltip
+} from '@mantine/core'
 import { estatCaducitat } from '../utils/caducitat'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
@@ -84,7 +95,7 @@ function Immobles(): React.JSX.Element {
               <Table.Th>{t('immobles.camps.refCatastral')}</Table.Th>
               <Table.Th>{t('immobles.camps.superficie')}</Table.Th>
               <Table.Th>{t('immobles.caducitats.titol')}</Table.Th>
-              <Table.Th />
+              <Table.Th colSpan={3} />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -95,44 +106,46 @@ function Immobles(): React.JSX.Element {
                 <Table.Td>{i.ref_catastral}</Table.Td>
                 <Table.Td>{i.superficie_m2}</Table.Td>
                 <Table.Td>
-                  <Group gap="xs">
+                  <Stack gap={4} align="flex-start">
                     {alertes(i).map((a) => (
                       <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
                         {t(`immobles.caducitats.${a.clau}`)}: {t(`immobles.caducitats.${a.estat}`)}
                       </Badge>
                     ))}
-                  </Group>
+                  </Stack>
                 </Table.Td>
-                <Table.Td>
-                  <Group gap="xs" wrap="nowrap">
-                    <Button
-                      size="xs"
+                <Table.Td style={{ width: 1, whiteSpace: 'nowrap' }}>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    leftSection={<IconFileText size={16} />}
+                    onClick={() => navigate(`/immobles/${i.id}/contractes`)}
+                  >
+                    {t('contractes.titol')}
+                  </Button>
+                </Table.Td>
+                <Table.Td style={{ width: 1 }}>
+                  <Tooltip label={t('comu.editar')}>
+                    <ActionIcon
                       variant="subtle"
-                      leftSection={<IconFileText size={16} />}
-                      onClick={() => navigate(`/immobles/${i.id}/contractes`)}
+                      aria-label={t('comu.editar')}
+                      onClick={() => navigate(`/immobles/${i.id}`)}
                     >
-                      {t('contractes.titol')}
-                    </Button>
-                    <Tooltip label={t('comu.editar')}>
-                      <ActionIcon
-                        variant="subtle"
-                        aria-label={t('comu.editar')}
-                        onClick={() => navigate(`/immobles/${i.id}`)}
-                      >
-                        <IconPencil size={18} />
-                      </ActionIcon>
-                    </Tooltip>
-                    <Tooltip label={t('comu.eliminar')}>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        aria-label={t('comu.eliminar')}
-                        onClick={() => demanarEliminar(i)}
-                      >
-                        <IconTrash size={18} />
-                      </ActionIcon>
-                    </Tooltip>
-                  </Group>
+                      <IconPencil size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Table.Td>
+                <Table.Td style={{ width: 1 }}>
+                  <Tooltip label={t('comu.eliminar')}>
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      aria-label={t('comu.eliminar')}
+                      onClick={() => demanarEliminar(i)}
+                    >
+                      <IconTrash size={18} />
+                    </ActionIcon>
+                  </Tooltip>
                 </Table.Td>
               </Table.Tr>
             ))}
