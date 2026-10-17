@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Button, Group, Select, Table, Text } from '@mantine/core'
+import { ActionIcon, Button, Group, Select, Table, Text, Tooltip } from '@mantine/core'
+import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconPaperclip } from '@tabler/icons-react'
+import { IconExternalLink, IconPaperclip, IconPencil, IconTrash } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { formatData } from '../utils/dates'
 import { esOk } from '../utils/resultat'
+import EditarDocument from './EditarDocument'
 import type { Contracte, DocumentLlistat, TipusDocument } from '../../../shared/tipus'
 
 // Documents adjunts d'un contracte (pestanya "Documents" de la fitxa).
@@ -59,6 +61,38 @@ function DocumentsContracte({ contracte }: { contracte: Contracte }): React.JSX.
     setVersio((v) => v + 1)
   }
 
+  // S'obre amb l'aplicació del sistema. Si el fitxer ja no és al disc, esOk mostra
+  // l'error traduït (FITXER_NO_TROBAT).
+  async function obrir(d: DocumentLlistat): Promise<void> {
+    esOk(await window.api.documents.obrir(d.id))
+  }
+
+  function editar(d: DocumentLlistat): void {
+    modals.open({
+      title: t('documents.editar.titol'),
+      children: (
+        <EditarDocument document={d} tipus={tipus} onDesat={() => setVersio((v) => v + 1)} />
+      )
+    })
+  }
+
+  function demanarEliminar(d: DocumentLlistat): void {
+    modals.openConfirmModal({
+      title: t('documents.eliminar.titol'),
+      children: (
+        <Text size="sm">{t('documents.eliminar.confirmacio', { nom: d.nom_original })}</Text>
+      ),
+      labels: { confirm: t('comu.eliminar'), cancel: t('comu.cancellar') },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        const resposta = await window.api.documents.eliminar(d.id)
+        if (!esOk(resposta)) return
+        notifications.show({ color: 'green', message: t('documents.eliminat') })
+        setVersio((v) => v + 1)
+      }
+    })
+  }
+
   return (
     <>
       <Group align="flex-end" mb="md">
@@ -89,6 +123,7 @@ function DocumentsContracte({ contracte }: { contracte: Contracte }): React.JSX.
               <Table.Th>{t('documents.camps.fitxer')}</Table.Th>
               <Table.Th>{t('documents.camps.data')}</Table.Th>
               <Table.Th>{t('documents.camps.comentaris')}</Table.Th>
+              <Table.Th colSpan={3} />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -99,6 +134,40 @@ function DocumentsContracte({ contracte }: { contracte: Contracte }): React.JSX.
                 <Table.Td>{d.nom_original}</Table.Td>
                 <Table.Td>{formatData(d.data_document)}</Table.Td>
                 <Table.Td>{d.comentaris}</Table.Td>
+                <Table.Td style={{ width: 1 }}>
+                  <Tooltip label={t('documents.obrir')}>
+                    <ActionIcon
+                      variant="subtle"
+                      aria-label={t('documents.obrir')}
+                      onClick={() => obrir(d)}
+                    >
+                      <IconExternalLink size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Table.Td>
+                <Table.Td style={{ width: 1 }}>
+                  <Tooltip label={t('comu.editar')}>
+                    <ActionIcon
+                      variant="subtle"
+                      aria-label={t('comu.editar')}
+                      onClick={() => editar(d)}
+                    >
+                      <IconPencil size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Table.Td>
+                <Table.Td style={{ width: 1 }}>
+                  <Tooltip label={t('comu.eliminar')}>
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      aria-label={t('comu.eliminar')}
+                      onClick={() => demanarEliminar(d)}
+                    >
+                      <IconTrash size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>

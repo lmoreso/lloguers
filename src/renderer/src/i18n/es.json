@@ -114,6 +114,16 @@
     }
   },
   "documents": {
+    "obrir": "Abrir",
+    "desat": "Documento guardado.",
+    "eliminat": "Documento eliminado.",
+    "editar": {
+      "titol": "Editar documento"
+    },
+    "eliminar": {
+      "titol": "Eliminar documento",
+      "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Se borrará también el archivo del disco. Esta acción no se puede deshacer."
+    },    
     "classes": {
       "contracte": "Contrato",
       "annex": "Anexo",

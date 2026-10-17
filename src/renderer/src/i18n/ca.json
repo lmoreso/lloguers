@@ -114,6 +114,16 @@
     }
   },
   "documents": {
+    "obrir": "Obrir",
+    "desat": "Document desat.",
+    "eliminat": "Document eliminat.",
+    "editar": {
+      "titol": "Editar document"
+    },
+    "eliminar": {
+      "titol": "Eliminar document",
+      "confirmacio": "Segur que vols eliminar {{nom}}? S'esborrarà també el fitxer del disc. Aquesta acció no es pot desfer."
+    },    
     "classes": {
       "contracte": "Contracte",
       "annex": "Annex",
