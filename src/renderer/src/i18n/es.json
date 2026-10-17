@@ -33,6 +33,7 @@
     "CONTRACTE_SOLAPAT": "El período se solapa con otro contrato de este inmueble.",
     "FK_VIOLADA": "La operación no es posible porque hay datos relacionados.",
     "CHECK_VIOLAT": "Alguno de los datos introducidos no es válido.",
+    "FITXER_NO_TROBAT": "No se ha encontrado el archivo en el disco.",    
     "DESCONEGUT": "Se ha producido un error inesperado."
   },
   "configuracio": {

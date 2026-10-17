@@ -33,6 +33,7 @@
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
     "FK_VIOLADA": "L'operació no és possible perquè hi ha dades relacionades.",
     "CHECK_VIOLAT": "Alguna de les dades introduïdes no és vàlida.",
+    "FITXER_NO_TROBAT": "No s'ha trobat el fitxer al disc.",    
     "DESCONEGUT": "S'ha produït un error inesperat."
   },
   "configuracio": {

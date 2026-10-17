@@ -1,5 +1,6 @@
 import { db } from './database'
 import type { Contracte, ContracteDades, ContracteLlistat } from '../shared/tipus'
+import { esborrarCarpetaContracte } from './documents'
 
 const COLUMNES = `id, id_inmoble, data_inici, data_fi, id_inquili, id_inquili_2, d_fi_prevista,
   lloguer_inicial, lloguer_actual, data_ultima_revisio, fianca_import, fianca_nc,
@@ -86,10 +87,11 @@ export function actualitzarContracte(id: number, d: ContracteDades): void {
   })()
 }
 
-// Els documents adjunts (files) s'esborren en cascada; els fitxers del disc els esborrarà
-// el pas 17, quan existeixin.
+// Esborra el contracte. Les files de documents_contracte s'esborren en cascada; els fitxers del disc
+// (la carpeta del contracte) s'esborren després, un cop confirmat l'esborrat de la fila.
 export function eliminarContracte(id: number): void {
   db.prepare('DELETE FROM contractes WHERE id = ?').run(id)
+  esborrarCarpetaContracte(id)
 }
 
 // Acció Tancar: informa la data de fi. El CHECK (data_fi >= data_inici) i els triggers de

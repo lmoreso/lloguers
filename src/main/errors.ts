@@ -12,6 +12,9 @@ export function traduirError(e: unknown): CodiError {
       return 'FK_VIOLADA'
     case 'SQLITE_CONSTRAINT_CHECK':
       return 'CHECK_VIOLAT'
+    case 'ENOENT': // un fitxer que no existeix (codi de Node)
+    case 'FITXER_NO_TROBAT':
+      return 'FITXER_NO_TROBAT'
     default:
       console.error('Error de BD no reconegut:', e)
       return 'DESCONEGUT'
@@ -23,6 +26,15 @@ export function traduirError(e: unknown): CodiError {
 export function executar<T>(operacio: () => T): Resultat<T> {
   try {
     return { ok: true, dades: operacio() }
+  } catch (e) {
+    return { ok: false, error: traduirError(e) }
+  }
+}
+
+// Igual que executar, per a operacions asíncrones (diàlegs, obrir fitxers...).
+export async function executarAsync<T>(operacio: () => Promise<T>): Promise<Resultat<T>> {
+  try {
+    return { ok: true, dades: await operacio() }
   } catch (e) {
     return { ok: false, error: traduirError(e) }
   }

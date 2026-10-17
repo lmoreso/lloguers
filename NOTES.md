@@ -222,6 +222,13 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
 - **Números al formulari**: camp de text amb `inputMode="decimal"` que accepta coma o punt; es converteix amb
   `aNumero()` i a la BD sempre va amb punt. Els camps buits es desen com a `NULL` (`buitANull`).
 
+### Contractes
+
+- **Icones**: `@tabler/icons-react` per a editar, eliminar, revisar i tancar (icona sola amb `Tooltip` i `aria-label` traduïts), **una columna per icona** perquè quedin alineades. Les accions principals (Afegir) són botons de text.
+  Els avisos es mostren apilats (`Stack`), com els inquilins.
+- **Avisos de contractes**: `DIES_AVIS_FI` (90) i `DIES_AVIS_REVISIO` (30) a `utils/caducitat.ts`; l'aniversari de la revisió és `data_ultima_revisio` + 1 any. `DatePickerInput` accepta `minDate` com a text ISO.
+- **Formulari de contracte**: permet informar `data_fi` per registrar contractes antics; l'acció Tancar és per al cas habitual.  
+
 ## Diferències amb la guia
 
 1. La guia desa la BD a `app.getPath('userData')`; aquí s'usa `~/Lloguers/` (vegeu més amunt).
@@ -423,8 +430,8 @@ src/renderer/src/
           triggers de solapament (dia final inclusiu, `data_fi` buida) i els `CHECK` nous des de les DevTools.
           Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*` que usa `traduirError`.
           Provar `FK_VIOLADA` en eliminar un immoble o un inquilí amb contractes.
-16. Contractes (UI, fase 1): vegeu "Contractes: disseny funcional > Interfície".
-17. Documents (backend): diàleg d'adjuntar, còpia a `documents/<id_contracte>/`, validació de ruta,
+16. [x] Contractes (UI, fase 1): s'hi entra des d'Immobles (`/immobles/:id/contractes`), amb llista, formulari en pantalla pròpia, eliminar, les accions Tancar i Revisar lloguer (finestres) i els avisos.
+17. [x] Documents (backend): diàleg d'adjuntar, còpia a `documents/<id_contracte>/`, validació de ruta,
     obrir amb `shell.openPath()`, esborrar també el fitxer. El tipus es tria d'`tipus_document`.
 18. Documents (UI): pestanya dins del contracte; avisos de la fiança si hi ha la data i falta el document.
 

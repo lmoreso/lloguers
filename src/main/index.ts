@@ -8,6 +8,7 @@ import { registrarIpcInquilins } from './ipc/inquilins'
 import { registrarIpcConfig } from './ipc/config'
 import { registrarIpcTipusDocument } from './ipc/tipusDocument'
 import { registrarIpcContractes } from './ipc/contractes'
+import { registrarIpcDocuments } from './ipc/documents'
 
 function createWindow(): void {
   // Create the browser window.
@@ -67,6 +68,8 @@ app.whenReady().then(() => {
   registrarIpcTipusDocument()
 
   registrarIpcContractes()
+
+  registrarIpcDocuments()
 
   createWindow()
 

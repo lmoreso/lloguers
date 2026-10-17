@@ -11,7 +11,10 @@ import type {
   TipusDocument,
   Contracte,
   ContracteDades,
-  ContracteLlistat
+  ContracteLlistat,
+  DocumentContracte,
+  DocumentDades,
+  DocumentLlistat
 } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -65,6 +68,20 @@ const api = {
       dataRevisio: string
     ): Promise<Resultat<void>> =>
       ipcRenderer.invoke('contractes:revisarLloguer', id, lloguerNou, dataRevisio)
+  },
+  documents: {
+    obtenir: (idContracte: number): Promise<Resultat<DocumentLlistat[]>> =>
+      ipcRenderer.invoke('documents:obtenir', idContracte),
+    adjuntar: (
+      idContracte: number,
+      idTipus: number,
+      titolDialeg: string
+    ): Promise<Resultat<DocumentContracte[]>> =>
+      ipcRenderer.invoke('documents:adjuntar', idContracte, idTipus, titolDialeg),
+    actualitzar: (id: number, dades: DocumentDades): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('documents:actualitzar', id, dades),
+    eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('documents:eliminar', id),
+    obrir: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('documents:obrir', id)
   }
 }
 

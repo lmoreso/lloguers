@@ -115,6 +115,26 @@ export interface TipusDocument {
 // Nom de cada classe en l'idioma actiu: el Renderer l'envia al Main per sembrar.
 export type NomsClasses = Record<ClasseDocument, string>
 
+// Un document adjunt d'un contracte, tal com el veu el Renderer. La ruta del fitxer al disc
+// (`ruta` a la BD) no s'hi exposa: només la fa servir el Main.
+export interface DocumentContracte {
+  id: number
+  id_contracte: number
+  id_tipus: number
+  nom_original: string
+  comentaris: string | null
+  data_document: string | null // ISO AAAA-MM-DD
+}
+
+// Camps editables d'un document ja adjuntat.
+export type DocumentDades = Pick<DocumentContracte, 'id_tipus' | 'comentaris' | 'data_document'>
+
+// Fila del llistat: el document més el nom i la classe del seu tipus (JOIN al Main).
+export interface DocumentLlistat extends DocumentContracte {
+  tipus_nom: string
+  tipus_classe: ClasseDocument
+}
+
 // Contingut de ~/Lloguers/config.json
 export interface Config {
   idioma: Idioma
@@ -128,7 +148,8 @@ export interface ConfigObtinguda extends Config {
 
 // Codis d'error estables que el Main retorna al Renderer.
 // El Renderer els tradueix amb t('errors.<CODI>'); mai es mostra el text de SQLite.
-export type CodiError = 'CONTRACTE_SOLAPAT' | 'FK_VIOLADA' | 'CHECK_VIOLAT' | 'DESCONEGUT'
+export type CodiError =
+  'CONTRACTE_SOLAPAT' | 'FK_VIOLADA' | 'CHECK_VIOLAT' | 'DESCONEGUT' | 'FITXER_NO_TROBAT'
 
 // Resposta uniforme de tots els handlers IPC.
 export type Resultat<T> = { ok: true; dades: T } | { ok: false; error: CodiError }
