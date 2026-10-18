@@ -10,54 +10,56 @@
 - Idioma de la conversa: **català**.
 - Editor: VS Code (veu els errors de TypeScript, ESLint i Prettier directament; no cal demanar-li que els enganxi tots si ho té net, però `npm run typecheck` és útil després de tocar `tsconfig`, `.d.ts` o el preload).
 - Control de versions: Git + compte de GitHub (ja configurat a la VM i al portàtil). L'usuari fa ell mateix els commits; se li proposa el missatge i se li recorda mirar el `git status` abans de `git add -A`.
-- **Treballa en dos ordinadors** (VM i portàtil Mint) amb GitHub com a única font de veritat: abans de deixar-ne un, `commit` i `push`; en arribar a l'altre, `git pull`. **Les BD no se sincronitzen** (cada màquina té la seva).
+- **Treballa en dos ordinadors** (VM i portàtil Mint) amb GitHub com a única font de veritat: abans de deixar-ne un, `commit` i `push`; en arribar a l'altre, `git pull` (i `npm install` si s'han afegit paquets). **Les BD no se sincronitzen** (cada màquina té la seva).
 - Quan una ordre no mostra res si va bé, o una sortida arriba tallada, demanar-ne la part que falta en lloc de suposar-la. Si l'usuari enganxa només una ordre sense la sortida, demanar la sortida.
-- Les proves del backend es fan des de les DevTools (`F12` > Console) amb `window.api.*`; les de la UI, a l'app. L'usuari comprova la BD amb `sqlite3`.
+- Les proves del backend es fan des de les DevTools (`F12` > Console) amb `window.api.*`; les de la UI, a l'app. L'usuari comprova la BD amb `sqlite3`. **La consola de les DevTools no comprova tipus**: un backend que funciona no demostra que el `typecheck` passi.
 - Les files de prova s'anomenen `PROVA` perquè es localitzin i s'esborrin; **no s'esborra mai cap dels immobles ni inquilins migrats de Base**.
 - **No es toca `App.tsx`** (decisió de l'usuari): només tria entre `ProvesMantine` i `lloguers.tsx`. La pantalla principal és `src/renderer/src/lloguers.tsx`.
-- La documentació de Mantine que s'ha pogut consultar arriba fins a la v8; l'API de la 9.7.1 (`useForm`, `DatePickerInput`, `Fieldset`, `SimpleGrid`, `modals.openConfirmModal`...) ha funcionat tal com es coneixia, però cal vigilar el `typecheck` en cada component nou.
+- La documentació de Mantine que s'ha pogut consultar arriba fins a la v8; l'API de la 9.7.1 (`useForm`, `DatePickerInput` amb `minDate`, `Fieldset`, `SimpleGrid`, `Select`, `Tabs`, `modals.openConfirmModal`...) ha funcionat tal com es coneixia, però cal vigilar el `typecheck` en cada component nou.
 - **Quan s'enganxen sortides al terminal, no enganxar mai línies que comencin amb `>`** (p. ex. `> lloguers@1.0.0 dev`): el shell les interpreta com una redirecció i crea fitxers buits amb aquests noms. Tampoc enganxar dues ordres amb un `|` entre elles.
 - La CLI `sqlite3` arrenca amb les **claus foranes desactivades** i continua executant després d'un error (cal `-bail` en provar migracions). Per tant una prova amb la CLI valida l'SQL, no el comportament amb `foreign_keys = ON` de l'app.
 - Les migracions es proven **sempre sobre còpies** (`/tmp/...`) i en dos escenaris: la BD real copiada i una instal·lació des de zero (001 + 002...). Després, l'app amb un `HOME` fals i, només al final, la BD real amb una còpia de seguretat fresca.
+- Cada bloc nou de l'API s'afegeix als **dos** fitxers del preload (`index.ts` i `index.d.ts`) i dins de `api`, no dins d'un altre bloc (vegeu la incidència 15).
 
 ## Entorn (verificat)
 
 ### VM de desenvolupament
 
-| Element                                                               | Valor                                                                                  |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| SO                                                                    | Ubuntu Cinnamon 26.04 (VM) sobre amfitrió Ubuntu 24.04                                 |
-| Usuari / host                                                         | `lluismb@UbuntuKvm`                                                                    |
-| Carpeta del projecte                                                  | `~/Projectes/Lloguers/lloguers/`                                                       |
-| Carpeta de dades                                                      | `~/Lloguers/` (**L majúscula**; conté `lloguers.sqlite`, `config.json` i `documents/`) |
-| Node.js                                                               | v24.21.0 (instal·lat amb nvm, `nvm install --lts`)                                     |
-| npm                                                                   | 11.19.0                                                                                |
-| g++ / make                                                            | 15.2.0 / 4.4.1                                                                         |
-| Electron                                                              | 39.8.10                                                                                |
-| Vite                                                                  | 7.3.7                                                                                  |
-| electron-builder                                                      | 26.15.3                                                                                |
-| `better-sqlite3`                                                      | 13.0.3                                                                                 |
-| React                                                                 | 19.3.0                                                                                 |
-| Mantine (`core`, `hooks`, `form`, `dates`, `notifications`, `modals`) | 9.7.1 (**totes la mateixa versió**)                                                    |
-| `react-router-dom`                                                    | 7.18.4                                                                                 |
-| `i18next` + `react-i18next`                                           | instal·lats (versió a `package.json`)                                                  |
-| `dayjs`                                                               | instal·lat (per a `@mantine/dates` i els càlculs de dates)                             |
-| Repositori                                                            | `https://github.com/lmoreso/lloguers`, branca `main`                                   |
+| Element | Valor |
+|---|---|
+| SO | Ubuntu Cinnamon 26.04 (VM) sobre amfitrió Ubuntu 24.04 |
+| Usuari / host | `lluismb@UbuntuKvm` |
+| Carpeta del projecte | `~/Projectes/Lloguers/lloguers/` |
+| Carpeta de dades | `~/Lloguers/` (**L majúscula**; conté `lloguers.sqlite`, `config.json` i `documents/`) |
+| Node.js | v24.21.0 (instal·lat amb nvm, `nvm install --lts`) |
+| npm | 11.19.0 |
+| g++ / make | 15.2.0 / 4.4.1 |
+| Electron | 39.8.10 |
+| Vite | 7.3.7 |
+| electron-builder | 26.15.3 |
+| `better-sqlite3` | 13.0.3 |
+| React | 19.3.0 |
+| Mantine (`core`, `hooks`, `form`, `dates`, `notifications`, `modals`) | 9.7.1 (**totes la mateixa versió**) |
+| `react-router-dom` | 7.18.4 |
+| `@tabler/icons-react` | 3.49.0 (icones d'editar, eliminar, revisar, tancar, adjuntar, obrir...) |
+| `i18next` + `react-i18next` | instal·lats (versió a `package.json`) |
+| `dayjs` | instal·lat (per a `@mantine/dates` i els càlculs de dates) |
+| Repositori | `https://github.com/lmoreso/lloguers`, branca `main` |
 
 ### Portàtil Linux Mint (verificat el 14-10-2026)
 
-| Element                | Valor                                                                                    |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| SO                     | Linux Mint 22.3 (Zena), base Ubuntu 24.04, x86_64                                        |
-| Usuari / host          | `lluismb@LENOVO-LLUIS`                                                                   |
-| g++ / make / git       | 13.3.0 / 4.3 / 2.43.0                                                                    |
-| Node.js / npm          | v24.21.0 / 11.19.0 (nvm, `nvm install --lts`; idèntics a la VM)                          |
-| VS Code                | 1.141.1 (`.deb` oficial; extensions ESLint 3.0.34 i Prettier 12.4.0)                     |
-| GitHub                 | clau SSH ed25519 (`~/.ssh/id_ed25519`); clonat amb `git@github.com:lmoreso/lloguers.git` |
-| Carpeta del projecte   | `~/Projectes/Lloguers/lloguers/`                                                         |
-| Carpeta de dades       | `~/Lloguers/` creada per l'app (**BD de proves**, sense dades reals)                     |
-| `sqlite3` / DB Browser | instal·lats amb `sudo apt install -y sqlite3 sqlitebrowser`                              |
-| `jq`                   | instal·lat el 15-10-2026 (cal per a la comprovació de claus d'i18n)                      |
+| Element | Valor |
+|---|---|
+| SO | Linux Mint 22.3 (Zena), base Ubuntu 24.04, x86_64 |
+| Usuari / host | `lluismb@LENOVO-LLUIS` |
+| g++ / make / git | 13.3.0 / 4.3 / 2.43.0 |
+| Node.js / npm | v24.21.0 / 11.19.0 (nvm, `nvm install --lts`; idèntics a la VM) |
+| VS Code | 1.141.1 (`.deb` oficial; extensions ESLint 3.0.34 i Prettier 12.4.0) |
+| GitHub | clau SSH ed25519 (`~/.ssh/id_ed25519`); clonat amb `git@github.com:lmoreso/lloguers.git` |
+| Carpeta del projecte | `~/Projectes/Lloguers/lloguers/` |
+| Carpeta de dades | `~/Lloguers/` creada per l'app (**BD de proves**, sense dades reals) |
+| `sqlite3` / DB Browser | instal·lats amb `sudo apt install -y sqlite3 sqlitebrowser` |
+| `jq` | instal·lat el 15-10-2026 (cal per a la comprovació de claus d'i18n) |
 
 Com es va instal·lar (ordre seguit):
 
@@ -71,7 +73,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 15 (backend de Contractes completat i provat).** Toca el **pas 16**: UI de Contractes.
+**Fases A, B i C fetes; Fase D feta fins al pas 18: la fase 1 de Contractes és completa** (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus). Tot s'ha provat amb `npm run dev`; **l'empaquetat dels passos 16 a 18 no s'ha provat** (vegeu "Pròxim pas").
 
 ### Fase A: base (feta)
 
@@ -83,14 +85,15 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 
 ### Fase B: backend al Main Process (feta)
 
-- `src/shared/tipus.ts`: `Immoble`, `ImmobleDades`, `Inquili`, `InquiliDades`, `Idioma`, `Config`, `ConfigObtinguda`,
-  `CodiError` (`CONTRACTE_SOLAPAT` | `FK_VIOLADA` | `CHECK_VIOLAT` | `DESCONEGUT`) i `Resultat<T>`. Cap tipus inclou
-  `afegit_el` ni `ultima_mod`.
-- `src/main/errors.ts`: `traduirError(e)` i `executar(op)`. `src/main/{inmobles,inquilins,config}.ts` i
-  `src/main/ipc/{inmobles,inquilins,config}.ts`, registrats a `index.ts`. A `inquilins` la conversió `0/1/NULL` ↔
-  `boolean` dels indicadors `ck_tel1_*` es fa només al Main.
+- `src/shared/tipus.ts`: `Immoble`, `ImmobleDades`, `Inquili`, `InquiliDades`, `Contracte`, `ContracteDades`,
+  `ContracteLlistat`, `IDIOMES`/`Idioma`, `Config`, `ConfigObtinguda`, `CLASSES_DOCUMENT`/`ClasseDocument`, `TipusDocument`,
+  `NomsClasses`, `DocumentContracte`, `DocumentDades`, `DocumentLlistat`, `CodiError` (`CONTRACTE_SOLAPAT` | `FK_VIOLADA` |
+  `CHECK_VIOLAT` | `FITXER_NO_TROBAT` | `DESCONEGUT`) i `Resultat<T>`. Cap tipus inclou `afegit_el` ni `ultima_mod`.
+- `src/main/errors.ts`: `traduirError(e)`, `executar(op)` i `executarAsync(op)` (per a diàlegs i obrir fitxers).
+  `src/main/{inmobles,inquilins,config,tipusDocument,contractes,documents}.ts` i `src/main/ipc/*.ts`, registrats a `index.ts`.
+  A `inquilins` la conversió `0/1/NULL` ↔ `boolean` dels indicadors `ck_tel1_*` es fa només al Main.
 - Preload i `src/preload/index.d.ts` amb `window.api.*` (cal duplicar la forma de l'objecte `api` als dos fitxers cada cop que
-  s'hi afegeix un mètode). Ara hi ha `inmobles`, `inquilins`, `config`, `tipusDocument` i `contractes`.
+  s'hi afegeix un mètode). Ara hi ha `inmobles`, `inquilins`, `config`, `tipusDocument`, `contractes` i `documents`.
 - Els tres codis `SQLITE_CONSTRAINT_*` que usa `traduirError` **estan verificats amb casos reals**: `_TRIGGER` →
   `CONTRACTE_SOLAPAT`, `_CHECK` → `CHECK_VIOLAT` i `_FOREIGNKEY` → `FK_VIOLADA`.
 
@@ -98,12 +101,13 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 
 - Mantine 9.7.1 (decisió **definitiva**), providers a `main.tsx`: `MantineProvider`, `DatesAmbIdioma`, `ModalsProvider`
   i `Notifications`, amb els estils de `core`, `dates` i `notifications` i els locales de dayjs `ca` i `es`.
-- i18n: `src/renderer/src/i18n/{index.ts,i18next.d.ts,ca.json,es.json}`; claus tipades des de `ca.json`. Components
-  `SelectorIdioma`, `SeleccioIdioma` i `DatesAmbIdioma` a `src/renderer/src/components/`.
+- i18n: `src/renderer/src/i18n/{index.ts,i18next.d.ts,ca.json,es.json}`; claus tipades des de `ca.json`; `idiomaNom` a cada JSON.
+  Components `SelectorIdioma`, `SeleccioIdioma` i `DatesAmbIdioma` a `src/renderer/src/components/`.
 - `react-router-dom` amb **`HashRouter`** (l'app empaquetada es carrega des de `file://`) i menú lateral amb `AppShell`:
-  Immobles, Inquilins, Contractes, Configuració i Quant a. Contractes i Quant a només tenen un títol provisional.
-- `src/renderer/src/utils/resultat.ts`: `esOk(resposta)` (notifica l'error traduït amb `t('errors.<CODI>')` i retorna
-  `false` si ha fallat) i `notificarError`.
+  **Immobles, Inquilins, Configuració i Quant a** (Contractes no té entrada al menú: s'hi entra des d'Immobles). Configuració només
+  té el selector d'idioma, i Quant a només el títol.
+- `src/renderer/src/utils/`: `resultat.ts` (`esOk` i `notificarError`), `caducitat.ts`, `adreca.ts`, `dates.ts` (`formatData`)
+  i `formulari.ts` (`buitANull`, `aNumero`).
 - Neteja del CSS de la plantilla: eliminats `main.css`, `base.css`, `Versions.tsx` i els SVG de demostració.
   No s'ha de tornar a posar `user-select: none` (cal poder copiar NIF, telèfons...).
 
@@ -114,6 +118,9 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 - **Immobles** (`{Immobles,FitxaImmoble,FormulariImmoble}.tsx`): llista; formulari en pantalla pròpia amb quatre seccions
   (`/immobles/nou`, `/immobles/:id`); dates amb `DatePickerInput` (treballa amb text `AAAA-MM-DD`, **no cal conversió `Date`**);
   eliminació amb confirmació; avís de caducitats (certificat i cèdula) a **60 dies** (`DIES_AVIS` a `utils/caducitat.ts`).
+- **Icones** (`@tabler/icons-react`): editar i eliminar a Inquilins, Immobles, Contractes i Documents són icona sola amb `Tooltip`
+  i `aria-label` traduïts, **una columna per icona** (les accions que no s'ofereixen deixen la cel·la buida i la resta queden
+  alineades). Les accions principals (Afegir) són botons de text. Els avisos es mostren apilats (`Stack`).
 - Les dates d'auditoria són en UTC (a Barcelona es veuen 1 o 2 hores menys al `sqlite3`); correcte, es convertiran a hora
   local només quan es mostrin a la UI.
 
@@ -124,7 +131,7 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
   l'idioma del sistema (`app.getLocale()`, fallback `ca`) com a no confirmat. Si no és confirmat, `main.tsx` mostra
   `SeleccioIdioma` (un botó per idioma pel seu nom propi; títol i botó en l'idioma ressaltat; només es desa en confirmar).
   Logs `[idioma]` a la terminal (Main) i a les DevTools (Renderer). Provat: fitxer vàlid, absent i amb `"fr"`.
-  `app.getLocale()` retorna `"ca"` a la VM i al portàtil; la branca "idioma del sistema no suportat" no s'ha pogut provar.
+  `app.getLocale()` retorna `"ca"` a la VM; la branca "idioma del sistema no suportat" no s'ha pogut provar.
 - **15b, migració 002** (`contractes` i `documents_contracte` reconstruïdes, `tipus_document` nova, índexs i triggers
   recreats: **3 índexs, 5 taules, 11 triggers**). Columnes noves de `contractes`: `id_inquili_2`, `lloguer_actual`,
   `data_ultima_revisio`, fiança (6 camps), devolució (4 camps). `CHECK`s: parelles de fiança, devolució només amb
@@ -137,13 +144,47 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
   JSON; `src/main/tipusDocument.ts` i IPC (`tipusDocument:obtenir`, `tipusDocument:sembrar`). Sembrat a `main.tsx`
   (`pintarApp`), amb l'idioma ja definitiu: insereix un tipus per cada classe que no en tingui cap (idempotent, per
   classe), amb validació al Main. Provat: sembrat, idempotència, sembrat d'una sola classe i idioma triat.
-- **15d, backend de Contractes.** Tipus `Contracte`, `ContracteDades` (sense `lloguer_actual`, `data_ultima_revisio` ni
-  devolució), `ContracteLlistat` (amb els dos inquilins); `src/main/contractes.ts` (CRUD, `JOIN` + `LEFT JOIN`, accions
-  `tancarContracte` i `revisarLloguer`) i `src/main/ipc/contractes.ts`. En crear, el Main fixa `lloguer_actual =
-lloguer_inicial` i `data_ultima_revisio = data_inici`; en actualitzar, `id_inmoble` s'ignora i, mentre no s'ha revisat mai,
-  s'arrossega el lloguer i la data. Provat des de les DevTools: solapament (vigent, dia final inclusiu, `UPDATE`),
-  els `CHECK` (4 casos), `FK_VIOLADA` en eliminar immoble o inquilins amb contractes, arrossegament, Revisar lloguer,
-  Tancar (data anterior a l'inici, `null`), i el llistat amb segon inquilí. Files de prova esborrades.
+- **15d, backend de Contractes.** `src/main/contractes.ts` (CRUD, `JOIN` + `LEFT JOIN`, accions `tancarContracte` i
+  `revisarLloguer`) i `src/main/ipc/contractes.ts`. En crear, el Main fixa `lloguer_actual = lloguer_inicial` i
+  `data_ultima_revisio = data_inici`; en actualitzar, `id_inmoble` s'ignora i, mentre no s'ha revisat mai, s'arrossega el
+  lloguer i la data. Provat des de les DevTools: solapament (vigent, dia final inclusiu, `UPDATE`), els `CHECK`, `FK_VIOLADA`
+  en eliminar immoble o inquilins amb contractes, arrossegament, Revisar lloguer, Tancar (data anterior a l'inici, `null`).
+
+**Pas 16: Contractes (UI), complet** (`src/renderer/src/pantalles/`):
+
+- Botó "Contractes" (icona i text) a cada fila d'Immobles → `/immobles/:id/contractes` (`Contractes.tsx`): llista de l'immoble,
+  l'últim primer, amb etiqueta *vigent* / *tancat*, nom dels dos inquilins (apilats), dates `DD/MM/AAAA` i lloguer en euros.
+  Per fila: revisar lloguer i tancar (només vigents), editar (amb confirmació si és tancat) i eliminar (la confirmació avisa
+  que s'esborren fiança i documents).
+- Formulari en pantalla pròpia (`FitxaContracte.tsx` + `FormulariContracte.tsx`; rutes `/immobles/:id/contractes/nou` i
+  `/immobles/:id/contractes/:idContracte`, amb `key` diferent): immoble fix, inquilins amb desplegable cercable, dates
+  (permet informar `data_fi` per registrar contractes antics), lloguer i fiança; `lloguer_actual` i `data_ultima_revisio` de
+  només lectura en editar. Un contracte inexistent o d'un altre immoble surt com a no trobat.
+- Accions en finestres: `TancarContracte.tsx` (data de fi, per defecte avui, `minDate` = inici) i `RevisarLloguer.tsx` (import i
+  data alhora; l'import pot ser igual).
+- Avisos a la llista (només contractes vigents): **fi prevista a 90 dies** i **revisió del lloguer a 30 dies** de l'aniversari
+  (`data_ultima_revisio` + 1 any), també un cop passats (`DIES_AVIS_FI` i `DIES_AVIS_REVISIO` a `utils/caducitat.ts`).
+
+**Pas 17: Documents (backend), complet.** `src/main/documents.ts` i `src/main/ipc/documents.ts`:
+
+- `adjuntarDocuments`: el diàleg de selecció s'obre **al Main** (el Renderer només envia contracte, tipus i títol, mai rutes);
+  selecció múltiple amb tipus comú; còpia a `~/Lloguers/documents/<id_contracte>/<id_document>_<nom_segur>` (el prefix evita
+  col·lisions; el nom es neteja de caràcters reservats; `nom_original` es conserva); a la BD només la ruta relativa; tot o res
+  (si un fitxer falla es desfan les files i els fitxers ja copiats).
+- `obrirDocument` (`shell.openPath`) i `eliminarDocument` validen que la ruta queda **dins de `documents/`** abans de tocar res.
+  Un fitxer absent dona `FITXER_NO_TROBAT` en obrir, i no és un error en eliminar.
+- `eliminarContracte` esborra la fila (els documents, en cascada) i després la carpeta del contracte.
+- Provat: múltiples fitxers, mateix nom dos cops, cancel·lar (llista buida), actualitzar (`CHECK_VIOLAT`/`FK_VIOLADA`), obrir,
+  fitxer desaparegut, **ruta amb `..` rebutjada sense tocar res**, i que eliminar un contracte només s'emporta la seva carpeta
+  (un id no numèric es descarta).
+
+**Pas 18: Documents (UI), complet.** A la fitxa d'un contracte **en edició** hi ha dues pestanyes (Dades i Documents, amb els
+panells muntats). `DocumentsContracte.tsx`: desplegable de tipus (per defecte el primer de classe `contracte`) i botó Adjuntar;
+llista amb obrir, editar (`EditarDocument.tsx`: tipus, data i comentaris) i eliminar (confirmació que avisa que s'esborra el
+fitxer). Els documents es desen a l'instant, independentment del botó Desar de les dades. **Avís "Falten documents"**: hi ha una
+data de la fiança informada (model 2 o notificació) i cap document de la classe corresponent; surt a la llista de contractes
+(etiqueta apilada, també als tancats) i, a la pestanya, com una caixa que diu quin falta. El calcula el Main (`te_doc_model2` i
+`te_doc_notificacio` a `ContracteLlistat`).
 
 ### Fase E: empaquetat (feta al portàtil)
 
@@ -165,33 +206,37 @@ Al portàtil (14-10-2026):
 - **Observació sobre el `chrome-sandbox`**: el del `.deb` instal·lat té mode `-rwxr-xr-x`, **sense SUID**, i l'app va arrencar
   igualment a Mint 22.3. No s'ha investigat el motiu. A la VM sí que va caldre el SUID. Si falla en un altre equip,
   aplicar l'arreglat de la incidència 2 sobre `/opt/lloguers/chrome-sandbox`, o valorar un script `afterInstall`.
+- **Aquesta prova és anterior als passos 16 a 18**: el diàleg de selecció de fitxers i `shell.openPath` mai s'han provat amb
+  l'app empaquetada.
 
 ### Pendent de confirmar
 
-- **Commit** de l'edició de la 002 (`IS` en lloc d'`=`) i dels canvis a `NOTES.md`; i `git push`. No consta que s'hagi fet.
-- Aplicar a `NOTES.md`: marcar el **15d** com a fet; corregir `CHECK (date(x) = x)` → `IS` als tres llocs (convencions de la BD,
-  regles de contractes) i afegir l'excepció de la 002 al punt de les migracions.
-- **Portàtil**: `git pull`, `npm install`, `npm install-scripts ls`, i **esborrar la seva BD de proves** (té la 002 antiga i
-  contractes de prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`, esborrar `-wal`/`-shm` i arrencar
-  perquè l'app la creï amb la 001 + 002. Comprovar `user_version = 2`, 7 tipus, 3/5/11 i que `'2025-1-1'` es rebutja.
+- **Commit** del pas 18-4 ("Falten documents") i d'aquest `PROGRES.md`; `git push`.
+- **`NOTES.md`**: marcar el 16, el 17 i el 18 com a fets i anotar les decisions dels passos (vegeu l'últim missatge del xat:
+  icones en columnes, avisos de contractes, formulari amb `data_fi`, documents i "Falten documents", preload en dos fitxers).
+- **Portàtil**: `git pull`, `npm install` (hi ha una dependència nova, `@tabler/icons-react`), `npm install-scripts ls`, i
+  **esborrar la seva BD de proves** (té la 002 antiga i contractes de prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`,
+  esborrar `-wal`/`-shm` i arrencar perquè l'app la creï amb la 001 + 002. Comprovar `user_version = 2`, 7 tipus, 3/5/11 i que
+  `'2025-1-1'` es rebutja.
+- **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins i contractes, aquest ordre invers per les claus foranes).
+  L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també `~/Lloguers/documents/<id>/` dels contractes de prova (només
+  l'esborrat des de l'app s'emporta la carpeta); `/tmp/provaDocs` és temporal.
 - Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
 
 ## Pròxim pas
 
-**Fase D, pas 16: Contractes (UI, fase 1)** (vegeu `NOTES.md`, "Contractes: disseny funcional > Interfície"). Proposta de trossos:
+**1. Prova d'empaquetat dels passos 16 a 18** (abans de seguir amb funcionalitat nova): `npm run build:linux`, instal·lar el
+`.deb` al portàtil i provar-hi, amb un `HOME` net o amb la BD de proves: pantalla d'idioma, llista i formulari de contractes,
+**adjuntar** documents (diàleg del sistema), **obrir** un fitxer amb l'aplicació del sistema (`shell.openPath`), eliminar un
+document i eliminar un contracte (que s'emporti la carpeta). Mirar també el `chrome-sandbox` (vegeu Fase E). Desinstal·lar després.
 
-1. Claus de text (`contractes.*`) i botó "Contractes" a cada fila d'Immobles, amb la ruta `/immobles/:id/contractes`.
-   Treure l'entrada provisional "Contractes" del menú (s'hi entra només des d'Immobles; el menú "Contractes vigents" és de la fase 3).
-2. Llista de contractes de l'immoble (l'últim primer, nom dels dos inquilins, etiqueta _vigent_ / _tancat_).
-3. Formulari en pantalla pròpia, per seccions (dades, fiança): immoble fix i no modificable, selector d'inquilí cercable i segon
-   inquilí opcional; `lloguer_actual` i `data_ultima_revisio` de només lectura en editar. Les dades de devolució NO hi són (fase 2).
-4. Accions **Tancar** (demana `data_fi`) i **Revisar lloguer** (import i data alhora; l'import pot ser igual).
-5. Confirmació en editar un contracte tancat; eliminar amb confirmació que avisa que s'esborren fiança i documents.
-6. Avisos de fi prevista (90 dies, també un cop passada) i de revisió de lloguer (30 dies abans de l'aniversari, també passat),
-   només per a contractes vigents, amb constants a `utils/caducitat.ts`.
+**2. Fase 2: devolució de la fiança (model 3).** Les columnes ja són a la BD (`devolucio_data_sollicitud`,
+`devolucio_data_cobrament`, `devolucio_import`, `devolucio_motiu`) i la classe de document `fianca_model3` també. La BD només
+permet informar-les amb el contracte tancat. Falta decidir el disseny de la UI (per exemple, una secció de devolució al formulari
+visible només en contractes tancats, o una acció pròpia) i l'avís "Falten documents" per al model 3.
 
-Després: Documents (backend i UI, passos 17 i 18), Fase 2 (devolució de la fiança) i Fase 3 (canvi de signants, correcció de
-l'immoble d'un contracte, menú Contractes vigents).
+**3. Fase 3** (decidida, no començada): canvi de signants (annex), corregir l'immoble d'un contracte mal assignat, historial de
+revisions i menú "Contractes vigents" amb els seus avisos (la clau `menu.contractes` ja existeix als JSON).
 
 ## Versions reals vs. la guia
 
@@ -310,21 +355,31 @@ Solució: `sudo apt install -y jq`. Convé veure que no surt cap "No s'ha trobat
 com a esborrat tot el que l'altre ordinador ha afegit (no és una pèrdua). Per posar-se al dia sense perdre res:
 `git stash`, `git pull`, comparar amb `git diff stash@{0} -- <fitxers>` i, si no hi ha res propi, `git stash drop`.
 
+### 15. `Property 'documents' does not exist on type ...` al `typecheck`
+
+Un bloc nou de `window.api` (aquí `documents`) havia quedat **dins** del bloc anterior (`contractes`) a `src/preload/index.d.ts`:
+no dona error de sintaxi, però el bloc no penja de `api`. Les proves des de les DevTools passaven igualment, perquè la consola no
+comprova tipus. Solució: tancar bé les claus. El segon error (`unknown` no assignable) n'és només la conseqüència.
+
 ## Altres pendents
 
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD
-  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`). Només cosmètic.
+  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`/`adjuntarDocuments`). Només cosmètic.
 - Configuració només té el selector d'idioma, i Quant a només el títol (la versió es pot llegir de `package.json`).
+- Pantalla per crear i editar tipus de document (a Configuració): fora de la fase 1. Quan es faci, caldrà decidir si es pot
+  esborrar l'últim tipus d'una classe amb lògica (el sembrat el recrea a l'arrencada).
+- Els noms dels tipus de document sembrats queden en l'idioma del primer arrencat (són dada de l'usuari).
+- Un contracte nou **no** porta a la pestanya Documents en desar-lo: cal tornar a entrar-hi amb el llapis.
+- Casos límit assumits: una revisió de lloguer feta el mateix dia que `data_inici` no es distingeix de "mai revisat"; una
+  correcció d'una data de revisió ha de poder retrocedir (ara es pot revisar amb una data anterior, mentre sigui `>= data_inici`).
+- Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans),
+  correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els documents), historial de revisions
+  de lloguer, menú "Contractes vigents".
 - `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren.
-- Pantalla per crear i editar tipus de document (a Configuració): fora de la fase 1.
-- Fase 2: devolució de la fiança (model 3). Fase 3: canvi de signants (annex), correcció de l'immoble d'un contracte
-  (ara només es pot eliminar i recrear, i això perd els documents), menú "Contractes vigents", historial de revisions.
-- `eliminarContracte` encara no esborra els fitxers del disc (no n'hi ha cap fins al pas 17).
 - Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida.
 
 ## Git
 
-- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim estat verificat a la VM (15-10-2026): al dia amb
-  `origin/main` al commit `04c0206` ("Contractes: backend (tipus, CRUD, accions Tancar i Revisar lloguer, IPC); proves parcials"),
-  precedit per "Sembrat dels tipus de document a l'arrencada" i "Tipus de document: classes, sembrat i IPC". Després d'això
-  s'ha editat la migració 002 i `NOTES.md`; **falta el commit** (vegeu "Pendent de confirmar").
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit de la fase 1 de contractes: documents
+  ("Documents: obrir, editar i eliminar des de la fitxa del contracte"); queda per confirmar el del pas 18-4
+  (vegeu "Pendent de confirmar").

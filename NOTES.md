@@ -237,6 +237,7 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
 - **Preload**: cada bloc nou s'ha d'afegir als **dos** fitxers (`index.ts` i `index.d.ts`), i dins de `api`, no dins d'un
   altre bloc. Si es oblida, el `typecheck` falla només a l'`.d.ts`, perquè la consola de les DevTools no comprova tipus.
   
+  
 ## Diferències amb la guia
 
 1. La guia desa la BD a `app.getPath('userData')`; aquí s'usa `~/Lloguers/` (vegeu més amunt).
