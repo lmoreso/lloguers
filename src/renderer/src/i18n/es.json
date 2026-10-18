@@ -212,6 +212,7 @@
       "confirmacio": "¿Seguro que quieres eliminar el contrato de {{inquilins}} (inicio {{inici}})? Se borrarán también la fianza y los documentos adjuntos. Esta acción no se puede deshacer."
     },
     "accions": {
+      "titol": "Acciones",
       "tancar": "Cerrar contrato",
       "revisarLloguer": "Revisar alquiler"
     },

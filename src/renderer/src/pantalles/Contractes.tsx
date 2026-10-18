@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react'
-import { ActionIcon, Badge, Button, Group, Stack, Table, Text, Title, Tooltip } from '@mantine/core'
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Group,
+  Menu,
+  Stack,
+  Table,
+  Text,
+  Title,
+  Tooltip
+} from '@mantine/core'
+import { IconCurrencyEuro, IconDots, IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
 import { modals } from '@mantine/modals'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +20,6 @@ import { formatData } from '../utils/dates'
 import { esOk } from '../utils/resultat'
 import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
 import { notifications } from '@mantine/notifications'
-import { IconCurrencyEuro, IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
 import RevisarLloguer from './RevisarLloguer'
 import TancarContracte from './TancarContracte'
 import {
@@ -151,7 +162,7 @@ function Contractes(): React.JSX.Element {
                   <Table.Th>{t('contractes.camps.inquilins')}</Table.Th>
                   <Table.Th>{t('contractes.camps.lloguerActual')}</Table.Th>
                   <Table.Th>{t('contractes.camps.avisos')}</Table.Th>
-                  <Table.Th colSpan={4} />
+                  <Table.Th>{t('contractes.accions.titol')}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -189,53 +200,47 @@ function Contractes(): React.JSX.Element {
                       </Stack>
                     </Table.Td>
                     <Table.Td style={{ width: 1 }}>
-                      {c.data_fi === null && (
-                        <Tooltip label={t('contractes.accions.revisarLloguer')}>
-                          <ActionIcon
-                            variant="subtle"
-                            aria-label={t('contractes.accions.revisarLloguer')}
-                            onClick={() => revisar(c)}
+                      <Menu position="bottom-end" withinPortal>
+                        <Menu.Target>
+                          <Tooltip label={t('contractes.accions.titol')}>
+                            <ActionIcon variant="subtle" aria-label={t('contractes.accions.titol')}>
+                              <IconDots size={18} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          {c.data_fi === null && (
+                            <>
+                              <Menu.Item
+                                leftSection={<IconCurrencyEuro size={16} />}
+                                onClick={() => revisar(c)}
+                              >
+                                {t('contractes.accions.revisarLloguer')}
+                              </Menu.Item>
+                              <Menu.Item
+                                leftSection={<IconLock size={16} />}
+                                onClick={() => tancar(c)}
+                              >
+                                {t('contractes.accions.tancar')}
+                              </Menu.Item>
+                            </>
+                          )}
+                          <Menu.Item
+                            leftSection={<IconPencil size={16} />}
+                            onClick={() => editar(c)}
                           >
-                            <IconCurrencyEuro size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
-                    </Table.Td>
-                    <Table.Td style={{ width: 1 }}>
-                      {c.data_fi === null && (
-                        <Tooltip label={t('contractes.accions.tancar')}>
-                          <ActionIcon
-                            variant="subtle"
-                            aria-label={t('contractes.accions.tancar')}
-                            onClick={() => tancar(c)}
+                            {t('comu.editar')}
+                          </Menu.Item>
+                          <Menu.Divider />
+                          <Menu.Item
+                            color="red"
+                            leftSection={<IconTrash size={16} />}
+                            onClick={() => demanarEliminar(c)}
                           >
-                            <IconLock size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
-                    </Table.Td>
-                    <Table.Td style={{ width: 1 }}>
-                      <Tooltip label={t('comu.editar')}>
-                        <ActionIcon
-                          variant="subtle"
-                          aria-label={t('comu.editar')}
-                          onClick={() => editar(c)}
-                        >
-                          <IconPencil size={18} />
-                        </ActionIcon>
-                      </Tooltip>
-                    </Table.Td>
-                    <Table.Td style={{ width: 1 }}>
-                      <Tooltip label={t('comu.eliminar')}>
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          aria-label={t('comu.eliminar')}
-                          onClick={() => demanarEliminar(c)}
-                        >
-                          <IconTrash size={18} />
-                        </ActionIcon>
-                      </Tooltip>
+                            {t('comu.eliminar')}
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
                     </Table.Td>
                   </Table.Tr>
                 ))}
