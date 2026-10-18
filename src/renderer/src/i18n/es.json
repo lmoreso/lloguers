@@ -145,7 +145,11 @@
       "fitxer": "Archivo",
       "data": "Fecha del documento",
       "comentaris": "Comentarios"
-    }    
+    },
+    "avis": {
+      "model2": "Hay fecha del modelo 2, pero falta adjuntar su documento.",
+      "notificacio": "Hay fecha de la notificación, pero falta adjuntar su documento."
+    }        
   },
   "contractes": {
     "titol": "Contratos",
@@ -226,7 +230,8 @@
       "revisio": {
         "caducat": "Revisión pendiente",
         "aviat": "Revisión próxima"
-      }
+      },
+      "documents": "Faltan documentos"      
     },        
     "tancar": {
       "titol": "Cerrar contrato",

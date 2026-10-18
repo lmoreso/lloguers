@@ -85,6 +85,9 @@ export interface ContracteLlistat extends Contracte {
   inquili_cognoms: string | null
   inquili2_nom: string | null // null si no hi ha segon inquilí
   inquili2_cognoms: string | null
+  // Si el contracte té algun document adjunt de la classe corresponent (calculat al Main).
+  te_doc_model2: boolean
+  te_doc_notificacio: boolean
 }
 
 // Idiomes de la interfície. Afegir-ne un de nou: afegir-lo aquí, crear el JSON

@@ -8,17 +8,28 @@ const COLUMNES = `id, id_inmoble, data_inici, data_fi, id_inquili, id_inquili_2,
   devolucio_data_sollicitud, devolucio_data_cobrament, devolucio_import, devolucio_motiu,
   comentaris`
 
-// Les mateixes columnes amb el prefix de la taula, més els noms dels dos inquilins (JOIN).
+// Les mateixes columnes amb el prefix de la taula, més els noms dels dos inquilins (JOIN) i si el
+// contracte té algun document de les classes de la fiança (EXISTS: 0 o 1).
 const COLUMNES_LLISTAT = `${COLUMNES.split(',')
   .map((c) => `c.${c.trim()}`)
   .join(', ')},
   q.nom AS inquili_nom, q.cognoms AS inquili_cognoms,
-  q2.nom AS inquili2_nom, q2.cognoms AS inquili2_cognoms`
+  q2.nom AS inquili2_nom, q2.cognoms AS inquili2_cognoms,
+  EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
+    WHERE d.id_contracte = c.id AND t.classe = 'fianca_model2') AS te_doc_model2,
+  EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
+    WHERE d.id_contracte = c.id AND t.classe = 'fianca_notificacio') AS te_doc_notificacio`
+
+// Fila tal com surt de SQLite: els dos indicadors són 0 o 1. El Main els converteix a boolean.
+type FilaLlistat = Omit<ContracteLlistat, 'te_doc_model2' | 'te_doc_notificacio'> & {
+  te_doc_model2: number
+  te_doc_notificacio: number
+}
 
 // Contractes d'un immoble, l'últim primer. S'hi entra només des d'Immobles.
 // El segon inquilí és opcional, per això el LEFT JOIN; el primer és obligatori (JOIN).
 export function obtenirContractes(idInmoble: number): ContracteLlistat[] {
-  return db
+  const files = db
     .prepare(
       `SELECT ${COLUMNES_LLISTAT}
        FROM contractes c
@@ -27,7 +38,12 @@ export function obtenirContractes(idInmoble: number): ContracteLlistat[] {
        WHERE c.id_inmoble = ?
        ORDER BY c.data_inici DESC, c.id DESC`
     )
-    .all(idInmoble) as ContracteLlistat[]
+    .all(idInmoble) as FilaLlistat[]
+  return files.map((f) => ({
+    ...f,
+    te_doc_model2: f.te_doc_model2 === 1,
+    te_doc_notificacio: f.te_doc_notificacio === 1
+  }))
 }
 
 export function obtenirContracte(id: number): Contracte | undefined {

@@ -29,6 +29,14 @@ function avisos(c: ContracteLlistat): { clau: 'fi' | 'revisio'; estat: 'caducat'
   return llista
 }
 
+// Hi ha una data de la fiança informada però no el document adjunt de la classe que la justifica.
+function faltenDocuments(c: ContracteLlistat): boolean {
+  return (
+    (c.fianca_data_model2 !== null && !c.te_doc_model2) ||
+    (c.fianca_data_notificacio !== null && !c.te_doc_notificacio)
+  )
+}
+
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
 function Contractes(): React.JSX.Element {
   const { t, i18n } = useTranslation()
@@ -175,6 +183,9 @@ function Contractes(): React.JSX.Element {
                             {t(`contractes.avisos.${a.clau}.${a.estat}`)}
                           </Badge>
                         ))}
+                        {faltenDocuments(c) && (
+                          <Badge color="orange">{t('contractes.avisos.documents')}</Badge>
+                        )}
                       </Stack>
                     </Table.Td>
                     <Table.Td style={{ width: 1 }}>

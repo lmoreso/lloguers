@@ -145,7 +145,11 @@
       "fitxer": "Fitxer",
       "data": "Data del document",
       "comentaris": "Comentaris"
-    }    
+    },
+    "avis": {
+      "model2": "Hi ha la data del model 2, però falta adjuntar-ne el document.",
+      "notificacio": "Hi ha la data de la notificació, però falta adjuntar-ne el document."
+    }        
   },
   "contractes": {
     "titol": "Contractes",
@@ -226,7 +230,8 @@
       "revisio": {
         "caducat": "Revisió pendent",
         "aviat": "Revisió pròxima"
-      }
+      },
+      "documents": "Falten documents"
     },    
     "tancar": {
       "titol": "Tancar contracte",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActionIcon, Button, Group, Select, Table, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Alert, Button, Group, Select, Table, Text, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { IconExternalLink, IconPaperclip, IconPencil, IconTrash } from '@tabler/icons-react'
@@ -93,8 +93,25 @@ function DocumentsContracte({ contracte }: { contracte: Contracte }): React.JSX.
     })
   }
 
+  // Dades de la fiança informades però sense el document adjunt de la classe corresponent.
+  // Només s'avisa un cop carregada la llista, per no parpellejar.
+  const faltaModel2 =
+    !carregant &&
+    contracte.fianca_data_model2 !== null &&
+    !documents.some((d) => d.tipus_classe === 'fianca_model2')
+  const faltaNotificacio =
+    !carregant &&
+    contracte.fianca_data_notificacio !== null &&
+    !documents.some((d) => d.tipus_classe === 'fianca_notificacio')
+
   return (
     <>
+      {(faltaModel2 || faltaNotificacio) && (
+        <Alert color="orange" mb="md">
+          {faltaModel2 && <Text size="sm">{t('documents.avis.model2')}</Text>}
+          {faltaNotificacio && <Text size="sm">{t('documents.avis.notificacio')}</Text>}
+        </Alert>
+      )}
       <Group align="flex-end" mb="md">
         <Select
           label={t('documents.camps.tipus')}

@@ -228,7 +228,15 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
   Els avisos es mostren apilats (`Stack`), com els inquilins.
 - **Avisos de contractes**: `DIES_AVIS_FI` (90) i `DIES_AVIS_REVISIO` (30) a `utils/caducitat.ts`; l'aniversari de la revisió és `data_ultima_revisio` + 1 any. `DatePickerInput` accepta `minDate` com a text ISO.
 - **Formulari de contracte**: permet informar `data_fi` per registrar contractes antics; l'acció Tancar és per al cas habitual.  
-
+- **Documents**: es desen a l'instant, independentment del botó Desar de les dades del contracte. El tipus d'una selecció
+  múltiple és comú. El nom del fitxer al disc porta el prefix de l'`id` del document (sense col·lisions) i es neteja de
+  caràcters reservats; el `nom_original` es conserva a la BD tal com era.
+- **Avís "Falten documents"**: hi ha una data de la fiança informada (model 2 o notificació) i cap document adjunt de la
+  classe corresponent (`fianca_model2` / `fianca_notificacio`). Surt també als contractes tancats, perquè aquests
+  documents són els que calen per demanar la devolució. El calcula el Main (`te_doc_model2`, `te_doc_notificacio`).
+- **Preload**: cada bloc nou s'ha d'afegir als **dos** fitxers (`index.ts` i `index.d.ts`), i dins de `api`, no dins d'un
+  altre bloc. Si es oblida, el `typecheck` falla només a l'`.d.ts`, perquè la consola de les DevTools no comprova tipus.
+  
 ## Diferències amb la guia
 
 1. La guia desa la BD a `app.getPath('userData')`; aquí s'usa `~/Lloguers/` (vegeu més amunt).
@@ -431,9 +439,12 @@ src/renderer/src/
           Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*` que usa `traduirError`.
           Provar `FK_VIOLADA` en eliminar un immoble o un inquilí amb contractes.
 16. [x] Contractes (UI, fase 1): s'hi entra des d'Immobles (`/immobles/:id/contractes`), amb llista, formulari en pantalla pròpia, eliminar, les accions Tancar i Revisar lloguer (finestres) i els avisos.
-17. [x] Documents (backend): diàleg d'adjuntar, còpia a `documents/<id_contracte>/`, validació de ruta,
-    obrir amb `shell.openPath()`, esborrar també el fitxer. El tipus es tria d'`tipus_document`.
-18. Documents (UI): pestanya dins del contracte; avisos de la fiança si hi ha la data i falta el document.
+17. [x] Documents (backend): diàleg d'adjuntar al Main (el Renderer només envia contracte, tipus i títol, mai rutes),
+    còpia a `documents/<id_contracte>/<id_document>_<nom_segur>.<ext>`, ruta relativa a la BD, validació que la ruta
+    queda dins de `documents/`, obrir amb `shell.openPath()` i esborrar també el fitxer. `eliminarContracte` esborra la
+    carpeta del contracte. Nou codi d'error `FITXER_NO_TROBAT`.
+18. [x] Documents (UI): pestanyes Dades i Documents a la fitxa d'un contracte (les pestanyes només en editar); adjuntar,
+    obrir, editar (tipus, data i comentaris) i eliminar; avís "Falten documents".
 
 ### Fase E: distribució
 
