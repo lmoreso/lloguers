@@ -27,13 +27,13 @@
     "carregant": "Carregant…",
     "obligatori": "Aquest camp és obligatori.",
     "tornar": "Tornar",
-    "capResultat": "Cap resultat"    
+    "capResultat": "Cap resultat"
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
     "FK_VIOLADA": "L'operació no és possible perquè hi ha dades relacionades.",
     "CHECK_VIOLAT": "Alguna de les dades introduïdes no és vàlida.",
-    "FITXER_NO_TROBAT": "No s'ha trobat el fitxer al disc.",    
+    "FITXER_NO_TROBAT": "No s'ha trobat el fitxer al disc.",
     "DESCONEGUT": "S'ha produït un error inesperat."
   },
   "configuracio": {
@@ -123,7 +123,7 @@
     "eliminar": {
       "titol": "Eliminar document",
       "confirmacio": "Segur que vols eliminar {{nom}}? S'esborrarà també el fitxer del disc. Aquesta acció no es pot desfer."
-    },    
+    },
     "classes": {
       "contracte": "Contracte",
       "annex": "Annex",
@@ -138,7 +138,7 @@
       "dialeg": "Tria els documents a adjuntar"
     },
     "adjuntats_one": "{{count}} document adjuntat.",
-    "adjuntats_other": "{{count}} documents adjuntats.",    
+    "adjuntats_other": "{{count}} documents adjuntats.",
     "buit": "Aquest contracte encara no té cap document.",
     "camps": {
       "tipus": "Tipus",
@@ -149,7 +149,7 @@
     "avis": {
       "model2": "Hi ha la data del model 2, però falta adjuntar-ne el document.",
       "notificacio": "Hi ha la data de la notificació, però falta adjuntar-ne el document."
-    }        
+    }
   },
   "contractes": {
     "titol": "Contractes",
@@ -157,7 +157,7 @@
     "nou": "Nou contracte",
     "editar": "Editar contracte",
     "buit": "Aquest immoble encara no té cap contracte.",
-    "noTrobat": "No s'ha trobat aquest contracte.",    
+    "noTrobat": "No s'ha trobat aquest contracte.",
     "desat": "Contracte desat.",
     "estat": {
       "vigent": "Vigent",
@@ -166,7 +166,7 @@
     "pestanyes": {
       "dades": "Dades",
       "documents": "Documents"
-    },    
+    },
     "seccions": {
       "dades": "Dades del contracte",
       "lloguer": "Lloguer",
@@ -190,7 +190,7 @@
       "fiancaDataModel2": "Data del model 2",
       "fiancaDataIngres": "Data de l'ingrés",
       "fiancaDataNotificacio": "Data de la notificació",
-      "avisos": "Avisos",      
+      "avisos": "Avisos",
       "fiancaNumRegistre": "Núm. de registre de la notificació"
     },
     "cercarInquili": "Cerca un inquilí…",
@@ -200,7 +200,7 @@
       "mateixInquili": "El segon inquilí ha de ser diferent del primer.",
       "parellaModel2": "El NC i la data del model 2 s'han d'informar junts.",
       "parellaNotificacio": "El número de registre i la data de la notificació s'han d'informar junts.",
-      "revisioAnterior": "La data de la revisió no pot ser anterior a l'inici del contracte."      
+      "revisioAnterior": "La data de la revisió no pot ser anterior a l'inici del contracte."
     },
     "editarTancat": {
       "titol": "Contracte tancat",
@@ -212,7 +212,7 @@
       "confirmacio": "Segur que vols eliminar el contracte de {{inquilins}} (inici {{inici}})? S'esborraran també la fiança i els documents adjunts. Aquesta acció no es pot desfer."
     },
     "accions": {
-      "titol": "Accions",      
+      "titol": "Accions",
       "tancar": "Tancar contracte",
       "revisarLloguer": "Revisar lloguer"
     },
@@ -233,12 +233,12 @@
         "aviat": "Revisió pròxima"
       },
       "documents": "Falten documents"
-    },    
+    },
     "tancar": {
       "titol": "Tancar contracte",
       "dataFi": "Data de fi",
       "fet": "Contracte tancat."
-    }        
+    }
   },
   "proves": {
     "titol": "Proves de Mantine",

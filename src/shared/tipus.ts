@@ -89,6 +89,11 @@ export interface ContracteLlistat extends Contracte {
   te_doc_model2: boolean
   te_doc_notificacio: boolean
 }
+// Dades de la devolució de la fiança (fase 2). Només es poden informar amb el contracte tancat.
+export type DevolucioDades = Pick<
+  Contracte,
+  'devolucio_data_sollicitud' | 'devolucio_data_cobrament' | 'devolucio_import' | 'devolucio_motiu'
+>
 
 // Idiomes de la interfície. Afegir-ne un de nou: afegir-lo aquí, crear el JSON
 // i registrar-lo a i18n/index.ts (vegeu "Afegir un idioma nou" a NOTES.md).

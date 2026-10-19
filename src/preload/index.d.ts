@@ -14,7 +14,8 @@ import type {
   InquiliDades,
   NomsClasses,
   Resultat,
-  TipusDocument
+  TipusDocument,
+  DevolucioDades
 } from '../shared/tipus'
 
 declare global {
@@ -55,6 +56,7 @@ declare global {
           lloguerNou: number,
           dataRevisio: string
         ) => Promise<Resultat<void>>
+        devolucio: (id: number, dades: DevolucioDades) => Promise<Resultat<void>>
       }
       documents: {
         obtenir: (idContracte: number) => Promise<Resultat<DocumentLlistat[]>>

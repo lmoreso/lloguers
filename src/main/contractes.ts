@@ -1,5 +1,5 @@
 import { db } from './database'
-import type { Contracte, ContracteDades, ContracteLlistat } from '../shared/tipus'
+import type { Contracte, ContracteDades, ContracteLlistat, DevolucioDades } from '../shared/tipus'
 import { esborrarCarpetaContracte } from './documents'
 
 const COLUMNES = `id, id_inmoble, data_inici, data_fi, id_inquili, id_inquili_2, d_fi_prevista,
@@ -76,6 +76,17 @@ export function actualitzarContracte(id: number, d: ContracteDades): void {
     const antic = obtenirContracte(id)
     if (!antic) return
 
+    // La sol·licitud de devolució no pot ser anterior a la fi del contracte: si es mou la data de fi
+    // cap endavant, ha de seguir sent coherent. (Si s'esborra la data de fi amb devolució informada,
+    // ho rebutja el CHECK de la BD; la UI ho avisa abans.)
+    if (
+      antic.devolucio_data_sollicitud !== null &&
+      d.data_fi !== null &&
+      d.data_fi > antic.devolucio_data_sollicitud
+    ) {
+      throw new Error('La data de fi no pot ser posterior a la sol·licitud de devolució')
+    }
+
     // Mentre el contracte no s'ha revisat mai (la data de l'última revisió és la d'inici), el
     // lloguer actual i la data de revisió segueixen el lloguer inicial i la data d'inici.
     // Un cop revisat, són independents i només els canvia l'acció Revisar lloguer.
@@ -129,4 +140,35 @@ export function revisarLloguer(id: number, lloguerNou: number, dataRevisio: stri
     dataRevisio,
     id
   )
+}
+// Acció Devolució de la fiança: informa (o corregeix) les quatre dades. Cap és obligatòria. Substitueix
+// el que hi havia: per esborrar la devolució, s'envien tots quatre a null. La BD ja només ho deixa fer amb
+// el contracte tancat (CHECK_VIOLAT) i rebutja les dates mal escrites; l'ordre de les dates el valida el Main.
+export function registrarDevolucio(id: number, d: DevolucioDades): void {
+  const esData = (v: unknown): boolean => v === null || typeof v === 'string'
+  if (!esData(d.devolucio_data_sollicitud) || !esData(d.devolucio_data_cobrament)) {
+    throw new Error('Data de devolució invàlida')
+  }
+  const imp = d.devolucio_import
+  if (imp !== null && (typeof imp !== 'number' || !Number.isFinite(imp) || imp < 0)) {
+    throw new Error('Import de devolució invàlid')
+  }
+  if (d.devolucio_motiu !== null && typeof d.devolucio_motiu !== 'string') {
+    throw new Error('Motiu de devolució invàlid')
+  }
+
+  const sol = d.devolucio_data_sollicitud
+  const cob = d.devolucio_data_cobrament
+  if (sol !== null && cob !== null && cob < sol) {
+    throw new Error('El cobrament no pot ser anterior a la sol·licitud')
+  }
+  const c = obtenirContracte(id)
+  if (c && c.data_fi !== null && sol !== null && sol < c.data_fi) {
+    throw new Error('La sol·licitud no pot ser anterior a la fi del contracte')
+  }
+
+  db.prepare(
+    `UPDATE contractes SET devolucio_data_sollicitud=@sol, devolucio_data_cobrament=@cob,
+      devolucio_import=@imp, devolucio_motiu=@motiu WHERE id=@id`
+  ).run({ sol, cob, imp, motiu: d.devolucio_motiu, id })
 }

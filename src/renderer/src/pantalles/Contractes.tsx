@@ -11,7 +11,7 @@ import {
   Title,
   Tooltip
 } from '@mantine/core'
-import { IconCurrencyEuro, IconDots, IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconCurrencyEuro, IconMenu2, IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
 import { modals } from '@mantine/modals'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -204,7 +204,7 @@ function Contractes(): React.JSX.Element {
                         <Menu.Target>
                           <Tooltip label={t('contractes.accions.titol')}>
                             <ActionIcon variant="subtle" aria-label={t('contractes.accions.titol')}>
-                              <IconDots size={18} />
+                              <IconMenu2 size={18} />
                             </ActionIcon>
                           </Tooltip>
                         </Menu.Target>

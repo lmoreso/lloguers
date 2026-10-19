@@ -7,9 +7,10 @@ import {
   actualitzarContracte,
   eliminarContracte,
   tancarContracte,
-  revisarLloguer
+  revisarLloguer,
+  registrarDevolucio
 } from '../contractes'
-import type { ContracteDades } from '../../shared/tipus'
+import type { ContracteDades, DevolucioDades } from '../../shared/tipus'
 
 export function registrarIpcContractes(): void {
   // Sempre d'un immoble: s'hi entra només des d'Immobles.
@@ -39,5 +40,9 @@ export function registrarIpcContractes(): void {
     'contractes:revisarLloguer',
     (_, id: number, lloguerNou: number, dataRevisio: string) =>
       executar(() => revisarLloguer(id, lloguerNou, dataRevisio))
+  )
+
+  ipcMain.handle('contractes:devolucio', (_, id: number, dades: DevolucioDades) =>
+    executar(() => registrarDevolucio(id, dades))
   )
 }
