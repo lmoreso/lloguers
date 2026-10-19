@@ -163,6 +163,15 @@
       "vigent": "Vigent",
       "tancat": "Tancat"
     },
+    "devolucio": {
+      "titol": "Devolució de la fiança",
+      "fianca": "Import de la fiança: {{import}}",
+      "dataSollicitud": "Data de la sol·licitud",
+      "dataCobrament": "Data del cobrament",
+      "import": "Import retornat",
+      "motiu": "Motiu (per què s'ha retornat sencera o no)",
+      "fet": "Devolució desada."
+    },
     "pestanyes": {
       "dades": "Dades",
       "documents": "Documents"
@@ -195,6 +204,8 @@
     },
     "cercarInquili": "Cerca un inquilí…",
     "validacio": {
+      "solAnterior": "La sol·licitud no pot ser anterior a la fi del contracte.",
+      "cobAnterior": "El cobrament no pot ser anterior a la sol·licitud.",
       "dataFiAnterior": "La data de fi no pot ser anterior a l'inici.",
       "fiPrevistaAnterior": "La fi prevista no pot ser anterior a l'inici.",
       "mateixInquili": "El segon inquilí ha de ser diferent del primer.",
@@ -214,7 +225,8 @@
     "accions": {
       "titol": "Accions",
       "tancar": "Tancar contracte",
-      "revisarLloguer": "Revisar lloguer"
+      "revisarLloguer": "Revisar lloguer",
+      "devolucio": "Devolució de la fiança"
     },
     "revisar": {
       "titol": "Revisar lloguer",

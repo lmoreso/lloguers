@@ -11,7 +11,14 @@ import {
   Title,
   Tooltip
 } from '@mantine/core'
-import { IconCurrencyEuro, IconMenu2, IconLock, IconPencil, IconTrash } from '@tabler/icons-react'
+import {
+  IconCurrencyEuro,
+  IconMenu2,
+  IconLock,
+  IconPencil,
+  IconTrash,
+  IconReceiptRefund
+} from '@tabler/icons-react'
 import { modals } from '@mantine/modals'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -22,6 +29,7 @@ import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
 import { notifications } from '@mantine/notifications'
 import RevisarLloguer from './RevisarLloguer'
 import TancarContracte from './TancarContracte'
+import DevolucioFianca from './DevolucioFianca'
 import {
   aniversariRevisio,
   DIES_AVIS_FI,
@@ -135,6 +143,13 @@ function Contractes(): React.JSX.Element {
     })
   }
 
+  function devolucio(c: ContracteLlistat): void {
+    modals.open({
+      title: t('contractes.devolucio.titol'),
+      children: <DevolucioFianca contracte={c} onDesat={() => setVersio((v) => v + 1)} />
+    })
+  }
+
   return (
     <>
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
@@ -224,6 +239,14 @@ function Contractes(): React.JSX.Element {
                                 {t('contractes.accions.tancar')}
                               </Menu.Item>
                             </>
+                          )}
+                          {c.data_fi !== null && (
+                            <Menu.Item
+                              leftSection={<IconReceiptRefund size={16} />}
+                              onClick={() => devolucio(c)}
+                            >
+                              {t('contractes.accions.devolucio')}
+                            </Menu.Item>
                           )}
                           <Menu.Item
                             leftSection={<IconPencil size={16} />}

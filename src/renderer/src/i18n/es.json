@@ -163,6 +163,15 @@
       "vigent": "Vigente",
       "tancat": "Cerrado"
     },
+    "devolucio": {
+      "titol": "Devolución de la fianza",
+      "fianca": "Importe de la fianza: {{import}}",
+      "dataSollicitud": "Fecha de la solicitud",
+      "dataCobrament": "Fecha del cobro",
+      "import": "Importe devuelto",
+      "motiu": "Motivo (por qué se ha devuelto entera o no)",
+      "fet": "Devolución guardada."
+    },    
     "pestanyes": {
       "dades": "Datos",
       "documents": "Documentos"
@@ -195,6 +204,8 @@
     },
     "cercarInquili": "Busca un inquilino…",
     "validacio": {
+      "solAnterior": "La solicitud no puede ser anterior al fin del contrato.",
+      "cobAnterior": "El cobro no puede ser anterior a la solicitud.",      
       "dataFiAnterior": "La fecha de fin no puede ser anterior al inicio.",
       "fiPrevistaAnterior": "El fin previsto no puede ser anterior al inicio.",
       "mateixInquili": "El segundo inquilino debe ser distinto del primero.",
@@ -214,7 +225,8 @@
     "accions": {
       "titol": "Acciones",
       "tancar": "Cerrar contrato",
-      "revisarLloguer": "Revisar alquiler"
+      "revisarLloguer": "Revisar alquiler",
+      "devolucio": "Devolución de la fianza"      
     },
     "revisar": {
       "titol": "Revisar alquiler",
