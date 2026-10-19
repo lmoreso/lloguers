@@ -473,7 +473,8 @@ src/renderer/src/
 ### Generals
 - Poder introduir les dates manualment.
 - Tots els camps de dades: menú per Editar amb botó dret (copiar, enganxar, etc.)
-- Posar una barra superior mes currada amb el nom de la pantalla. A la part dreta posar un menu amb les accions de la pantalla (tornar, Afegir, Desar, etc) i no botons a la part superior (Afegir) i botons a la part inferior (si la panttalla creix en altura els botons queden amagats).
+- Posar una barra superior mes currada amb el nom de la pantalla (a estudiar). 
+- A la part dreta de la barra superior posar un menu amb les accions de la pantalla (tornar, Afegir, Desar, etc) i no botons a la part superior (Afegir) i botons a la part inferior (si la panttalla creix en altura els botons queden amagats).
 - Menú sortir a la parte esquerre inferior.
 - Icona de la Aplicació
 
@@ -481,40 +482,50 @@ src/renderer/src/
 - Dades personals com a Inquilins, amb IBAN.
 
 ### Pantalla Inquilins (Llista)
-- Quan no hi ha telèfon, els camps Bizzum i Whatssap haurien de ser nuls, inclús a la pantalla.
-- Afegir camp IBAN.
+- Afegir columna al principi amb el ID.
+- Afegir nova acció per anar al nou formulari dels Documents (veure apartat seguent).
+
+#### Nova Gestió dels Documents del Inquilí (pendent d'aprofundir)
+- Nou Formulari.
+- DNI, Vida Laboral, Nómina, Altres.
+- Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
+- Accesible desde la llista i desde Editar.
 
 #### Formulari Editar Inquilí
 - Validar que NO es pugui marcar Bizzum i Whatssap si no hi ha telèfon.
-
-#### Nova Gestió dels Documents del Inquilí (pendent d'aprofundir)
-- Nou Formulari o fer una pantalla conjunta 'Editar Inquilí'.
-- DNI, Vida Laboral, Nómina, Altres.
-- Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
+- Afegir camp IBAN.
+- Acció per anar al nou formulari dels Documents. Abans preguntar si es vol Guardar (Si, Cancelar). En cas de Error quedarse al Inquilí. 
 
 ### Pantalla Immmobles (Llista)
-- Afegir els propietaris que tinguin amb el seu % (que ha de sumar 100). Taula a part o afegir 4 propietaris com a màxim a la taula de Inmobles (mes senzill).
+- Afegir columna al principi amb el ID.
 - Afegir un Avis genèric si algun contracte te avisos.
-
-#### Pantalla Editar Immoble
-- Acció per anar directament als contractes (ara s'ha de tornar a la llista). Si hi han modificacions guardar automàticament. Si hi ha errors ens mantenim a Immobles.
-- Afegir la barra superior taronja (com a la llista) amb detall dels avisos + l'avis genèric si els contractes tenen avisos.
+- Afegir nova acció per anar al nou formulari dels Documents (veure apartat seguent).
+- Afegir nova acció per editar directament el últim contracte.
 
 #### Nova Gestió dels Documents del Immoble (pendent d'aprofundir)
 - Certificat Energètic, Cédula habitibilitat, Fotos, Altres.
 - Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
+- Accesible desde la llista i desde Editar.
+
+#### Pantalla Editar Immoble
+- Acció per anar directament als contractes (ara s'ha de tornar a la llista). Si hi han modificacions preguntar si es vol Guardar (Si, Cancelar). Si hi ha errors ens mantenim a Immobles.
+- Acció per anar al nou formulari dels Documents. Abans preguntar si es vol Guardar (Si, Cancelar). Si hi ha errors ens mantenim a Immobles. 
+- Afegir la barra superior taronja (com a la llista) amb detall dels avisos + l'avis genèric si els contractes tenen avisos.
+- Afegir els propietaris que tinguin amb el seu % (que ha de sumar 100). Taula a part o afegir 4 propietaris com a màxim a la taula de Inmobles (mes senzill). Si la pantalla està molt carregada, posar-ho a una altra pestanya.
 
 ### Pantalla Contractes (Llista)
-- A la part superior poder NAvegar entre els Immobles.
+- A la part superior poder Navegar entre els Immobles.
+- Afegir columna al principi amb el ID.
 
 #### Pantalla Editar Contracte
 - Al subtítol només hi consta el Immobles. Afegir:
   - 'Contracte nou' si es el cas.
   - 'Contracte de {data}' si el contracte ja existía.
-- Afegir barres de navegació a sota del subtítol. Si hi han modificacions preguntar si es vol guardar (Si, No, Cancel·lar) o guardar sense preguntar. Si hi han errors al guardar, ens mantenim al mateix contracte.
-- Al clicar a la pestanya Documents fer el mateix que al Navegar (vols guardar? etc.).
+- Afegir barres de navegació abans del subtítol, per navegar entre contractes. Si hi han modificacions preguntar si es vol guardar (Si, Cancel·lar). Si hi han errors al guardar, ens mantenim al mateix registre.
+- Al clicar a la pestanya Documents fer el mateix que al Navegar si hi han modificacions.
 - Afegir format monetari als camps Lloguer Inicial i Fiança (a Lloguer actual ja hi es).
 - Afegir barra superior tronja amb els avisos del Contracte.
+- Nova acció per Tancar el Contracte. Si hi han modificacions preguntar si es vol guardar (Si, Cancel·lar). Si hi han errors al guardar, ens mantenim al mateix registre.
 
 #### Tancar Contracte
 - Afegir camp 'Motiu de Final' amb llista desplegable fixa:
@@ -532,4 +543,4 @@ src/renderer/src/
 
 ### Empaquetat (executables).
 - Falta sistema de versions.
-- Activar versió Windows.
+- Activar suport per Windows.
