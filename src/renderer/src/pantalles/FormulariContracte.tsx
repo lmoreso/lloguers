@@ -85,10 +85,24 @@ function FormulariContracte({ immoble, contracte, inquilins }: Props): React.JSX
           ? t('contractes.validacio.fiPrevistaAnterior')
           : null
       },
-      data_fi: (v, vals) =>
-        v && vals.data_inici && v < vals.data_inici
-          ? t('contractes.validacio.dataFiAnterior')
-          : null,
+      data_fi: (v, vals) => {
+        if (v && vals.data_inici && v < vals.data_inici) {
+          return t('contractes.validacio.dataFiAnterior')
+        }
+        // Un contracte amb devolució informada no es pot reobrir, i la fi no pot passar de la sol·licitud.
+        if (contracte) {
+          const sol = contracte.devolucio_data_sollicitud
+          const teDevolucio = [
+            sol,
+            contracte.devolucio_data_cobrament,
+            contracte.devolucio_import,
+            contracte.devolucio_motiu
+          ].some((x) => x !== null)
+          if (!v && teDevolucio) return t('contractes.validacio.reobrirAmbDevolucio')
+          if (v && sol && v > sol) return t('contractes.validacio.finPosteriorSollicitud')
+        }
+        return null
+      },
       id_inquili: (v) => (v ? null : t('comu.obligatori')),
       id_inquili_2: (v, vals) =>
         v && v === vals.id_inquili ? t('contractes.validacio.mateixInquili') : null,

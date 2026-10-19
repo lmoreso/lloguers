@@ -49,10 +49,22 @@ function avisos(c: ContracteLlistat): { clau: 'fi' | 'revisio'; estat: 'caducat'
 }
 
 // Hi ha una data de la fiança informada però no el document adjunt de la classe que la justifica.
+// El model 3 justifica la sol·licitud de devolució.
 function faltenDocuments(c: ContracteLlistat): boolean {
   return (
     (c.fianca_data_model2 !== null && !c.te_doc_model2) ||
-    (c.fianca_data_notificacio !== null && !c.te_doc_notificacio)
+    (c.fianca_data_notificacio !== null && !c.te_doc_notificacio) ||
+    (c.devolucio_data_sollicitud !== null && !c.te_doc_model3)
+  )
+}
+
+// Contracte tancat amb la fiança ja gestionada (model 2 o notificació) però sense el cobrament de
+// la devolució: la fiança està per cobrar.
+function devolucioPendent(c: ContracteLlistat): boolean {
+  return (
+    c.data_fi !== null &&
+    (c.fianca_data_model2 !== null || c.fianca_data_notificacio !== null) &&
+    c.devolucio_data_cobrament === null
   )
 }
 
@@ -211,6 +223,9 @@ function Contractes(): React.JSX.Element {
                         ))}
                         {faltenDocuments(c) && (
                           <Badge color="orange">{t('contractes.avisos.documents')}</Badge>
+                        )}
+                        {devolucioPendent(c) && (
+                          <Badge color="yellow">{t('contractes.avisos.devolucioPendent')}</Badge>
                         )}
                       </Stack>
                     </Table.Td>

@@ -103,13 +103,18 @@ function DocumentsContracte({ contracte }: { contracte: Contracte }): React.JSX.
     !carregant &&
     contracte.fianca_data_notificacio !== null &&
     !documents.some((d) => d.tipus_classe === 'fianca_notificacio')
+  const faltaModel3 =
+    !carregant &&
+    contracte.devolucio_data_sollicitud !== null &&
+    !documents.some((d) => d.tipus_classe === 'fianca_model3')
 
   return (
     <>
-      {(faltaModel2 || faltaNotificacio) && (
+      {(faltaModel2 || faltaNotificacio || faltaModel3) && (
         <Alert color="orange" mb="md">
           {faltaModel2 && <Text size="sm">{t('documents.avis.model2')}</Text>}
           {faltaNotificacio && <Text size="sm">{t('documents.avis.notificacio')}</Text>}
+          {faltaModel3 && <Text size="sm">{t('documents.avis.model3')}</Text>}
         </Alert>
       )}
       <Group align="flex-end" mb="md">

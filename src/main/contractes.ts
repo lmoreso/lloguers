@@ -18,12 +18,18 @@ const COLUMNES_LLISTAT = `${COLUMNES.split(',')
   EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
     WHERE d.id_contracte = c.id AND t.classe = 'fianca_model2') AS te_doc_model2,
   EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
-    WHERE d.id_contracte = c.id AND t.classe = 'fianca_notificacio') AS te_doc_notificacio`
+    WHERE d.id_contracte = c.id AND t.classe = 'fianca_notificacio') AS te_doc_notificacio,
+  EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
+    WHERE d.id_contracte = c.id AND t.classe = 'fianca_model3') AS te_doc_model3`
 
 // Fila tal com surt de SQLite: els dos indicadors són 0 o 1. El Main els converteix a boolean.
-type FilaLlistat = Omit<ContracteLlistat, 'te_doc_model2' | 'te_doc_notificacio'> & {
+type FilaLlistat = Omit<
+  ContracteLlistat,
+  'te_doc_model2' | 'te_doc_notificacio' | 'te_doc_model3'
+> & {
   te_doc_model2: number
   te_doc_notificacio: number
+  te_doc_model3: number
 }
 
 // Contractes d'un immoble, l'últim primer. S'hi entra només des d'Immobles.
@@ -42,7 +48,8 @@ export function obtenirContractes(idInmoble: number): ContracteLlistat[] {
   return files.map((f) => ({
     ...f,
     te_doc_model2: f.te_doc_model2 === 1,
-    te_doc_notificacio: f.te_doc_notificacio === 1
+    te_doc_notificacio: f.te_doc_notificacio === 1,
+    te_doc_model3: f.te_doc_model3 === 1
   }))
 }
 

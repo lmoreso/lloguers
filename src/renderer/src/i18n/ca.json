@@ -147,6 +147,7 @@
       "comentaris": "Comentaris"
     },
     "avis": {
+      "model3": "Hi ha la data de sol·licitud de la devolució, però falta adjuntar-ne el document (model 3).",
       "model2": "Hi ha la data del model 2, però falta adjuntar-ne el document.",
       "notificacio": "Hi ha la data de la notificació, però falta adjuntar-ne el document."
     }
@@ -204,6 +205,8 @@
     },
     "cercarInquili": "Cerca un inquilí…",
     "validacio": {
+      "reobrirAmbDevolucio": "Aquest contracte té dades de devolució de la fiança: no es pot reobrir.",
+      "finPosteriorSollicitud": "La data de fi no pot ser posterior a la sol·licitud de devolució.",
       "solAnterior": "La sol·licitud no pot ser anterior a la fi del contracte.",
       "cobAnterior": "El cobrament no pot ser anterior a la sol·licitud.",
       "dataFiAnterior": "La data de fi no pot ser anterior a l'inici.",
@@ -236,6 +239,7 @@
       "fet": "Lloguer revisat."
     },
     "avisos": {
+      "devolucioPendent": "Devolució pendent",
       "fi": {
         "caducat": "Fi prevista passada",
         "aviat": "Fi prevista pròxima"
