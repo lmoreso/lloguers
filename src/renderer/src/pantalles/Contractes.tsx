@@ -13,7 +13,7 @@ import {
 } from '@mantine/core'
 import {
   IconCurrencyEuro,
-  IconMenu2,
+  IconDots,
   IconLock,
   IconPencil,
   IconTrash,
@@ -234,7 +234,7 @@ function Contractes(): React.JSX.Element {
                         <Menu.Target>
                           <Tooltip label={t('contractes.accions.titol')}>
                             <ActionIcon variant="subtle" aria-label={t('contractes.accions.titol')}>
-                              <IconMenu2 size={18} />
+                              <IconDots size={18} />
                             </ActionIcon>
                           </Tooltip>
                         </Menu.Target>

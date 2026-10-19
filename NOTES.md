@@ -188,7 +188,7 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
 
 1. **Fase 1:** dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i
    Revisar lloguer, avisos i documents amb la taula de tipus.
-2. **Fase 2:** devolució de la fiança (model 3).
+2. **Fase 2 (feta):** devolució de la fiança (model 3).
 3. **Fase 3:** canvi de signants (annex), correcció de l'immoble d'un contracte i menú Contractes vigents.
 
 ### Pendent per a més endavant
@@ -236,7 +236,15 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
   documents són els que calen per demanar la devolució. El calcula el Main (`te_doc_model2`, `te_doc_notificacio`).
 - **Preload**: cada bloc nou s'ha d'afegir als **dos** fitxers (`index.ts` i `index.d.ts`), i dins de `api`, no dins d'un
   altre bloc. Si es oblida, el `typecheck` falla només a l'`.d.ts`, perquè la consola de les DevTools no comprova tipus.
-  
+- **Menú d'accions**: la llista de contractes té una sola icona per fila (capçalera "Accions") que obre un menú amb icona i
+  text. Als vigents: Revisar lloguer i Tancar contracte; als tancats: Devolució de la fiança; a tots: Editar i Eliminar.
+- **Devolució de la fiança**: acció pròpia (finestra), només als contractes tancats. Cap camp és obligatori; tot buit
+  esborra la devolució. El Main valida que el cobrament no sigui anterior a la sol·licitud i que la sol·licitud no sigui
+  anterior a la fi del contracte (i la fi no pot passar de la sol·licitud). Un contracte amb devolució informada no es pot
+  reobrir (esborrar `data_fi`), i el formulari ho diu amb un missatge concret.
+- **Avisos de la fiança**: "Falten documents" també per al model 3 (hi ha data de sol·licitud i no hi ha cap document de classe
+  `fianca_model3`); "Devolució pendent" als contractes tancats amb el model 2 o la notificació informats i sense data de
+  cobrament. Risc assumit: un contracte antic amb la fiança ja retornada però no anotada avisa fins que s'hi posa el cobrament.  
   
 ## Diferències amb la guia
 
@@ -459,3 +467,69 @@ src/renderer/src/
           Opcional: excloure la resta per reduir la mida.
     - [x] Revisar `appId`, `maintainer` i el bloc `publish` (apunta a `example.com`).
 20. [x]`npm run build:linux` (`.deb` / AppImage) i prova al portàtil Mint.
+
+## Correccions i Noves funcionalitats 
+
+### Generals
+- Poder introduir les dates manualment.
+- Tots els camps de dades: menú per Editar amb botó dret (copiar, enganxar, etc.)
+- Posar una barra superior mes currada amb el nom de la pantalla. A la part dreta posar un menu amb les accions de la pantalla (tornar, Afegir, Desar, etc) i no botons a la part superior (Afegir) i botons a la part inferior (si la panttalla creix en altura els botons queden amagats).
+- Menú sortir a la parte esquerre inferior.
+- Icona de la Aplicació
+
+### Nova Taula i Pantalla Propietaris
+- Dades personals com a Inquilins, amb IBAN.
+
+### Pantalla Inquilins (Llista)
+- Quan no hi ha telèfon, els camps Bizzum i Whatssap haurien de ser nuls, inclús a la pantalla.
+- Afegir camp IBAN.
+
+#### Formulari Editar Inquilí
+- Validar que NO es pugui marcar Bizzum i Whatssap si no hi ha telèfon.
+
+#### Nova Gestió dels Documents del Inquilí (pendent d'aprofundir)
+- Nou Formulari o fer una pantalla conjunta 'Editar Inquilí'.
+- DNI, Vida Laboral, Nómina, Altres.
+- Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
+
+### Pantalla Immmobles (Llista)
+- Afegir els propietaris que tinguin amb el seu % (que ha de sumar 100). Taula a part o afegir 4 propietaris com a màxim a la taula de Inmobles (mes senzill).
+- Afegir un Avis genèric si algun contracte te avisos.
+
+#### Pantalla Editar Immoble
+- Acció per anar directament als contractes (ara s'ha de tornar a la llista). Si hi han modificacions guardar automàticament. Si hi ha errors ens mantenim a Immobles.
+- Afegir la barra superior taronja (com a la llista) amb detall dels avisos + l'avis genèric si els contractes tenen avisos.
+
+#### Nova Gestió dels Documents del Immoble (pendent d'aprofundir)
+- Certificat Energètic, Cédula habitibilitat, Fotos, Altres.
+- Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
+
+### Pantalla Contractes (Llista)
+- A la part superior poder NAvegar entre els Immobles.
+
+#### Pantalla Editar Contracte
+- Al subtítol només hi consta el Immobles. Afegir:
+  - 'Contracte nou' si es el cas.
+  - 'Contracte de {data}' si el contracte ja existía.
+- Afegir barres de navegació a sota del subtítol. Si hi han modificacions preguntar si es vol guardar (Si, No, Cancel·lar) o guardar sense preguntar. Si hi han errors al guardar, ens mantenim al mateix contracte.
+- Al clicar a la pestanya Documents fer el mateix que al Navegar (vols guardar? etc.).
+- Afegir format monetari als camps Lloguer Inicial i Fiança (a Lloguer actual ja hi es).
+- Afegir barra superior tronja amb els avisos del Contracte.
+
+#### Tancar Contracte
+- Afegir camp 'Motiu de Final' amb llista desplegable fixa:
+  - No renovació.
+  - Voluntaria.
+  - Nou Contracte.
+  - Altres.
+- Afegir camp 'Comentaris del Tancament'.
+
+### Configuració
+- Ruta i nom de la BD a escollir. Cal fitxer de configuració a una carpeta estandar del SO.
+  - Posibilitat de treballar amb varies BD. 
+  - Al obrir la App carregar sempre la última BD.
+- Mantenir la configuració del Idioma a la mateixa carpeta de la BD.
+
+### Empaquetat (executables).
+- Falta sistema de versions.
+- Activar versió Windows.
