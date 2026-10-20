@@ -8,6 +8,7 @@
     "confirmar": "Continuar"
   },
   "menu": {
+    "ultimsContractes": "Últims contractes",
     "immobles": "Immobles",
     "inquilins": "Inquilins",
     "contractes": "Contractes",
@@ -160,6 +161,10 @@
     "buit": "Aquest immoble encara no té cap contracte.",
     "noTrobat": "No s'ha trobat aquest contracte.",
     "desat": "Contracte desat.",
+    "ultims": {
+      "titol": "Últims contractes",
+      "senseContracte": "Sense contracte"
+    },    
     "estat": {
       "vigent": "Vigent",
       "tancat": "Tancat"

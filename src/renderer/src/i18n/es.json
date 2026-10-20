@@ -8,6 +8,7 @@
     "confirmar": "Continuar"
   },
   "menu": {
+    "ultimsContractes": "Últimos contratos",    
     "immobles": "Inmuebles",
     "inquilins": "Inquilinos",
     "contractes": "Contratos",
@@ -160,6 +161,10 @@
     "buit": "Este inmueble todavía no tiene ningún contrato.",
     "noTrobat": "No se ha encontrado este contrato.",    
     "desat": "Contrato guardado.",
+    "ultims": {
+      "titol": "Últimos contratos",
+      "senseContracte": "Sin contrato"
+    },    
     "estat": {
       "vigent": "Vigente",
       "tancat": "Cerrado"

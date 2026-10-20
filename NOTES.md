@@ -227,7 +227,7 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
 - **Icones**: `@tabler/icons-react` per a editar, eliminar, revisar i tancar (icona sola amb `Tooltip` i `aria-label` traduïts), **una columna per icona** perquè quedin alineades. Les accions principals (Afegir) són botons de text.
   Els avisos es mostren apilats (`Stack`), com els inquilins.
 - **Avisos de contractes**: `DIES_AVIS_FI` (90) i `DIES_AVIS_REVISIO` (30) a `utils/caducitat.ts`; l'aniversari de la revisió és `data_ultima_revisio` + 1 any. `DatePickerInput` accepta `minDate` com a text ISO.
-- **Formulari de contracte**: permet informar `data_fi` per registrar contractes antics; l'acció Tancar és per al cas habitual.  
+- **Formulari de contracte**: permet informar `data_fi` per registrar contractes antics; l'acció Tancar és per al cas habitual.
 - **Documents**: es desen a l'instant, independentment del botó Desar de les dades del contracte. El tipus d'una selecció
   múltiple és comú. El nom del fitxer al disc porta el prefix de l'`id` del document (sense col·lisions) i es neteja de
   caràcters reservats; el `nom_original` es conserva a la BD tal com era.
@@ -244,8 +244,14 @@ Constants a `src/renderer/src/utils/caducitat.ts`, com `DIES_AVIS` d'Immobles. E
   reobrir (esborrar `data_fi`), i el formulari ho diu amb un missatge concret.
 - **Avisos de la fiança**: "Falten documents" també per al model 3 (hi ha data de sol·licitud i no hi ha cap document de classe
   `fianca_model3`); "Devolució pendent" als contractes tancats amb el model 2 o la notificació informats i sense data de
-  cobrament. Risc assumit: un contracte antic amb la fiança ja retornada però no anotada avisa fins que s'hi posa el cobrament.  
-  
+  cobrament. Risc assumit: un contracte antic amb la fiança ja retornada però no anotada avisa fins que s'hi posa el cobrament.
+- **Menú "Últims contractes"** (`/ultims-contractes`): una fila per contracte, amb  l'adreça repetida si un immoble en té dos. 
+De cada immoble surten els contractes **en curs** (sense `data_fi`, o amb `data_fi` d'avui o posterior) **més el de
+  `data_inici` més recent** (en empat, l'`id` més alt). Així: un vigent amb un d'antic, només el vigent; un tancat a futur
+  amb un de posterior, els dos; tots acabats, només l'últim. Els immobles sense contracte hi surten ("Sense contracte").
+  Només dos estats visibles: Vigent i Tancat (un tancat a futur surt com a Tancat, amb la data de fi a la columna).
+  Reutilitza `AccionsContracte` i `AvisosContracte`.
+
 ## Diferències amb la guia
 
 1. La guia desa la BD a `app.getPath('userData')`; aquí s'usa `~/Lloguers/` (vegeu més amunt).
@@ -448,12 +454,13 @@ src/renderer/src/
           Verificar que `better-sqlite3` retorna els codis `SQLITE_CONSTRAINT_*` que usa `traduirError`.
           Provar `FK_VIOLADA` en eliminar un immoble o un inquilí amb contractes.
 16. [x] Contractes (UI, fase 1): s'hi entra des d'Immobles (`/immobles/:id/contractes`), amb llista, formulari en pantalla pròpia, eliminar, les accions Tancar i Revisar lloguer (finestres) i els avisos.
+  - “Contractes vigents” ja és fet, amb el nom definitiu “Últims contractes”.
 17. [x] Documents (backend): diàleg d'adjuntar al Main (el Renderer només envia contracte, tipus i títol, mai rutes),
-    còpia a `documents/<id_contracte>/<id_document>_<nom_segur>.<ext>`, ruta relativa a la BD, validació que la ruta
-    queda dins de `documents/`, obrir amb `shell.openPath()` i esborrar també el fitxer. `eliminarContracte` esborra la
-    carpeta del contracte. Nou codi d'error `FITXER_NO_TROBAT`.
+        còpia a `documents/<id_contracte>/<id_document>_<nom_segur>.<ext>`, ruta relativa a la BD, validació que la ruta
+        queda dins de `documents/`, obrir amb `shell.openPath()` i esborrar també el fitxer. `eliminarContracte` esborra la
+        carpeta del contracte. Nou codi d'error `FITXER_NO_TROBAT`.
 18. [x] Documents (UI): pestanyes Dades i Documents a la fitxa d'un contracte (les pestanyes només en editar); adjuntar,
-    obrir, editar (tipus, data i comentaris) i eliminar; avís "Falten documents".
+        obrir, editar (tipus, data i comentaris) i eliminar; avís "Falten documents".
 
 ### Fase E: distribució
 
@@ -468,57 +475,116 @@ src/renderer/src/
     - [x] Revisar `appId`, `maintainer` i el bloc `publish` (apunta a `example.com`).
 20. [x]`npm run build:linux` (`.deb` / AppImage) i prova al portàtil Mint.
 
+## Modificacions fetes fora del projecte de Claude
+
+- 20/10/2026. 'UltimsContractes.tsx' dona un error:
+
+```
+src/renderer/src/pantalles/UltimsContractes.tsx:45:5 - error TS2322: Type '{ immoble: Immoble; contracte: ContracteLlistat; }[] | { immoble: Immoble; contracte: null; }[]' is not assignable to type '{ immoble: Immoble; contracte: ContracteLlistat; } | readonly { immoble: Immoble; contracte: ContracteLlistat; }[]'.
+  Type '{ immoble: Immoble; contracte: null; }[]' is not assignable to type '{ immoble: Immoble; contracte: ContracteLlistat; } | readonly { immoble: Immoble; contracte: ContracteLlistat; }[]'.
+    Type '{ immoble: Immoble; contracte: null; }[]' is not assignable to type 'readonly { immoble: Immoble; contracte: ContracteLlistat; }[]'.
+      Type '{ immoble: Immoble; contracte: null; }' is not assignable to type '{ immoble: Immoble; contracte: ContracteLlistat; }'.
+        Types of property 'contracte' are incompatible.
+          Type 'null' is not assignable to type 'ContracteLlistat'.
+
+45     d.contractes.length > 0
+       ~~~~~~~~~~~~~~~~~~~~~~~
+46       ? d.contractes.map((c) => ({ immoble: d.immoble, contracte: c }))
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+47       : [{ immoble: d.immoble, contracte: null }]
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  node_modules/typescript/lib/lib.es2019.array.d.ts:65:19
+    65         callback: (this: This, value: T, index: number, array: T[]) => U | ReadonlyArray<U>,
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    The expected type comes from the return type of this signature.
+
+
+Found 1 error in src/renderer/src/pantalles/UltimsContractes.tsx:45
+
+```
+
+He substituit el codi
+
+```typescript
+const files: Fila[] = dades.flatMap((d) =>
+    d.contractes.length > 0
+      ? d.contractes.map((c) => ({ immoble: d.immoble, contracte: c }))
+      : [{ immoble: d.immoble, contracte: null }]
+```
+
+per
+
+```typescript
+// const files: Fila[] = dades.flatMap((d) =>
+const files = dades.flatMap<Fila>((d) =>
+  d.contractes.length > 0
+    ? d.contractes.map((c) => ({ immoble: d.immoble, contracte: c }))
+    : [{ immoble: d.immoble, contracte: null }]
+)
+```
+
 ## Correccions i Noves funcionalitats (notes a ignorar, de moment)
 
 ### Generals
+
 - Poder introduir les dates manualment.
 - Tots els camps de dades: menú per Editar amb botó dret (copiar, enganxar, etc.)
-- Posar una barra superior mes currada amb el nom de la pantalla (a estudiar). 
+- Posar una barra superior mes currada amb el nom de la pantalla (a estudiar).
 - A la part dreta de la barra superior posar un menu amb les accions de la pantalla (tornar, Afegir, Desar, etc) i no botons a la part superior (Afegir) i botons a la part inferior (si la panttalla creix en altura els botons queden amagats).
 - Menú sortir a la parte esquerre inferior.
 - Icona de la Aplicació.
 - Falta sistema de versions.
 
 ### Nova Taula i Pantalla Propietaris
+
 - Dades personals com a Inquilins, amb IBAN.
 
 ### Pantalla Inquilins (Llista)
+
 - Afegir columna al principi amb el ID.
 - Afegir nova acció per anar al nou formulari dels Documents (veure apartat seguent).
 
 #### Nova Gestió dels Documents del Inquilí (pendent d'aprofundir)
+
 - Nou Formulari.
 - DNI, Vida Laboral, Nómina, Altres.
 - Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
 - Accesible desde la llista i desde Editar.
 
 #### Formulari Editar Inquilí
+
 - Validar que NO es pugui marcar Bizzum i Whatssap si no hi ha telèfon.
 - Afegir camp IBAN.
-- Acció per anar al nou formulari dels Documents. Abans preguntar si es vol Guardar (Si, Cancelar). En cas de Error quedarse al Inquilí. 
+- Acció per anar al nou formulari dels Documents. Abans preguntar si es vol Guardar (Si, Cancelar). En cas de Error quedarse al Inquilí.
 
 ### Pantalla Immmobles (Llista)
+
 - Afegir columna al principi amb el ID.
 - Afegir un Avis genèric si algun contracte te avisos.
 - Afegir nova acció per anar al nou formulari dels Documents (veure apartat seguent).
 - Afegir nova acció per editar directament el últim contracte.
 
 #### Nova Gestió dels Documents del Immoble (pendent d'aprofundir)
+
 - Certificat Energètic, Cédula habitibilitat, Fotos, Altres.
 - Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
 - Accesible desde la llista i desde Editar.
 
 #### Pantalla Editar Immoble
+
 - Acció per anar directament als contractes (ara s'ha de tornar a la llista). Si hi han modificacions preguntar si es vol Guardar (Si, Cancelar). Si hi ha errors ens mantenim a Immobles.
-- Acció per anar al nou formulari dels Documents. Abans preguntar si es vol Guardar (Si, Cancelar). Si hi ha errors ens mantenim a Immobles. 
+- Acció per anar al nou formulari dels Documents. Abans preguntar si es vol Guardar (Si, Cancelar). Si hi ha errors ens mantenim a Immobles.
 - Afegir la barra superior taronja (com a la llista) amb detall dels avisos + l'avis genèric si els contractes tenen avisos.
 - Afegir els propietaris que tinguin amb el seu % (que ha de sumar 100). Taula a part o afegir 4 propietaris com a màxim a la taula de Inmobles (mes senzill). Si la pantalla està molt carregada, posar-ho a una altra pestanya.
 
 ### Pantalla Contractes (Llista)
+
 - A la part superior poder Navegar entre els Immobles.
 - Afegir columna al principi amb el ID.
 
 #### Pantalla Editar Contracte
+
 - Al subtítol només hi consta el Immobles. Afegir:
   - 'Contracte nou' si es el cas.
   - 'Contracte de {data}' si el contracte ja existía.
@@ -528,7 +594,14 @@ src/renderer/src/
 - Afegir barra superior tronja amb els avisos del Contracte.
 - Nova acció per Tancar el Contracte. Si hi han modificacions preguntar si es vol guardar (Si, Cancel·lar). Si hi han errors al guardar, ens mantenim al mateix registre.
 
+### Pantalla Últims Contractes (llista)
+
+- Els Inmobles sense Contracte al final, ordenats per adreça.
+- El menú 'Afegir' i el menu '...' no estan alineats.
+- Quan vas als Contractes del Immoble, hauria de tornar a 'Últims Contractes' i no a 'Immobles'.
+
 #### Tancar Contracte
+
 - Afegir camp 'Motiu de Final' amb llista desplegable fixa:
   - No renovació.
   - Voluntaria.
@@ -537,10 +610,12 @@ src/renderer/src/
 - Afegir camp 'Comentaris del Tancament'.
 
 ### Configuració
+
 - Ruta i nom de la BD a escollir. Cal fitxer de configuració a una carpeta estandar del SO.
-  - Posibilitat de treballar amb varies BD. 
+  - Posibilitat de treballar amb varies BD.
   - Al obrir la App carregar sempre la última BD.
 - Mantenir la configuració del Idioma a la mateixa carpeta de la BD.
 
 ### Empaquetat (executables).
+
 - Activar suport per Windows.

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Badge, Button, Group, Stack, Table, Text, Title } from '@mantine/core'
+import { Badge, Button, Group, Table, Text, Title } from '@mantine/core'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -8,43 +8,7 @@ import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
 import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
 import AccionsContracte from './AccionsContracte'
-import {
-  aniversariRevisio,
-  DIES_AVIS_FI,
-  DIES_AVIS_REVISIO,
-  estatCaducitat
-} from '../utils/caducitat'
-
-// Avisos d'un contracte. Només els vigents (sense data de fi) en tenen.
-function avisos(c: ContracteLlistat): { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] {
-  if (c.data_fi !== null) return []
-  const llista: { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] = []
-  const fi = estatCaducitat(c.d_fi_prevista, DIES_AVIS_FI)
-  if (fi) llista.push({ clau: 'fi', estat: fi })
-  const revisio = estatCaducitat(aniversariRevisio(c.data_ultima_revisio), DIES_AVIS_REVISIO)
-  if (revisio) llista.push({ clau: 'revisio', estat: revisio })
-  return llista
-}
-
-// Hi ha una data de la fiança informada però no el document adjunt de la classe que la justifica.
-// El model 3 justifica la sol·licitud de devolució.
-function faltenDocuments(c: ContracteLlistat): boolean {
-  return (
-    (c.fianca_data_model2 !== null && !c.te_doc_model2) ||
-    (c.fianca_data_notificacio !== null && !c.te_doc_notificacio) ||
-    (c.devolucio_data_sollicitud !== null && !c.te_doc_model3)
-  )
-}
-
-// Contracte tancat amb la fiança ja gestionada (model 2 o notificació) però sense el cobrament de
-// la devolució: la fiança està per cobrar.
-function devolucioPendent(c: ContracteLlistat): boolean {
-  return (
-    c.data_fi !== null &&
-    (c.fianca_data_model2 !== null || c.fianca_data_notificacio !== null) &&
-    c.devolucio_data_cobrament === null
-  )
-}
+import AvisosContracte from '../components/AvisosContracte'
 
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
 function Contractes(): React.JSX.Element {
@@ -129,19 +93,7 @@ function Contractes(): React.JSX.Element {
                     </Table.Td>
                     <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
                     <Table.Td>
-                      <Stack gap={4} align="flex-start">
-                        {avisos(c).map((a) => (
-                          <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
-                            {t(`contractes.avisos.${a.clau}.${a.estat}`)}
-                          </Badge>
-                        ))}
-                        {faltenDocuments(c) && (
-                          <Badge color="orange">{t('contractes.avisos.documents')}</Badge>
-                        )}
-                        {devolucioPendent(c) && (
-                          <Badge color="yellow">{t('contractes.avisos.devolucioPendent')}</Badge>
-                        )}
-                      </Stack>
+                      <AvisosContracte contracte={c} />
                     </Table.Td>
                     <Table.Td style={{ width: 1 }}>
                       <AccionsContracte contracte={c} onCanvi={() => setVersio((v) => v + 1)} />
