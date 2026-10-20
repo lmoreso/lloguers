@@ -1,6 +1,13 @@
 import { db } from './database'
-import type { Contracte, ContracteDades, ContracteLlistat, DevolucioDades } from '../shared/tipus'
+import type {
+  Contracte,
+  ContracteDades,
+  ContracteLlistat,
+  DevolucioDades,
+  ImmobleAmbContractes
+} from '../shared/tipus'
 import { esborrarCarpetaContracte } from './documents'
+import { obtenirInmobles } from './inmobles'
 
 const COLUMNES = `id, id_inmoble, data_inici, data_fi, id_inquili, id_inquili_2, d_fi_prevista,
   lloguer_inicial, lloguer_actual, data_ultima_revisio, fianca_import, fianca_nc,
@@ -32,6 +39,15 @@ type FilaLlistat = Omit<
   te_doc_model3: number
 }
 
+function aLlistat(f: FilaLlistat): ContracteLlistat {
+  return {
+    ...f,
+    te_doc_model2: f.te_doc_model2 === 1,
+    te_doc_notificacio: f.te_doc_notificacio === 1,
+    te_doc_model3: f.te_doc_model3 === 1
+  }
+}
+
 // Contractes d'un immoble, l'últim primer. S'hi entra només des d'Immobles.
 // El segon inquilí és opcional, per això el LEFT JOIN; el primer és obligatori (JOIN).
 export function obtenirContractes(idInmoble: number): ContracteLlistat[] {
@@ -45,12 +61,7 @@ export function obtenirContractes(idInmoble: number): ContracteLlistat[] {
        ORDER BY c.data_inici DESC, c.id DESC`
     )
     .all(idInmoble) as FilaLlistat[]
-  return files.map((f) => ({
-    ...f,
-    te_doc_model2: f.te_doc_model2 === 1,
-    te_doc_notificacio: f.te_doc_notificacio === 1,
-    te_doc_model3: f.te_doc_model3 === 1
-  }))
+  return files.map(aLlistat)
 }
 
 export function obtenirContracte(id: number): Contracte | undefined {
@@ -178,4 +189,44 @@ export function registrarDevolucio(id: number, d: DevolucioDades): void {
     `UPDATE contractes SET devolucio_data_sollicitud=@sol, devolucio_data_cobrament=@cob,
       devolucio_import=@imp, devolucio_motiu=@motiu WHERE id=@id`
   ).run({ sol, cob, imp, motiu: d.devolucio_motiu, id })
+}
+
+// Els contractes de cada immoble que encara no han acabat (sense data de fi, o amb data de fi d'avui o
+// posterior) més el de data d'inici més recent (en empat, l'id més alt). Així, un immoble amb un contracte
+// tancat a futur i un altre de posterior mostra els dos; amb un vigent i un d'antic, només el vigent; i si
+// tots han acabat, només l'últim. Els immobles sense contracte hi surten igualment, amb la llista buida.
+// Dins d'un immoble, en ordre cronològic. Els immobles, ordenats com a Immobles.
+export function obtenirUltimsContractes(): ImmobleAmbContractes[] {
+  // "Avui" en hora local (no en UTC, que és el que dona date('now') de SQLite).
+  const d = new Date()
+  const avui = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+  const files = db
+    .prepare(
+      `SELECT ${COLUMNES_LLISTAT}
+       FROM contractes c
+       JOIN inquilins q ON q.id = c.id_inquili
+       LEFT JOIN inquilins q2 ON q2.id = c.id_inquili_2
+       WHERE c.data_fi IS NULL
+          OR c.data_fi >= @avui
+          OR c.id = (
+            SELECT c2.id FROM contractes c2
+            WHERE c2.id_inmoble = c.id_inmoble
+            ORDER BY c2.data_inici DESC, c2.id DESC
+            LIMIT 1
+          )
+       ORDER BY c.data_inici, c.id`
+    )
+    .all({ avui }) as FilaLlistat[]
+
+  const perImmoble = new Map<number, ContracteLlistat[]>()
+  for (const f of files) {
+    const llista = perImmoble.get(f.id_inmoble) ?? []
+    llista.push(aLlistat(f))
+    perImmoble.set(f.id_inmoble, llista)
+  }
+  return obtenirInmobles().map((immoble) => ({
+    immoble,
+    contractes: perImmoble.get(immoble.id) ?? []
+  }))
 }

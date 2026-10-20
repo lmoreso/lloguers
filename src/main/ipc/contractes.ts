@@ -8,7 +8,8 @@ import {
   eliminarContracte,
   tancarContracte,
   revisarLloguer,
-  registrarDevolucio
+  registrarDevolucio,
+  obtenirUltimsContractes
 } from '../contractes'
 import type { ContracteDades, DevolucioDades } from '../../shared/tipus'
 
@@ -45,4 +46,6 @@ export function registrarIpcContractes(): void {
   ipcMain.handle('contractes:devolucio', (_, id: number, dades: DevolucioDades) =>
     executar(() => registrarDevolucio(id, dades))
   )
+
+  ipcMain.handle('contractes:ultims', () => executar(() => obtenirUltimsContractes()))
 }

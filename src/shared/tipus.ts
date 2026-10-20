@@ -96,6 +96,13 @@ export type DevolucioDades = Pick<
   'devolucio_data_sollicitud' | 'devolucio_data_cobrament' | 'devolucio_import' | 'devolucio_motiu'
 >
 
+// Una entrada de la vista "Últims contractes": un immoble amb els seus contractes en curs o l'últim.
+// La llista és buida si l'immoble no té cap contracte.
+export interface ImmobleAmbContractes {
+  immoble: Immoble
+  contractes: ContracteLlistat[]
+}
+
 // Idiomes de la interfície. Afegir-ne un de nou: afegir-lo aquí, crear el JSON
 // i registrar-lo a i18n/index.ts (vegeu "Afegir un idioma nou" a NOTES.md).
 export const IDIOMES = ['ca', 'es'] as const

@@ -20,6 +20,8 @@
 - La CLI `sqlite3` arrenca amb les **claus foranes desactivades** i continua executant després d'un error (cal `-bail` en provar migracions). Per tant una prova amb la CLI valida l'SQL, no el comportament amb `foreign_keys = ON` de l'app.
 - Les migracions es proven **sempre sobre còpies** (`/tmp/...`) i en dos escenaris: la BD real copiada i una instal·lació des de zero (001 + 002...). Després, l'app amb un `HOME` fals i, només al final, la BD real amb una còpia de seguretat fresca.
 - Cada bloc nou de l'API s'afegeix als **dos** fitxers del preload (`index.ts` i `index.d.ts`) i dins de `api`, no dins d'un altre bloc (vegeu la incidència 15).
+- Quan una prova "no funciona", **primer comprovar que el canvi s'ha aplicat al fitxer** (`grep -n` sobre el text nou): ha passat
+  tres cops (`asarUnpack`, el bloc `documents` de l'`index.d.ts` i l'entrada de devolució del menú de contractes).
 
 ## Entorn (verificat)
 
@@ -73,7 +75,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 18: la fase 1 de Contractes és completa** (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus). Tot s'ha provat amb `npm run dev`; **l'empaquetat dels passos 16 a 18 no s'ha provat** (vegeu "Pròxim pas").
+**Fases A, B i C fetes; Fase D feta fins al pas 18 (la fase 1 de Contractes és completa) i la Fase 2 (devolució de la fiança) també.** Fase 1: dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus. Fase 2: devolució de la fiança (model 3). Tot s'ha provat amb `npm run dev`; **l'empaquetat dels passos 16 en endavant no s'ha provat** (vegeu "Pròxim pas").
 
 ### Fase A: base (feta)
 
@@ -86,7 +88,7 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 ### Fase B: backend al Main Process (feta)
 
 - `src/shared/tipus.ts`: `Immoble`, `ImmobleDades`, `Inquili`, `InquiliDades`, `Contracte`, `ContracteDades`,
-  `ContracteLlistat`, `IDIOMES`/`Idioma`, `Config`, `ConfigObtinguda`, `CLASSES_DOCUMENT`/`ClasseDocument`, `TipusDocument`,
+  `ContracteLlistat`, `DevolucioDades`, `IDIOMES`/`Idioma`, `Config`, `ConfigObtinguda`, `CLASSES_DOCUMENT`/`ClasseDocument`, `TipusDocument`,
   `NomsClasses`, `DocumentContracte`, `DocumentDades`, `DocumentLlistat`, `CodiError` (`CONTRACTE_SOLAPAT` | `FK_VIOLADA` |
   `CHECK_VIOLAT` | `FITXER_NO_TROBAT` | `DESCONEGUT`) i `Resultat<T>`. Cap tipus inclou `afegit_el` ni `ultima_mod`.
 - `src/main/errors.ts`: `traduirError(e)`, `executar(op)` i `executarAsync(op)` (per a diàlegs i obrir fitxers).
@@ -118,9 +120,9 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 - **Immobles** (`{Immobles,FitxaImmoble,FormulariImmoble}.tsx`): llista; formulari en pantalla pròpia amb quatre seccions
   (`/immobles/nou`, `/immobles/:id`); dates amb `DatePickerInput` (treballa amb text `AAAA-MM-DD`, **no cal conversió `Date`**);
   eliminació amb confirmació; avís de caducitats (certificat i cèdula) a **60 dies** (`DIES_AVIS` a `utils/caducitat.ts`).
-- **Icones** (`@tabler/icons-react`): editar i eliminar a Inquilins, Immobles, Contractes i Documents són icona sola amb `Tooltip`
+- **Icones** (`@tabler/icons-react`): editar i eliminar a Inquilins, Immobles i Documents són icona sola amb `Tooltip`
   i `aria-label` traduïts, **una columna per icona** (les accions que no s'ofereixen deixen la cel·la buida i la resta queden
-  alineades). Les accions principals (Afegir) són botons de text. Els avisos es mostren apilats (`Stack`).
+  alineades). Les accions principals (Afegir) són botons de text. Els avisos es mostren apilats (`Stack`). A Contractes, en canvi, hi ha **una sola icona per fila** (menú d'accions, vegeu més avall).
 - Les dates d'auditoria són en UTC (a Barcelona es veuen 1 o 2 hores menys al `sqlite3`); correcte, es convertiran a hora
   local només quan es mostrin a la UI.
 
@@ -154,7 +156,7 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 
 - Botó "Contractes" (icona i text) a cada fila d'Immobles → `/immobles/:id/contractes` (`Contractes.tsx`): llista de l'immoble,
   l'últim primer, amb etiqueta *vigent* / *tancat*, nom dels dos inquilins (apilats), dates `DD/MM/AAAA` i lloguer en euros.
-  Per fila: revisar lloguer i tancar (només vigents), editar (amb confirmació si és tancat) i eliminar (la confirmació avisa
+  Per fila, al menú d'accions: revisar lloguer i tancar (només vigents), editar (amb confirmació si és tancat) i eliminar (la confirmació avisa
   que s'esborren fiança i documents).
 - Formulari en pantalla pròpia (`FitxaContracte.tsx` + `FormulariContracte.tsx`; rutes `/immobles/:id/contractes/nou` i
   `/immobles/:id/contractes/:idContracte`, amb `key` diferent): immoble fix, inquilins amb desplegable cercable, dates
@@ -186,6 +188,26 @@ data de la fiança informada (model 2 o notificació) i cap document de la class
 (etiqueta apilada, també als tancats) i, a la pestanya, com una caixa que diu quin falta. El calcula el Main (`te_doc_model2` i
 `te_doc_notificacio` a `ContracteLlistat`).
 
+**Menú d'accions de la llista de contractes.** Una sola icona per fila (`IconMenu2`, de moment; capçalera de columna "Accions")
+que obre un `Menu` amb icona i text: als **vigents**, Revisar lloguer i Tancar contracte; als **tancats**, Devolució de la fiança;
+a **tots**, Editar i (després d'una línia) Eliminar en vermell. Les confirmacions (editar un tancat, eliminar) no han canviat.
+
+**Fase 2: devolució de la fiança (model 3), completa.**
+
+- **Backend**: `registrarDevolucio` a `src/main/contractes.ts` (IPC `contractes:devolucio`, `window.api.contractes.devolucio`).
+  Cap camp és obligatori; tot a `null` esborra la devolució. El Main valida que el cobrament no sigui anterior a la sol·licitud,
+  que la sol·licitud no sigui anterior a la fi del contracte, l'import (>= 0) i el tipus dels valors; la BD ja només deixa informar-la
+  amb el contracte tancat (`CHECK_VIOLAT`). `actualitzarContracte` rebutja una `data_fi` posterior a la sol·licitud ja informada.
+  Provat (17 casos des de les DevTools): vigent, només la sol·licitud, dates en ordre invers, import negatiu o no numèric, data
+  mal escrita, tot informat, la devolució no es perd en editar el contracte, esborrar-la, i reobrir.
+- **UI**: `DevolucioFianca.tsx` (finestra amb data de sol·licitud, de cobrament, import retornat i motiu; mostra l'import de la
+  fiança; els calendaris limiten les dates amb `minDate`).
+- **Avisos**: "Falten documents" també per al model 3 (hi ha data de sol·licitud i cap document de classe `fianca_model3`;
+  `te_doc_model3` a `ContracteLlistat`, també a la caixa de la pestanya Documents). Avís nou **"Devolució pendent"** (groc): contracte
+  tancat amb el model 2 o la notificació informats i sense data de cobrament.
+- **Reobrir**: un contracte amb alguna dada de devolució no es pot reobrir (esborrar `data_fi`) i la fi no pot passar de la
+  sol·licitud; el formulari ho diu amb un missatge concret abans d'arribar a la BD.
+
 ### Fase E: empaquetat (feta al portàtil)
 
 Prova d'empaquetat anticipada a la VM (`npm run build:unpack`): migracions incrustades; `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`
@@ -211,10 +233,11 @@ Al portàtil (14-10-2026):
 
 ### Pendent de confirmar
 
-- **Commit** del pas 18-4 ("Falten documents") i d'aquest `PROGRES.md`; `git push`.
-- **`NOTES.md`**: marcar el 16, el 17 i el 18 com a fets i anotar les decisions dels passos (vegeu l'últim missatge del xat:
-  icones en columnes, avisos de contractes, formulari amb `data_fi`, documents i "Falten documents", preload en dos fitxers).
-- **Portàtil**: `git pull`, `npm install` (hi ha una dependència nova, `@tabler/icons-react`), `npm install-scripts ls`, i
+- **Commits**: confirmar que tots els commits des del pas 18-4 (avís "Falten documents", menú d'accions, devolució de la fiança i
+  els seus avisos) s'han fet i pujat (`git status` net i `git log origin/main..` buit).
+- **`NOTES.md`**: marcar el 16, el 17 i el 18 com a fets, marcar la **fase 2** i anotar les decisions (menú d'accions, devolució
+  com a acció pròpia, avisos "Falten documents" i "Devolució pendent", reobrir bloquejat amb devolució, preload en dos fitxers).
+- **Portàtil**: `git pull`, `npm install` (dependència nova: `@tabler/icons-react`), `npm install-scripts ls`, i
   **esborrar la seva BD de proves** (té la 002 antiga i contractes de prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`,
   esborrar `-wal`/`-shm` i arrencar perquè l'app la creï amb la 001 + 002. Comprovar `user_version = 2`, 7 tipus, 3/5/11 i que
   `'2025-1-1'` es rebutja.
@@ -225,18 +248,18 @@ Al portàtil (14-10-2026):
 
 ## Pròxim pas
 
-**1. Prova d'empaquetat dels passos 16 a 18** (abans de seguir amb funcionalitat nova): `npm run build:linux`, instal·lar el
-`.deb` al portàtil i provar-hi, amb un `HOME` net o amb la BD de proves: pantalla d'idioma, llista i formulari de contractes,
-**adjuntar** documents (diàleg del sistema), **obrir** un fitxer amb l'aplicació del sistema (`shell.openPath`), eliminar un
-document i eliminar un contracte (que s'emporti la carpeta). Mirar també el `chrome-sandbox` (vegeu Fase E). Desinstal·lar després.
+**1. Prova d'empaquetat** (abans de seguir amb funcionalitat nova; tot el que s'ha fet des del pas 15 només s'ha vist amb
+`npm run dev`): `npm run build:linux`, instal·lar el `.deb` **al portàtil** (o a la VM amb un `HOME` fals, perquè no toqui les
+dades reals; l'app empaquetada i `npm run dev` comparteixen `~/Lloguers/`) i provar-hi: pantalla d'idioma del primer arrencament,
+llista i formulari de contractes, el menú d'accions, **adjuntar** documents (diàleg del sistema), **obrir** un fitxer amb
+l'aplicació del sistema (`shell.openPath`), eliminar un document i eliminar un contracte (que s'emporti la carpeta), i la finestra
+de devolució. Mirar també el `chrome-sandbox` (vegeu Fase E). Desinstal·lar després.
 
-**2. Fase 2: devolució de la fiança (model 3).** Les columnes ja són a la BD (`devolucio_data_sollicitud`,
-`devolucio_data_cobrament`, `devolucio_import`, `devolucio_motiu`) i la classe de document `fianca_model3` també. La BD només
-permet informar-les amb el contracte tancat. Falta decidir el disseny de la UI (per exemple, una secció de devolució al formulari
-visible només en contractes tancats, o una acció pròpia) i l'avís "Falten documents" per al model 3.
+**2. Fase 3** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar, com es va fer amb els
+contractes): canvi de signants (annex), corregir l'immoble d'un contracte mal assignat, historial de revisions de lloguer i menú
+"Contractes vigents" amb els seus avisos (la clau `menu.contractes` ja existeix als JSON).
 
-**3. Fase 3** (decidida, no començada): canvi de signants (annex), corregir l'immoble d'un contracte mal assignat, historial de
-revisions i menú "Contractes vigents" amb els seus avisos (la clau `menu.contractes` ja existeix als JSON).
+**3. Menors**: contingut de "Quant a" i de Configuració, pantalla per crear i editar tipus de document.
 
 ## Versions reals vs. la guia
 
@@ -364,22 +387,28 @@ comprova tipus. Solució: tancar bé les claus. El segon error (`unknown` no ass
 ## Altres pendents
 
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD
-  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`/`adjuntarDocuments`). Només cosmètic.
+  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`/`registrarDevolucio`/`adjuntarDocuments`).
+  Només cosmètic.
 - Configuració només té el selector d'idioma, i Quant a només el títol (la versió es pot llegir de `package.json`).
 - Pantalla per crear i editar tipus de document (a Configuració): fora de la fase 1. Quan es faci, caldrà decidir si es pot
   esborrar l'últim tipus d'una classe amb lògica (el sembrat el recrea a l'arrencada).
 - Els noms dels tipus de document sembrats queden en l'idioma del primer arrencat (són dada de l'usuari).
 - Un contracte nou **no** porta a la pestanya Documents en desar-lo: cal tornar a entrar-hi amb el llapis.
+- `aNumero` només converteix la coma decimal: un import amb punt de milers (`1.400,50`) no s'accepta. Escriure `1400,50` o `1400.50`.
+- L'avís "Devolució pendent" pot persistir en contractes antics amb la fiança ja retornada però no anotada, fins que s'hi posa el cobrament.
 - Casos límit assumits: una revisió de lloguer feta el mateix dia que `data_inici` no es distingeix de "mai revisat"; una
   correcció d'una data de revisió ha de poder retrocedir (ara es pot revisar amb una data anterior, mentre sigui `>= data_inici`).
 - Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans),
   correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els documents), historial de revisions
   de lloguer, menú "Contractes vigents".
-- `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren.
+- `inmobles` té dates sense cap `CHECK` (conté dades reals; el selector de dates ja protegeix l'app).
+- La icona del menú d'accions dels contractes és `IconMenu2` (abans `IconDots`); decisió estètica pendent de confirmar.
+- `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren (`App.tsx.bak` es va fer fora de Git:
+  comprovar-ho amb `git status` abans de `git add -A`).
 - Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida.
 
 ## Git
 
-- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit de la fase 1 de contractes: documents
-  ("Documents: obrir, editar i eliminar des de la fitxa del contracte"); queda per confirmar el del pas 18-4
-  (vegeu "Pendent de confirmar").
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit confirmat: "Documents: obrir, editar i eliminar
+  des de la fitxa del contracte" (pas 18-3). Després s'han proposat els del pas 18-4, el menú d'accions i la fase 2; **cal confirmar que
+  s'han fet** (vegeu "Pendent de confirmar").

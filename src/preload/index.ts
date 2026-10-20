@@ -15,7 +15,8 @@ import type {
   DocumentContracte,
   DocumentDades,
   DocumentLlistat,
-  DevolucioDades
+  DevolucioDades,
+  ImmobleAmbContractes
 } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -70,7 +71,8 @@ const api = {
     ): Promise<Resultat<void>> =>
       ipcRenderer.invoke('contractes:revisarLloguer', id, lloguerNou, dataRevisio),
     devolucio: (id: number, dades: DevolucioDades): Promise<Resultat<void>> =>
-      ipcRenderer.invoke('contractes:devolucio', id, dades)
+      ipcRenderer.invoke('contractes:devolucio', id, dades),
+    ultims: (): Promise<Resultat<ImmobleAmbContractes[]>> => ipcRenderer.invoke('contractes:ultims')
   },
   documents: {
     obtenir: (idContracte: number): Promise<Resultat<DocumentLlistat[]>> =>

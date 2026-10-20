@@ -468,7 +468,7 @@ src/renderer/src/
     - [x] Revisar `appId`, `maintainer` i el bloc `publish` (apunta a `example.com`).
 20. [x]`npm run build:linux` (`.deb` / AppImage) i prova al portàtil Mint.
 
-## Correccions i Noves funcionalitats 
+## Correccions i Noves funcionalitats (notes a ignorar, de moment)
 
 ### Generals
 - Poder introduir les dates manualment.
@@ -476,7 +476,8 @@ src/renderer/src/
 - Posar una barra superior mes currada amb el nom de la pantalla (a estudiar). 
 - A la part dreta de la barra superior posar un menu amb les accions de la pantalla (tornar, Afegir, Desar, etc) i no botons a la part superior (Afegir) i botons a la part inferior (si la panttalla creix en altura els botons queden amagats).
 - Menú sortir a la parte esquerre inferior.
-- Icona de la Aplicació
+- Icona de la Aplicació.
+- Falta sistema de versions.
 
 ### Nova Taula i Pantalla Propietaris
 - Dades personals com a Inquilins, amb IBAN.
@@ -542,5 +543,4 @@ src/renderer/src/
 - Mantenir la configuració del Idioma a la mateixa carpeta de la BD.
 
 ### Empaquetat (executables).
-- Falta sistema de versions.
 - Activar suport per Windows.
