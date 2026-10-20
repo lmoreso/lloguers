@@ -1,35 +1,13 @@
 import { useEffect, useState } from 'react'
-import {
-  ActionIcon,
-  Badge,
-  Button,
-  Group,
-  Menu,
-  Stack,
-  Table,
-  Text,
-  Title,
-  Tooltip
-} from '@mantine/core'
-import {
-  IconCurrencyEuro,
-  IconDots,
-  IconLock,
-  IconPencil,
-  IconTrash,
-  IconReceiptRefund
-} from '@tabler/icons-react'
-import { modals } from '@mantine/modals'
+import { Badge, Button, Group, Stack, Table, Text, Title } from '@mantine/core'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
 import { formatData } from '../utils/dates'
+import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
 import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
-import { notifications } from '@mantine/notifications'
-import RevisarLloguer from './RevisarLloguer'
-import TancarContracte from './TancarContracte'
-import DevolucioFianca from './DevolucioFianca'
+import AccionsContracte from './AccionsContracte'
 import {
   aniversariRevisio,
   DIES_AVIS_FI,
@@ -96,71 +74,7 @@ function Contractes(): React.JSX.Element {
     }
   }, [id, versio])
 
-  const nomInquili = (nom: string | null, cognoms: string | null): string =>
-    [nom, cognoms].filter(Boolean).join(' ') || t('inquilins.senseNom')
-
   const euros = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
-
-  // Un contracte tancat (amb data de fi) demana confirmació abans d'editar-lo.
-  function editar(c: ContracteLlistat): void {
-    const anar = (): void => {
-      navigate(`/immobles/${id}/contractes/${c.id}`)
-    }
-    if (c.data_fi === null) {
-      anar()
-      return
-    }
-    modals.openConfirmModal({
-      title: t('contractes.editarTancat.titol'),
-      children: <Text size="sm">{t('contractes.editarTancat.text')}</Text>,
-      labels: { confirm: t('comu.editar'), cancel: t('comu.cancellar') },
-      onConfirm: anar
-    })
-  }
-
-  function demanarEliminar(c: ContracteLlistat): void {
-    const inquilins = [
-      nomInquili(c.inquili_nom, c.inquili_cognoms),
-      ...(c.id_inquili_2 !== null ? [nomInquili(c.inquili2_nom, c.inquili2_cognoms)] : [])
-    ].join(' / ')
-    modals.openConfirmModal({
-      title: t('contractes.eliminar.titol'),
-      children: (
-        <Text size="sm">
-          {t('contractes.eliminar.confirmacio', { inquilins, inici: formatData(c.data_inici) })}
-        </Text>
-      ),
-      labels: { confirm: t('comu.eliminar'), cancel: t('comu.cancellar') },
-      confirmProps: { color: 'red' },
-      onConfirm: async () => {
-        const resposta = await window.api.contractes.eliminar(c.id)
-        if (!esOk(resposta)) return
-        notifications.show({ color: 'green', message: t('contractes.eliminat') })
-        setVersio((v) => v + 1)
-      }
-    })
-  }
-
-  function tancar(c: ContracteLlistat): void {
-    modals.open({
-      title: t('contractes.tancar.titol'),
-      children: <TancarContracte contracte={c} onTancat={() => setVersio((v) => v + 1)} />
-    })
-  }
-
-  function revisar(c: ContracteLlistat): void {
-    modals.open({
-      title: t('contractes.revisar.titol'),
-      children: <RevisarLloguer contracte={c} onRevisat={() => setVersio((v) => v + 1)} />
-    })
-  }
-
-  function devolucio(c: ContracteLlistat): void {
-    modals.open({
-      title: t('contractes.devolucio.titol'),
-      children: <DevolucioFianca contracte={c} onDesat={() => setVersio((v) => v + 1)} />
-    })
-  }
 
   return (
     <>
@@ -230,55 +144,7 @@ function Contractes(): React.JSX.Element {
                       </Stack>
                     </Table.Td>
                     <Table.Td style={{ width: 1 }}>
-                      <Menu position="bottom-end" withinPortal>
-                        <Menu.Target>
-                          <Tooltip label={t('contractes.accions.titol')}>
-                            <ActionIcon variant="subtle" aria-label={t('contractes.accions.titol')}>
-                              <IconDots size={18} />
-                            </ActionIcon>
-                          </Tooltip>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                          {c.data_fi === null && (
-                            <>
-                              <Menu.Item
-                                leftSection={<IconCurrencyEuro size={16} />}
-                                onClick={() => revisar(c)}
-                              >
-                                {t('contractes.accions.revisarLloguer')}
-                              </Menu.Item>
-                              <Menu.Item
-                                leftSection={<IconLock size={16} />}
-                                onClick={() => tancar(c)}
-                              >
-                                {t('contractes.accions.tancar')}
-                              </Menu.Item>
-                            </>
-                          )}
-                          {c.data_fi !== null && (
-                            <Menu.Item
-                              leftSection={<IconReceiptRefund size={16} />}
-                              onClick={() => devolucio(c)}
-                            >
-                              {t('contractes.accions.devolucio')}
-                            </Menu.Item>
-                          )}
-                          <Menu.Item
-                            leftSection={<IconPencil size={16} />}
-                            onClick={() => editar(c)}
-                          >
-                            {t('comu.editar')}
-                          </Menu.Item>
-                          <Menu.Divider />
-                          <Menu.Item
-                            color="red"
-                            leftSection={<IconTrash size={16} />}
-                            onClick={() => demanarEliminar(c)}
-                          >
-                            {t('comu.eliminar')}
-                          </Menu.Item>
-                        </Menu.Dropdown>
-                      </Menu>
+                      <AccionsContracte contracte={c} onCanvi={() => setVersio((v) => v + 1)} />
                     </Table.Td>
                   </Table.Tr>
                 ))}
