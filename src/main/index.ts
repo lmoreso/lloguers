@@ -9,6 +9,7 @@ import { registrarIpcConfig } from './ipc/config'
 import { registrarIpcTipusDocument } from './ipc/tipusDocument'
 import { registrarIpcContractes } from './ipc/contractes'
 import { registrarIpcDocuments } from './ipc/documents'
+import { registrarIpcApp } from './ipc/app'
 
 function createWindow(): void {
   // Create the browser window.
@@ -29,7 +30,7 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    if (details.url.startsWith('https://')) shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
@@ -67,6 +68,8 @@ app.whenReady().then(() => {
   registrarIpcContractes()
 
   registrarIpcDocuments()
+
+  registrarIpcApp()
 
   createWindow()
 

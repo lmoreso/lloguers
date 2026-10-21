@@ -43,7 +43,17 @@
   },
   "quantA": {
     "titol": "Acerca de",
-    "versio": "Versión"
+    "versio": "Versión",
+    "descripcio": "Aplicación de escritorio para gestionar inmuebles, inquilinos y contratos de alquiler, con la fianza y los documentos adjuntos de cada contrato.",
+    "autor": "Autor",
+    "tecnologies": "Tecnologías",
+    "claudeAbans": "Desarrollada con la ayuda de",
+    "claudeDespres": ", el asistente de IA de Anthropic.",
+    "llicenciaTitol": "Licencia",
+    "llicenciaAbans": "Software de código abierto - ",
+    "llicencia": "Licencia MIT",
+    "gitHubTitol": "Colabora i Comparte",
+    "gitHubAbans": "Colabora i comparte el proyecto en "
   },
   "inquilins": {
     "nou": "Nuevo inquilino",

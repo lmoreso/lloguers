@@ -87,6 +87,11 @@ const api = {
       ipcRenderer.invoke('documents:actualitzar', id, dades),
     eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('documents:eliminar', id),
     obrir: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('documents:obrir', id)
+  },
+  app: {
+    versio: (): Promise<Resultat<string>> => ipcRenderer.invoke('app:versio'),
+    obrirEnllac: (url: string): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('app:obrirEnllac', url)
   }
 }
 

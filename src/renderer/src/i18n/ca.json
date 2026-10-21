@@ -43,7 +43,17 @@
   },
   "quantA": {
     "titol": "Quant a",
-    "versio": "Versió"
+    "versio": "Versió",
+    "descripcio": "Aplicació d'escriptori per gestionar immobles, inquilins i contractes de lloguer, amb la fiança i els documents adjunts de cada contracte.",
+    "autor": "Autor",
+    "tecnologies": "Tecnologies",
+    "claudeAbans": "Desenvolupada amb l'ajuda de",
+    "claudeDespres": ", l'assistent d'IA d'Anthropic.",
+    "llicenciaTitol": "Llicència",
+    "llicenciaAbans": "Programari de codi obert - ",
+    "llicencia": "Llicència MIT",
+    "gitHubTitol": "Col·labora i Comparteix",
+    "gitHubAbans": "Col·labora i comparteix el projecte a "
   },
   "inquilins": {
     "nou": "Nou inquilí",

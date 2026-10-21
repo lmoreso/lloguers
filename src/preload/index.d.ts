@@ -71,6 +71,10 @@ declare global {
         eliminar: (id: number) => Promise<Resultat<void>>
         obrir: (id: number) => Promise<Resultat<void>>
       }
+      app: {
+        versio: () => Promise<Resultat<string>>
+        obrirEnllac: (url: string) => Promise<Resultat<void>>
+      }
     }
   }
 }

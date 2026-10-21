@@ -8,6 +8,7 @@ import FitxaImmoble from './pantalles/FitxaImmoble'
 import Contractes from './pantalles/Contractes'
 import FitxaContracte from './pantalles/FitxaContracte'
 import UltimsContractes from './pantalles/UltimsContractes'
+import QuantA from './pantalles/QuantA'
 
 const SECCIONS = [
   { ruta: '/immobles', clau: 'menu.immobles' },
@@ -63,7 +64,7 @@ function Estructura(): React.JSX.Element {
               </>
             }
           />
-          <Route path="/quant-a" element={<Title order={2}>{t('quantA.titol')}</Title>} />
+          <Route path="/quant-a" element={<QuantA />} />
         </Routes>
       </AppShell.Main>
     </AppShell>
