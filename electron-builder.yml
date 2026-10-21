@@ -1,5 +1,5 @@
 appId: com.lmoreso.lloguers
-productName: lloguers
+productName: Lloguers
 directories:
   buildResources: build
 files:
@@ -32,7 +32,10 @@ linux:
     - AppImage
     - deb
   maintainer: 'Lluis Moreso Bosch <lmoreso@yahoo.com>'
-  category: Utility
+  category: Office
+  executableName: lloguers
+  synopsis: Gestió de lloguers d'immobles
+  description: "Aplicació d'escriptori per gestionar immobles, inquilins i contractes de lloguer, amb la fiança i els documents adjunts de cada contracte."
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
