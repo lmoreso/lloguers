@@ -16,6 +16,7 @@
     "quantA": "Acerca de"
   },
   "comu": {
+    "accions": "Acciones",    
     "afegir": "Añadir",
     "editar": "Editar",
     "eliminar": "Eliminar",
@@ -108,7 +109,9 @@
       "registre": "Registro",
       "classe": "Clase",
       "data": "Fecha",
-      "caducitat": "Caducidad"
+      "caducitat": "Caducidad",
+      "id": "Id",
+      "avisos": "Avisos"      
     },
     "validacio": {
       "numero": "Introduce un número válido."

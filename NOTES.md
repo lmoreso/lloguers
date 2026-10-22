@@ -523,8 +523,52 @@ const files = dades.flatMap<Fila>((d) =>
     : [{ immoble: d.immoble, contracte: null }]
 )
 ```
+## Modificar Gestió de Immobles
 
-## Correccions i Noves funcionalitats (notes a ignorar, de moment)
+### Decisions (tancades)
+
+- Tipus de document de l'immoble: llista fixa al codi (certificat energètic, cèdula d'habitabilitat, fotos, altres) amb `CHECK` a la BD i noms als JSON. No toca `tipus_document`.
+- "Afegir document" obre una finestra amb el tipus i el diàleg de selecció (múltiple, tipus comú). "Editar" només canvia tipus,  data i comentaris; el fitxer no se substitueix (s'elimina i se'n torna a adjuntar un).
+- Eliminar un immoble amb documents: permès, amb confirmació; s'esborren les files i la carpeta. Amb contractes, bloquejat (`FK_VIOLADA`).
+- Desar a l'edició d'un immoble: es queda a la pantalla i refresca subtítol i avisos; un immoble nou passa a edició (`/immobles/:id`).
+- Avís genèric "Contractes amb avisos": algun dels contractes que surten a "Últims contractes" té algun avís. Surt a la columna Avisos de la llista i a la barra taronja de l'edició.
+- Canvis sense desar: diàleg amb Desar i continuar / Descartar / Cancel·lar. Protegeix els botons de la pantalla, no el menú lateral ni `Ctrl+R` (caldria un router de dades).
+- Pantalla de documents: botons "Afegir", "Tornar" (a l'edició de l'immoble) i "Contractes".
+
+### Nova Taula dels Documents del Immoble
+
+- Nova taula 'documents_immoble', amb les seguents columnes:
+  - Id, id_inmoble, id_tipus (a piñó: Certificat Energètic, Cédula habitibilitat, Fotos, Altres), nom_original, ruta, comentaris, data_document, afegit_el, ultima_mod
+- Guardar els documents a documents/immobles.
+
+### Nova Pantalla Documents (llista)
+
+- Similar a la dels documents del contracte, amb diferencies.
+- Tres accions en menú desplegable:
+  - Visualitzar.
+  - Editar.
+  - Borrar.
+- El Formulari per Editar permet triar el tipus i adjuntar el document (a la llista no).
+- Titol i subtitol mateix estil de Contractes: 'Documents del Immoble' i 'Adressa del immoble'.
+- A sota del subtítol, els botons d'acció: 'Afegir document', 'Anar al Immoble', 'Anar als Contractes' i 'Tornar a la llista de Immobles', amb noms mes resumits.
+
+### Pantalla Immobles (llista)
+
+- Afegir columna 'Id' al principi.
+- Convertir els tres botons d'acció en un submenú, com a la llista Contractes, afegint l'acció 'Documents'.
+- Canviar el nom de la columna 'Caducitats' per 'Avisos'.
+
+### Pantalla Editar Immoble
+
+- A sota del Títol, un subtítol amb:
+  - Nou immoble quan sigui el cas.
+  - En cas contrari un literal amb el Id + l'adrressa. Si al guardar es modifica l'adressa, cal refrescar el subtítol.
+- A sota del subtítol, afegir la barra taronja (com a la llista) amb detall dels avisos del immoble actual + l'avis genèric si els contractes tenen avisos.
+- A sota dels Avisos, els botons d'acció: 'Contractes', 'Documents', 'Eliminar', 'Immoble nou'.
+- Al clicar alguna opció que suposi canviar de pantalla cal verificar si hi han modificacions pendents de guardar.
+
+
+## Correccions i Noves funcionalitats (notes disperses a ignorar per Claude)
 
 ### Generals
 
@@ -535,6 +579,14 @@ const files = dades.flatMap<Fila>((d) =>
 - Menú sortir a la parte esquerre inferior.
 - Icona de la Aplicació.
 - Falta sistema de versions.
+
+### Menú Immbobles de la esquerra
+
+- Al clicar, es mostren 3 submenús:
+  - Editar: porta a la pestanya de edició.
+  - Documents: porta a la pestanya dels documents.
+  - Contractes: porta a la llista de Contractes.
+- Quan s'entri a la edició, contractes o documents per una altra via, s'ha de seleccionar el menú corresponent.
 
 ### Nova Taula i Pantalla Propietaris
 
@@ -560,22 +612,13 @@ const files = dades.flatMap<Fila>((d) =>
 
 ### Pantalla Immmobles (Llista)
 
-- Afegir columna al principi amb el ID.
 - Afegir un Avis genèric si algun contracte te avisos.
-- Afegir nova acció per anar al nou formulari dels Documents (veure apartat seguent).
 - Afegir nova acció per editar directament el últim contracte.
-
-#### Nova Gestió dels Documents del Immoble (pendent d'aprofundir)
-
-- Certificat Energètic, Cédula habitibilitat, Fotos, Altres.
-- Estudiar si fer servir la mateixa taula i estructura de carpetes o no.
-- Accesible desde la llista i desde Editar.
 
 #### Pantalla Editar Immoble
 
 - Acció per anar directament als contractes (ara s'ha de tornar a la llista). Si hi han modificacions preguntar si es vol Guardar (Si, Cancelar). Si hi ha errors ens mantenim a Immobles.
 - Acció per anar al nou formulari dels Documents. Abans preguntar si es vol Guardar (Si, Cancelar). Si hi ha errors ens mantenim a Immobles.
-- Afegir la barra superior taronja (com a la llista) amb detall dels avisos + l'avis genèric si els contractes tenen avisos.
 - Afegir els propietaris que tinguin amb el seu % (que ha de sumar 100). Taula a part o afegir 4 propietaris com a màxim a la taula de Inmobles (mes senzill). Si la pantalla està molt carregada, posar-ho a una altra pestanya.
 
 ### Pantalla Contractes (Llista)

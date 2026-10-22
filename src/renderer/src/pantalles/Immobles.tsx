@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Group,
+  Menu,
   Stack,
   Table,
   Text,
@@ -18,7 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import type { Immoble } from '../../../shared/tipus'
-import { IconFileText, IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconDots, IconFileText, IconPencil, IconTrash } from '@tabler/icons-react'
 import { adreca } from '../utils/adreca'
 
 const DOCUMENTS = [
@@ -90,17 +91,19 @@ function Immobles(): React.JSX.Element {
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
+              <Table.Th>{t('immobles.camps.id')}</Table.Th>
               <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
               <Table.Th>{t('immobles.camps.localitat')}</Table.Th>
               <Table.Th>{t('immobles.camps.refCatastral')}</Table.Th>
               <Table.Th>{t('immobles.camps.superficie')}</Table.Th>
-              <Table.Th>{t('immobles.caducitats.titol')}</Table.Th>
-              <Table.Th colSpan={3} />
+              <Table.Th>{t('immobles.camps.avisos')}</Table.Th>
+              <Table.Th>{t('comu.accions')}</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {immobles.map((i) => (
               <Table.Tr key={i.id}>
+                <Table.Td>{i.id}</Table.Td>
                 <Table.Td>{adreca(i)}</Table.Td>
                 <Table.Td>{i.localitat}</Table.Td>
                 <Table.Td>{i.ref_catastral}</Table.Td>
@@ -114,38 +117,38 @@ function Immobles(): React.JSX.Element {
                     ))}
                   </Stack>
                 </Table.Td>
-                <Table.Td style={{ width: 1, whiteSpace: 'nowrap' }}>
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    leftSection={<IconFileText size={16} />}
-                    onClick={() => navigate(`/immobles/${i.id}/contractes`)}
-                  >
-                    {t('contractes.titol')}
-                  </Button>
-                </Table.Td>
                 <Table.Td style={{ width: 1 }}>
-                  <Tooltip label={t('comu.editar')}>
-                    <ActionIcon
-                      variant="subtle"
-                      aria-label={t('comu.editar')}
-                      onClick={() => navigate(`/immobles/${i.id}`)}
-                    >
-                      <IconPencil size={18} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Table.Td>
-                <Table.Td style={{ width: 1 }}>
-                  <Tooltip label={t('comu.eliminar')}>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      aria-label={t('comu.eliminar')}
-                      onClick={() => demanarEliminar(i)}
-                    >
-                      <IconTrash size={18} />
-                    </ActionIcon>
-                  </Tooltip>
+                  <Menu position="bottom-end" withinPortal>
+                    <Menu.Target>
+                      <Tooltip label={t('comu.accions')}>
+                        <ActionIcon variant="subtle" aria-label={t('comu.accions')}>
+                          <IconDots size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<IconFileText size={16} />}
+                        onClick={() => navigate(`/immobles/${i.id}/contractes`)}
+                      >
+                        {t('contractes.titol')}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconPencil size={16} />}
+                        onClick={() => navigate(`/immobles/${i.id}`)}
+                      >
+                        {t('comu.editar')}
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item
+                        color="red"
+                        leftSection={<IconTrash size={16} />}
+                        onClick={() => demanarEliminar(i)}
+                      >
+                        {t('comu.eliminar')}
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
                 </Table.Td>
               </Table.Tr>
             ))}
