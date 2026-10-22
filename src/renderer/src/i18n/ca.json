@@ -118,6 +118,7 @@
     },
     "noTrobat": "No s'ha trobat aquest immoble.",
     "caducitats": {
+      "contractesAmbAvisos": "Contractes amb avisos",      
       "titol": "Caducitats",
       "certificat": "Certificat",
       "cedula": "Cèdula",

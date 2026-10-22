@@ -118,6 +118,7 @@
     },
     "noTrobat": "No se ha encontrado este inmueble.",
     "caducitats": {
+      "contractesAmbAvisos": "Contratos con avisos",      
       "titol": "Caducidades",
       "certificat": "Certificado",
       "cedula": "Cédula",

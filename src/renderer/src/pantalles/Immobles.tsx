@@ -21,6 +21,7 @@ import { esOk } from '../utils/resultat'
 import type { Immoble } from '../../../shared/tipus'
 import { IconDots, IconFileText, IconPencil, IconTrash } from '@tabler/icons-react'
 import { adreca } from '../utils/adreca'
+import { teAvisos } from '../utils/avisosContracte'
 
 const DOCUMENTS = [
   { clau: 'certificat', camp: 'cert_en_caduc' },
@@ -40,18 +41,29 @@ function Immobles(): React.JSX.Element {
   const navigate = useNavigate()
   const [immobles, setImmobles] = useState<Immoble[]>([])
   const [carregant, setCarregant] = useState(true)
+  // Ids dels immobles amb algun contracte (en curs o l'últim) que té avisos.
+  const [ambAvisosContractes, setAmbAvisosContractes] = useState<Set<number>>(new Set())
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
   const ambAvisos = immobles.filter((i) => alertes(i).length > 0).length
 
   useEffect(() => {
     let cancelat = false
-    window.api.inmobles.obtenir().then((resposta) => {
-      if (cancelat) return
-      if (esOk(resposta)) setImmobles(resposta.dades)
-      setCarregant(false)
-    })
-    // Si el component es desmunta abans que arribi la resposta, no s'actualitza l'estat.
+    Promise.all([window.api.inmobles.obtenir(), window.api.contractes.ultims()]).then(
+      ([rImmobles, rUltims]) => {
+        if (cancelat) return
+        if (esOk(rImmobles)) setImmobles(rImmobles.dades)
+        if (esOk(rUltims)) {
+          setAmbAvisosContractes(
+            new Set(
+              rUltims.dades.filter((x) => x.contractes.some(teAvisos)).map((x) => x.immoble.id)
+            )
+          )
+        }
+        setCarregant(false)
+      }
+    )
+    // Si el component es desmunta abans que arribin les respostes, no s'actualitza l'estat.
     return () => {
       cancelat = true
     }
@@ -115,6 +127,9 @@ function Immobles(): React.JSX.Element {
                         {t(`immobles.caducitats.${a.clau}`)}: {t(`immobles.caducitats.${a.estat}`)}
                       </Badge>
                     ))}
+                    {ambAvisosContractes.has(i.id) && (
+                      <Badge color="orange">{t('immobles.caducitats.contractesAmbAvisos')}</Badge>
+                    )}
                   </Stack>
                 </Table.Td>
                 <Table.Td style={{ width: 1 }}>
