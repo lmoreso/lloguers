@@ -12,7 +12,6 @@ import {
   Title,
   Tooltip
 } from '@mantine/core'
-import { estatCaducitat } from '../utils/caducitat'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
@@ -22,19 +21,7 @@ import type { Immoble } from '../../../shared/tipus'
 import { IconDots, IconFileText, IconPencil, IconTrash } from '@tabler/icons-react'
 import { adreca } from '../utils/adreca'
 import { teAvisos } from '../utils/avisosContracte'
-
-const DOCUMENTS = [
-  { clau: 'certificat', camp: 'cert_en_caduc' },
-  { clau: 'cedula', camp: 'ced_hab_caduc' }
-] as const
-
-// Documents d'un immoble que estan caducats o a punt de caducar.
-function alertes(i: Immoble): { clau: 'certificat' | 'cedula'; estat: 'caducat' | 'aviat' }[] {
-  return DOCUMENTS.flatMap((d) => {
-    const estat = estatCaducitat(i[d.camp])
-    return estat ? [{ clau: d.clau, estat }] : []
-  })
-}
+import { alertes } from '../utils/avisosImmoble'
 
 function Immobles(): React.JSX.Element {
   const { t } = useTranslation()

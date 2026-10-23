@@ -16,6 +16,12 @@
     "quantA": "Quant a"
   },
   "comu": {
+    "canvisSenseDesar": {
+      "titol": "Canvis sense desar",
+      "text": "Hi ha canvis sense desar. Què vols fer?",
+      "desarContinuar": "Desar i continuar",
+      "descartar": "Descartar"
+    },    
     "accions": "Accions",    
     "afegir": "Afegir",
     "editar": "Editar",
@@ -113,6 +119,9 @@
       "id": "Id",
       "avisos": "Avisos"
     },
+    "titol": "Immoble",
+    "subtitol": "Id {{id}}: {{adreca}}",
+    "nouBoto": "Immoble nou",    
     "validacio": {
       "numero": "Introdueix un número vàlid."
     },

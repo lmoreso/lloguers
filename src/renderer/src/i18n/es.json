@@ -16,6 +16,12 @@
     "quantA": "Acerca de"
   },
   "comu": {
+    "canvisSenseDesar": {
+      "titol": "Cambios sin guardar",
+      "text": "Hay cambios sin guardar. ¿Qué quieres hacer?",
+      "desarContinuar": "Guardar y continuar",
+      "descartar": "Descartar"
+    },    
     "accions": "Acciones",    
     "afegir": "Añadir",
     "editar": "Editar",
@@ -113,6 +119,9 @@
       "id": "Id",
       "avisos": "Avisos"      
     },
+    "titol": "Inmueble",
+    "subtitol": "Id {{id}}: {{adreca}}",
+    "nouBoto": "Inmueble nuevo",    
     "validacio": {
       "numero": "Introduce un número válido."
     },

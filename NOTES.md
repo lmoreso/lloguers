@@ -534,7 +534,15 @@ const files = dades.flatMap<Fila>((d) =>
 - Avís genèric "Contractes amb avisos": algun dels contractes que surten a "Últims contractes" té algun avís. Surt a la columna Avisos de la llista i a la barra taronja de l'edició.
 - Canvis sense desar: diàleg amb Desar i continuar / Descartar / Cancel·lar. Protegeix els botons de la pantalla, no el menú lateral ni `Ctrl+R` (caldria un router de dades).
 - Pantalla de documents: botons "Afegir", "Tornar" (a l'edició de l'immoble) i "Contractes".
+- "Afegir document" obre una finestra amb el tipus, la data (opcional) i el comentari (**obligatori**); el botó per triar fitxers està desactivat fins que el comentari té text. Es poden triar diversos fitxers (tipus, data i comentari comuns): es crea **una fila per fitxer**, ordenats pel nom. Si n'hi ha més d'un, el Main numera el comentari al principi (`1. Façana`, `2. Façana`; amb zero davant a partir de 10: `01.`...); amb un de sol, es desa tal qual. Tot o res. El comentari és obligatori també en "Editar" (que només canvia tipus, data i comentari: el fitxer no se substitueix; per canviar-lo s'elimina i se'n torna a adjuntar un).
 
+### Disseny de la UI (pendent de revisar)
+
+- **Pantalles noves: cap botó a sota.** Les accions van a la capçalera, al costat del títol.
+- Pendent de revisar més endavant: la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar
+  (resulta confús) i els botons Desar i Cancel·lar a sota dels formularis (Immobles, Contractes), que es perden si el
+  formulari és llarg.
+  
 ### Nova Taula dels Documents del Immoble
 
 - Nova taula 'documents_immoble', amb les seguents columnes:
