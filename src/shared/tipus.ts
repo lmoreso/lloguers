@@ -151,6 +151,29 @@ export interface DocumentLlistat extends DocumentContracte {
   tipus_classe: ClasseDocument
 }
 
+// Tipus de document d'un immoble: llista fixa (el nom visible surt de la traducció).
+// Afegir-ne un exigeix una migració nova (el CHECK de la taula).
+export const TIPUS_DOCUMENT_IMMOBLE = [
+  'certificat_energetic',
+  'cedula_habitabilitat',
+  'fotos',
+  'altres'
+] as const
+export type TipusDocumentImmoble = (typeof TIPUS_DOCUMENT_IMMOBLE)[number]
+
+// Un document adjunt d'un immoble. La ruta del fitxer no s'exposa: només la fa servir el Main.
+export interface DocumentImmoble {
+  id: number
+  id_inmoble: number
+  tipus: TipusDocumentImmoble
+  nom_original: string
+  comentaris: string
+  data_document: string | null // ISO AAAA-MM-DD
+}
+
+// Camps editables, i els que s'envien en adjuntar (comuns a tots els fitxers de la selecció).
+export type DocumentImmobleDades = Pick<DocumentImmoble, 'tipus' | 'comentaris' | 'data_document'>
+
 // Contingut de ~/Lloguers/config.json
 export interface Config {
   idioma: Idioma

@@ -16,7 +16,9 @@ import type {
   DocumentDades,
   DocumentLlistat,
   DevolucioDades,
-  ImmobleAmbContractes
+  ImmobleAmbContractes,
+  DocumentImmoble,
+  DocumentImmobleDades
 } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -92,6 +94,21 @@ const api = {
     versio: (): Promise<Resultat<string>> => ipcRenderer.invoke('app:versio'),
     obrirEnllac: (url: string): Promise<Resultat<void>> =>
       ipcRenderer.invoke('app:obrirEnllac', url)
+  },
+  documentsImmoble: {
+    obtenir: (idInmoble: number): Promise<Resultat<DocumentImmoble[]>> =>
+      ipcRenderer.invoke('documentsImmoble:obtenir', idInmoble),
+    adjuntar: (
+      idInmoble: number,
+      dades: DocumentImmobleDades,
+      titolDialeg: string
+    ): Promise<Resultat<DocumentImmoble[]>> =>
+      ipcRenderer.invoke('documentsImmoble:adjuntar', idInmoble, dades, titolDialeg),
+    actualitzar: (id: number, dades: DocumentImmobleDades): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('documentsImmoble:actualitzar', id, dades),
+    eliminar: (id: number): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('documentsImmoble:eliminar', id),
+    obrir: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('documentsImmoble:obrir', id)
   }
 }
 

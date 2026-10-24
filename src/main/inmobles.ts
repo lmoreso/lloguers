@@ -1,5 +1,6 @@
 import { db } from './database'
 import type { Immoble, ImmobleDades } from '../shared/tipus'
+import { esborrarCarpetaImmoble } from './documentsImmoble'
 
 const COLUMNES = `id, via, num_via, pis, porta, codi_postal, localitat, provincia,
   ref_catastral, superficie_m2, superficie_pati, cert_en_reg, cert_en_class,
@@ -42,6 +43,9 @@ export function actualitzarInmoble(id: number, d: ImmobleDades): void {
   ).run({ ...d, id })
 }
 
+// Esborra l'immoble. Els documents (files) s'esborren en cascada; la carpeta del disc, després. Un immoble amb
+// contractes continua bloquejat (FK_VIOLADA), i llavors no es toca cap fitxer.
 export function eliminarInmoble(id: number): void {
   db.prepare('DELETE FROM inmobles WHERE id = ?').run(id)
+  esborrarCarpetaImmoble(id)
 }
