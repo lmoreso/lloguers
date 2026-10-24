@@ -16,7 +16,9 @@ import type {
   Resultat,
   TipusDocument,
   DevolucioDades,
-  ImmobleAmbContracte
+  ImmobleAmbContracte,
+  DocumentImmoble,
+  DocumentImmobleDades
 } from '../shared/tipus'
 
 declare global {
@@ -74,6 +76,17 @@ declare global {
       app: {
         versio: () => Promise<Resultat<string>>
         obrirEnllac: (url: string) => Promise<Resultat<void>>
+      }
+      documentsImmoble: {
+        obtenir: (idInmoble: number) => Promise<Resultat<DocumentImmoble[]>>
+        adjuntar: (
+          idInmoble: number,
+          dades: DocumentImmobleDades,
+          titolDialeg: string
+        ) => Promise<Resultat<DocumentImmoble[]>>
+        actualitzar: (id: number, dades: DocumentImmobleDades) => Promise<Resultat<void>>
+        eliminar: (id: number) => Promise<Resultat<void>>
+        obrir: (id: number) => Promise<Resultat<void>>
       }
     }
   }
