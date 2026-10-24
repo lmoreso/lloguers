@@ -9,6 +9,7 @@ import Contractes from './pantalles/Contractes'
 import FitxaContracte from './pantalles/FitxaContracte'
 import UltimsContractes from './pantalles/UltimsContractes'
 import QuantA from './pantalles/QuantA'
+import DocumentsImmoble from './pantalles/DocumentsImmoble'
 
 const SECCIONS = [
   { ruta: '/immobles', clau: 'menu.immobles' },
@@ -47,6 +48,7 @@ function Estructura(): React.JSX.Element {
           <Route path="/immobles/:id" element={<FitxaImmoble key="edicio" />} />
           <Route path="/immobles/:id/contractes" element={<Contractes />} />
           <Route path="/immobles/:id/contractes/nou" element={<FitxaContracte key="nou" />} />
+          <Route path="/immobles/:id/documents" element={<DocumentsImmoble />} />
           <Route path="/ultims-contractes" element={<UltimsContractes />} />
           <Route
             path="/immobles/:id/contractes/:idContracte"

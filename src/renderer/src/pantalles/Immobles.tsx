@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import type { Immoble } from '../../../shared/tipus'
-import { IconDots, IconFileText, IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconDots, IconFileText, IconPencil, IconTrash, IconFiles } from '@tabler/icons-react'
 import { adreca } from '../utils/adreca'
 import { teAvisos } from '../utils/avisosContracte'
 import { alertes } from '../utils/avisosImmoble'
@@ -134,6 +134,12 @@ function Immobles(): React.JSX.Element {
                         onClick={() => navigate(`/immobles/${i.id}/contractes`)}
                       >
                         {t('contractes.titol')}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconFiles size={16} />}
+                        onClick={() => navigate(`/immobles/${i.id}/documents`)}
+                      >
+                        {t('documentsImmoble.boto')}
                       </Menu.Item>
                       <Menu.Item
                         leftSection={<IconPencil size={16} />}

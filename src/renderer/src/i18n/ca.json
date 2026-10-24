@@ -2,6 +2,39 @@
   "app": {
     "titol": "Lloguers"
   },
+  "documentsImmoble": {
+    "titol": "Documents de l'immoble",
+    "boto": "Documents",
+    "buit": "Aquest immoble encara no té cap document.",
+    "visualitzar": "Visualitzar",
+    "desat": "Document desat.",
+    "eliminat": "Document eliminat.",
+    "tipus": {
+      "certificat_energetic": "Certificat energètic",
+      "cedula_habitabilitat": "Cèdula d'habitabilitat",
+      "fotos": "Fotos",
+      "altres": "Altres"
+    },
+    "camps": {
+      "tipus": "Tipus",
+      "fitxer": "Fitxer",
+      "data": "Data del document",
+      "comentaris": "Comentaris"
+    },
+    "afegir": {
+      "titol": "Afegir documents",
+      "triar": "Triar fitxers",
+      "dialeg": "Tria els documents a adjuntar",
+      "ajuda": "Obligatori. Si tries més d'un fitxer, s'hi afegirà un número al principi (1. …, 2. …)."
+    },
+    "editar": {
+      "titol": "Editar document"
+    },
+    "eliminar": {
+      "titol": "Eliminar document",
+      "confirmacio": "Segur que vols eliminar {{nom}}? S'esborrarà també el fitxer del disc. Aquesta acció no es pot desfer."
+    }
+  },  
   "idiomaNom": "Català",
   "seleccioIdioma": {
     "titol": "Tria l'idioma",
@@ -93,8 +126,7 @@
     "eliminat": "Immoble eliminat.",
     "eliminar": {
       "titol": "Eliminar immoble",
-      "confirmacio": "Segur que vols eliminar {{nom}}? Aquesta acció no es pot desfer."
-    },
+      "confirmacio": "Segur que vols eliminar {{nom}}? S'esborraran també els seus documents. Aquesta acció no es pot desfer."    },
     "seccions": {
       "adreca": "Adreça",
       "cadastre": "Cadastre",

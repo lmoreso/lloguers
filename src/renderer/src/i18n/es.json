@@ -2,6 +2,39 @@
   "app": {
     "titol": "Alquileres"
   },
+  "documentsImmoble": {
+    "titol": "Documentos del inmueble",
+    "boto": "Documentos",
+    "buit": "Este inmueble todavía no tiene ningún documento.",
+    "visualitzar": "Visualizar",
+    "desat": "Documento guardado.",
+    "eliminat": "Documento eliminado.",
+    "tipus": {
+      "certificat_energetic": "Certificado energético",
+      "cedula_habitabilitat": "Cédula de habitabilidad",
+      "fotos": "Fotos",
+      "altres": "Otros"
+    },
+    "camps": {
+      "tipus": "Tipo",
+      "fitxer": "Archivo",
+      "data": "Fecha del documento",
+      "comentaris": "Comentarios"
+    },
+    "afegir": {
+      "titol": "Añadir documentos",
+      "triar": "Elegir archivos",
+      "dialeg": "Elige los documentos a adjuntar",
+      "ajuda": "Obligatorio. Si eliges más de un archivo, se añadirá un número al principio (1. …, 2. …)."
+    },
+    "editar": {
+      "titol": "Editar documento"
+    },
+    "eliminar": {
+      "titol": "Eliminar documento",
+      "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Se borrará también el archivo del disco. Esta acción no se puede deshacer."
+    }
+  },  
   "idiomaNom": "Castellano",
   "seleccioIdioma": {
     "titol": "Elige el idioma",
@@ -93,8 +126,7 @@
     "eliminat": "Inmueble eliminado.",
     "eliminar": {
       "titol": "Eliminar inmueble",
-      "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Esta acción no se puede deshacer."
-    },
+      "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Se borrarán también sus documentos. Esta acción no se puede deshacer."    },
     "seccions": {
       "adreca": "Dirección",
       "cadastre": "Catastro",

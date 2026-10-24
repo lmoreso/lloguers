@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Group, Stack, Text, Title } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconFileText, IconPlus, IconTrash } from '@tabler/icons-react'
+import { IconFileText, IconPlus, IconTrash, IconFiles } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -109,6 +109,13 @@ function FitxaImmoble(): React.JSX.Element {
               onClick={() => anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/contractes`))}
             >
               {t('contractes.titol')}
+            </Button>
+            <Button
+              variant="default"
+              leftSection={<IconFiles size={16} />}
+              onClick={() => anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/documents`))}
+            >
+              {t('documentsImmoble.boto')}
             </Button>
             <Button
               variant="default"
