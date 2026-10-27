@@ -575,6 +575,28 @@ const files = dades.flatMap<Fila>((d) =>
 - A sota dels Avisos, els botons d'acció: 'Contractes', 'Documents', 'Eliminar', 'Immoble nou'.
 - Al clicar alguna opció que suposi canviar de pantalla cal verificar si hi han modificacions pendents de guardar.
 
+## Mes Millores a Immobles
+
+### Editar Immobles
+- Al títol posar 'Editar Immoble'.
+- Dividir la info en 2 pestanyes:
+  - Una amb Adressa i Cadastre i una altra amb Certificat i Cedula.
+  - Tota la part superior, Titol, adressa, avisos i botons, visible a les dos pestanyes.
+- Botons inferiors:
+  - El botó Cancelar passa a dirse Tancar o Tornar i amb protecció per si hi han modificacions pendents de guardar. A ser posible que detecti la tecla Escape.
+  - El botó Desar hauria de capturar la tecla Enter.
+  - Els dos botons inferiors passen al mateix nivell que els superiors, però alineats a la dreta.
+ 
+### Llista Immobles
+- Als Avisos falta posar el nº de avisos als contractes vigents, per exemple '2 avisos al últim contracte'.
+
+### Documents del Immoble
+- Eliminar el botó 'Contractes'.
+- Els dos botons que queden, al mateix lloc que a Editar Immobles, 'Nou Immoble' alineat a l'esquerra i 'Tornar' a la dreta.
+- El camp Comentari deixa de ser obligatori. Si no hi ha comentari en multlipes fitxers es posa la numeració igualment al comentari.
+- La Cédula i El Certificat, en aquesta pantalla, nomes es poden Visualitzar i Eliminar, ni Afegir ni Editar, això es farà desde la mateixa pantalla de Immobles.
+
+
 
 ## Correccions i Noves funcionalitats (notes disperses a ignorar per Claude)
 

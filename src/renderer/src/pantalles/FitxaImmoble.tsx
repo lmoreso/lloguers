@@ -10,6 +10,7 @@ import { alertes } from '../utils/avisosImmoble'
 import { teAvisos } from '../utils/avisosContracte'
 import { esOk } from '../utils/resultat'
 import FormulariImmoble from './FormulariImmoble'
+import type { AccionsCapcalera } from './FormulariImmoble'
 import type { Immoble } from '../../../shared/tipus'
 
 function FitxaImmoble(): React.JSX.Element {
@@ -22,6 +23,8 @@ function FitxaImmoble(): React.JSX.Element {
   const [contractesAmbAvisos, setContractesAmbAvisos] = useState(false)
   // Canvia després de desar: el formulari es torna a muntar amb les dades noves (i sense canvis pendents).
   const [versioForm, setVersioForm] = useState(0)
+  // Pestanya activa del formulari. Viu aquí perquè es conservi quan el formulari es torna a muntar en desar.
+  const [pestanya, setPestanya] = useState('adreca')
 
   useEffect(() => {
     if (id === undefined) return
@@ -45,6 +48,7 @@ function FitxaImmoble(): React.JSX.Element {
   }, [id])
 
   const noTrobat = id !== undefined && !carregant && immoble === null
+  const titol = id !== undefined ? t('immobles.editar') : t('immobles.nou')
 
   function alDesar(desat: Immoble): void {
     if (id === undefined) {
@@ -71,19 +75,20 @@ function FitxaImmoble(): React.JSX.Element {
     })
   }
 
-  // Capçalera: títol, subtítol, barra d'avisos i botons d'acció. La dibuixa el formulari a dalt de tot,
-  // i ens dona `anarAmbGuarda` per preguntar abans de sortir si hi ha canvis sense desar.
-  function capcalera(anarAmbGuarda: (accio: () => void) => void): React.ReactNode {
+  // Capçalera: títol, subtítol, barra d'avisos i una sola fila de botons (accions a l'esquerra; Tornar i Desar
+  // a la dreta). Es veu a totes les pestanyes. La dibuixa el formulari a dalt de tot, i ens dona
+  // `anarAmbGuarda` per preguntar abans de sortir si hi ha canvis sense desar.
+  function capcalera({ anarAmbGuarda, idFormulari, tornar }: AccionsCapcalera): React.ReactNode {
     const alertesImmoble = immoble ? alertes(immoble) : []
     return (
       <Stack gap="sm" mb="md">
         <div>
-          <Title order={2}>{t('immobles.titol')}</Title>
-          <Text c="dimmed">
-            {immoble
-              ? t('immobles.subtitol', { id: immoble.id, adreca: adreca(immoble) })
-              : t('immobles.nou')}
-          </Text>
+          <Title order={2}>{titol}</Title>
+          {immoble && (
+            <Text c="dimmed">
+              {t('immobles.subtitol', { id: immoble.id, adreca: adreca(immoble) })}
+            </Text>
+          )}
         </div>
 
         {(alertesImmoble.length > 0 || contractesAmbAvisos) && (
@@ -101,39 +106,53 @@ function FitxaImmoble(): React.JSX.Element {
           </Alert>
         )}
 
-        {immoble && (
+        <Group justify="space-between">
           <Group gap="xs">
-            <Button
-              variant="default"
-              leftSection={<IconFileText size={16} />}
-              onClick={() => anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/contractes`))}
-            >
-              {t('contractes.titol')}
+            {immoble && (
+              <>
+                <Button
+                  variant="default"
+                  leftSection={<IconFileText size={16} />}
+                  onClick={() =>
+                    anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/contractes`))
+                  }
+                >
+                  {t('contractes.titol')}
+                </Button>
+                <Button
+                  variant="default"
+                  leftSection={<IconFiles size={16} />}
+                  onClick={() => anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/documents`))}
+                >
+                  {t('documentsImmoble.boto')}
+                </Button>
+                <Button
+                  variant="default"
+                  leftSection={<IconPlus size={16} />}
+                  onClick={() => anarAmbGuarda(() => navigate('/immobles/nou'))}
+                >
+                  {t('immobles.nouBoto')}
+                </Button>
+                <Button
+                  variant="default"
+                  color="red"
+                  leftSection={<IconTrash size={16} />}
+                  onClick={() => demanarEliminar(immoble)}
+                >
+                  {t('comu.eliminar')}
+                </Button>
+              </>
+            )}
+          </Group>
+          <Group gap="xs">
+            <Button variant="default" onClick={tornar}>
+              {t('comu.tornar')}
             </Button>
-            <Button
-              variant="default"
-              leftSection={<IconFiles size={16} />}
-              onClick={() => anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/documents`))}
-            >
-              {t('documentsImmoble.boto')}
-            </Button>
-            <Button
-              variant="default"
-              leftSection={<IconPlus size={16} />}
-              onClick={() => anarAmbGuarda(() => navigate('/immobles/nou'))}
-            >
-              {t('immobles.nouBoto')}
-            </Button>
-            <Button
-              variant="default"
-              color="red"
-              leftSection={<IconTrash size={16} />}
-              onClick={() => demanarEliminar(immoble)}
-            >
-              {t('comu.eliminar')}
+            <Button type="submit" form={idFormulari}>
+              {t('comu.desar')}
             </Button>
           </Group>
-        )}
+        </Group>
       </Stack>
     )
   }
@@ -142,7 +161,7 @@ function FitxaImmoble(): React.JSX.Element {
     <>
       {(carregant || noTrobat) && (
         <Title order={2} mb="md">
-          {t('immobles.titol')}
+          {titol}
         </Title>
       )}
 
@@ -164,6 +183,8 @@ function FitxaImmoble(): React.JSX.Element {
           immoble={immoble}
           onDesat={alDesar}
           capcalera={capcalera}
+          pestanya={pestanya}
+          onPestanya={setPestanya}
         />
       )}
     </>

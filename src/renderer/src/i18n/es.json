@@ -127,6 +127,10 @@
     "eliminar": {
       "titol": "Eliminar inmueble",
       "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Se borrarán también sus documentos. Esta acción no se puede deshacer."    },
+    "pestanyes": {
+      "adreca": "Dirección y catastro",
+      "certificat": "Certificado y cédula"
+    },      
     "seccions": {
       "adreca": "Dirección",
       "cadastre": "Catastro",

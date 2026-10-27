@@ -22,6 +22,11 @@
 - Cada bloc nou de l'API s'afegeix als **dos** fitxers del preload (`index.ts` i `index.d.ts`) i dins de `api`, no dins d'un altre bloc (vegeu la incidència 15).
 - Quan una prova "no funciona", **primer comprovar que el canvi s'ha aplicat al fitxer** (`grep -n` sobre el text nou): ha passat
   tres cops (`asarUnpack`, el bloc `documents` de l'`index.d.ts` i l'entrada de devolució del menú de contractes).
+- Quan l'usuari diu **"continua"**, vol dir que tot el pendent està fet i provat correctament: es passa al pas següent.
+- **Pantalles noves: cap botó a sota** (si la llista o el formulari és gran, es perden); les accions van a la capçalera, al costat del títol.
+- L'usuari treballa per defecte a la **VM**; el portàtil i l'ordinador anfitrió (Ubuntu 24.04, dades reals) es fan servir per a proves
+  d'empaquetat. Abans d'instal·lar una versió nova a l'anfitrió, còpia de seguretat de `~/Lloguers/lloguers.sqlite` (les migracions
+  s'apliquen soles en la primera arrencada).
 
 ## Entorn (verificat)
 
@@ -75,7 +80,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 18 (la fase 1 de Contractes és completa) i la Fase 2 (devolució de la fiança) també.** Fase 1: dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus. Fase 2: devolució de la fiança (model 3). Tot s'ha provat amb `npm run dev`; **l'empaquetat dels passos 16 en endavant no s'ha provat** (vegeu "Pròxim pas").
+**Fases A, B i C fetes; Fase D feta fins al pas 23.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus) i fase 2 (devolució de la fiança). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22) i els documents d'immoble (23). **La BD és a `user_version = 3`.** L'empaquetat s'ha provat fins al pas 21 (`.deb` v1.0.2 a l'anfitrió, amb dades reals); **els passos 22 i 23 no s'han empaquetat encara**.
 
 ### Fase A: base (feta)
 
@@ -120,9 +125,9 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
 - **Immobles** (`{Immobles,FitxaImmoble,FormulariImmoble}.tsx`): llista; formulari en pantalla pròpia amb quatre seccions
   (`/immobles/nou`, `/immobles/:id`); dates amb `DatePickerInput` (treballa amb text `AAAA-MM-DD`, **no cal conversió `Date`**);
   eliminació amb confirmació; avís de caducitats (certificat i cèdula) a **60 dies** (`DIES_AVIS` a `utils/caducitat.ts`).
-- **Icones** (`@tabler/icons-react`): editar i eliminar a Inquilins, Immobles i Documents són icona sola amb `Tooltip`
+- **Icones** (`@tabler/icons-react`): editar i eliminar a Inquilins i als Documents d'un contracte són icona sola amb `Tooltip`
   i `aria-label` traduïts, **una columna per icona** (les accions que no s'ofereixen deixen la cel·la buida i la resta queden
-  alineades). Les accions principals (Afegir) són botons de text. Els avisos es mostren apilats (`Stack`). A Contractes, en canvi, hi ha **una sola icona per fila** (menú d'accions, vegeu més avall).
+  alineades). Les accions principals (Afegir) són botons de text. Els avisos es mostren apilats (`Stack`). A Contractes, Immobles i als Documents d'immoble, en canvi, hi ha **una sola icona per fila** (menú d'accions, vegeu més avall).
 - Les dates d'auditoria són en UTC (a Barcelona es veuen 1 o 2 hores menys al `sqlite3`); correcte, es convertiran a hora
   local només quan es mostrin a la UI.
 
@@ -208,6 +213,65 @@ a **tots**, Editar i (després d'una línia) Eliminar en vermell. Les confirmaci
 - **Reobrir**: un contracte amb alguna dada de devolució no es pot reobrir (esborrar `data_fi`) i la fi no pot passar de la
   sol·licitud; el formulari ho diu amb un missatge concret abans d'arribar a la BD.
 
+**Pas 20: "Últims contractes", complet.**
+
+- **Backend**: `obtenirUltimsContractes()` a `src/main/contractes.ts` (IPC `contractes:ultims`, `window.api.contractes.ultims`; tipus
+  `ImmobleAmbContractes { immoble, contractes[] }`). De cada immoble surten els contractes **en curs** (sense `data_fi`, o amb `data_fi`
+  d'avui o posterior; l'"avui" es calcula al Main en hora local) **més el de `data_inici` més recent** (en empat, l'`id` més alt), en ordre
+  cronològic. Els immobles sense contracte hi surten amb la llista buida. Provat amb cinc casos (antic acabat + tancat a futur, tancat a
+  futur + posterior, cap contracte, tots acabats, antic acabat + vigent).
+- **Refactor sense canvis visibles**: `AccionsContracte.tsx` (menú d'accions compartit; navega amb `c.id_inmoble`), `utils/inquilins.ts`
+  (`nomInquili`), `components/AvisosContracte.tsx` i `utils/avisosContracte.ts` (`avisos`, `faltenDocuments`, `devolucioPendent`, `teAvisos`).
+- **UI**: `UltimsContractes.tsx` a `/ultims-contractes`, entrada de menú "Últims contractes" (entre Immobles i Inquilins). Una fila per
+  contracte (l'adreça es repeteix si un immoble en té dos; clicable cap a la llista de contractes de l'immoble); els immobles sense
+  contracte mostren "Sense contracte" i un botó Afegir. Només dos estats: Vigent i Tancat (un tancat a futur surt com a Tancat, amb la
+  data de fi). Detall conegut: editar un contracte des d'aquí torna, en desar o cancel·lar, a la llista de l'immoble i no a aquesta vista.
+  (`dades.flatMap<Fila>(...)`: vegeu la incidència 16.)
+
+**Pas 21: primera versió publicable, feta.**
+
+- Versió `1.0.2` al `package.json` (`app.getVersion()`); `<title>Lloguers</title>`; metadades del paquet (`description`, `author`,
+  `homepage`; a `electron-builder.yml`, `productName: Lloguers` i el bloc `linux` amb categoria, `executableName`, `synopsis` i
+  `description`). `index.ts` netejat (`ping`, `setAppUserModelId('com.lmoreso.lloguers')`).
+- **Icona** (SVG Repo, lliure): `resources/icon.png` (finestra) i `build/icon.png` (paquet), 512x512, més una còpia dins del Renderer
+  (`src/renderer/src/assets/icon.png`, per a Quant a). **Hi ha tres còpies que s'han de mantenir iguals.** `build/icon.icns` i
+  `build/icon.ico` encara són els de la plantilla (només es fan servir a macOS i Windows).
+- **Quant a** (`pantalles/QuantA.tsx`): icona abans del títol, versió (IPC `app:versio`), descripció, autor, tecnologies i la paraula
+  Claude com a enllaços. Els enllaços s'obren al navegador del sistema per `app:obrirEnllac`, que **només accepta `https`**; el
+  `setWindowOpenHandler` de `index.ts` també. L'usuari hi ha afegit llicència i enllaç al repositori.
+- `npm run build:linux`: `.deb` generat i instal·lat a l'anfitrió amb dades reals; tot funciona (inclosos adjuntar i obrir documents).
+
+**Pas 22: gestió ampliada d'immobles, feta.**
+
+- **Llista d'Immobles**: columna Id, "Avisos" en lloc de "Caducitats", menú d'accions (Contractes, Documents, Editar, Eliminar) i
+  l'etiqueta **"Contractes amb avisos"** quan algun dels contractes que surten a "Últims contractes" té algun avís. Les alertes de
+  l'immoble són a `utils/avisosImmoble.ts`.
+- **Edició d'immoble** (`FitxaImmoble.tsx` + `FormulariImmoble.tsx`): capçalera amb títol "Immoble" i subtítol "Id N: adreça" (o "Nou
+  immoble"), barra taronja amb les caducitats i l'avís dels contractes, i botons Contractes, Documents, Immoble nou i Eliminar. **Desar es
+  queda a la pantalla** (refresca subtítol i avisos); un immoble nou passa a `/immobles/:id`. Si hi ha canvis sense desar
+  (`form.isDirty()`), els botons de la capçalera preguntan (`CanvisSenseDesar.tsx`: Desar i continuar / Descartar / Cancel·lar). **No
+  cobreix el menú lateral ni `Ctrl+R`**: `HashRouter` no té `useBlocker` (cal un router de dades).
+- **A revisar (decisió de l'usuari)**: la navegació entre pantalles, el botó "Descartar" (resulta confús) i els botons Desar i Cancel·lar
+  a sota dels formularis (Immobles, Contractes), que es perden si el formulari és llarg.
+
+**Pas 23: documents de l'immoble, fet.**
+
+- **Migració `003_documents_immoble.sql`** (només afegeix una taula, un índex i un trigger; no toca res existent): `documents_immoble` amb
+  `tipus` (`CHECK` amb quatre valors: `certificat_energetic`, `cedula_habitabilitat`, `fotos`, `altres`), `comentaris` obligatori i no
+  buit, `data_document` amb `IS`, `ON DELETE CASCADE` cap a l'immoble. Provada sobre còpies i amb una instal·lació des de zero.
+- **Backend**: `src/main/documentsImmoble.ts`, `src/main/ipc/documentsImmoble.ts` i `src/main/fitxers.ts` (funcions compartides amb
+  `documents.ts`: `nomSegur`, `rutaDins`, `fitxerNoTrobat`). Fitxers a `~/Lloguers/documents/immobles/<id_immoble>/<id_document>_<nom_segur>`.
+  El Main valida el comentari i el tipus **abans** d'obrir el diàleg. Una fila per fitxer, amb tipus, data i comentari comuns; si en són
+  més d'un, el comentari es numera (`1. Sala`, `2. Sala`...; `01.` a partir de 10) segons l'ordre dels noms (ordre numèric). Tot o res.
+  El llistat va per ordre d'adjuntat. `eliminarInmoble` esborra també la carpeta; un immoble amb contractes continua bloquejat (`FK_VIOLADA`)
+  i no es toca cap fitxer. Provat: validacions sense diàleg, un i diversos fitxers, numeració i ordre, cancel·lar, data mal escrita,
+  actualitzar, obrir, fitxer desaparegut, ruta amb `..` rebutjada sense tocar res, i eliminar un immoble amb documents i amb contractes.
+  **No s'ha pogut provar** que, si falla un fitxer a mig adjuntar, s'esborrin els ja copiats (el codi hi és).
+- **UI**: `DocumentsImmoble.tsx` a `/immobles/:id/documents` (capçalera amb Afegir, Contractes i Tornar; cap botó a sota; llista amb menú
+  Visualitzar, Editar, Eliminar), `AfegirDocumentImmoble.tsx` (el botó per triar fitxers està desactivat fins que hi ha comentari) i
+  `EditarDocumentImmoble.tsx` (tipus, data i comentari; el fitxer no se substitueix). Entrades al menú d'Immobles i botó Documents a l'edició.
+  La confirmació d'eliminar un immoble avisa que s'esborren també els documents.
+
 ### Fase E: empaquetat (feta al portàtil)
 
 Prova d'empaquetat anticipada a la VM (`npm run build:unpack`): migracions incrustades; `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`
@@ -228,38 +292,40 @@ Al portàtil (14-10-2026):
 - **Observació sobre el `chrome-sandbox`**: el del `.deb` instal·lat té mode `-rwxr-xr-x`, **sense SUID**, i l'app va arrencar
   igualment a Mint 22.3. No s'ha investigat el motiu. A la VM sí que va caldre el SUID. Si falla en un altre equip,
   aplicar l'arreglat de la incidència 2 sobre `/opt/lloguers/chrome-sandbox`, o valorar un script `afterInstall`.
-- **Aquesta prova és anterior als passos 16 a 18**: el diàleg de selecció de fitxers i `shell.openPath` mai s'han provat amb
-  l'app empaquetada.
+- **Prova a l'anfitrió (Ubuntu 24.04, dades reals), després del pas 21**: `.deb` v1.0.2 instal·lat; pantalla d'idioma, contractes,
+  adjuntar i obrir documents (diàleg del sistema i `shell.openPath`) i la resta funcionen. Els passos 22 i 23 no s'han empaquetat encara.
 
 ### Pendent de confirmar
 
-- **Commits**: confirmar que tots els commits des del pas 18-4 (avís "Falten documents", menú d'accions, devolució de la fiança i
-  els seus avisos) s'han fet i pujat (`git status` net i `git log origin/main..` buit).
-- **`NOTES.md`**: marcar el 16, el 17 i el 18 com a fets, marcar la **fase 2** i anotar les decisions (menú d'accions, devolució
-  com a acció pròpia, avisos "Falten documents" i "Devolució pendent", reobrir bloquejat amb devolució, preload en dos fitxers).
-- **Portàtil**: `git pull`, `npm install` (dependència nova: `@tabler/icons-react`), `npm install-scripts ls`, i
-  **esborrar la seva BD de proves** (té la 002 antiga i contractes de prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`,
-  esborrar `-wal`/`-shm` i arrencar perquè l'app la creï amb la 001 + 002. Comprovar `user_version = 2`, 7 tipus, 3/5/11 i que
-  `'2025-1-1'` es rebutja.
-- **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins i contractes, aquest ordre invers per les claus foranes).
-  L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també `~/Lloguers/documents/<id>/` dels contractes de prova (només
-  l'esborrat des de l'app s'emporta la carpeta); `/tmp/provaDocs` és temporal.
+- **Commit** del pas 23-3 (UI dels documents d'immoble) i d'aquest `PROGRES.md`; `git push`.
+- **`NOTES.md`**: afegir a "Modificar Gestió de Immobles" els blocs "Decisions (tancades)" i "Disseny de la UI (pendent de revisar)", i
+  actualitzar el punt dels documents (comentari obligatori; una fila per fitxer amb numeració). Marcar els passos 20 a 23.
+- **Anfitrió (dades reals)**: quan s'hi instal·li una versió nova, fer abans una còpia de seguretat de `~/Lloguers/lloguers.sqlite`; la
+  migració 003 s'hi aplicarà sola en la primera arrencada (només afegeix una taula).
+- **Portàtil**: `git pull`, `npm install`, `npm install-scripts ls`, i **esborrar la seva BD de proves** (té la 002 antiga i contractes de
+  prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`, esborrar `-wal`/`-shm` i arrencar perquè l'app la creï amb la
+  001 + 002 + 003. Comprovar `user_version = 3`, 7 tipus i que `'2025-1-1'` es rebutja.
+- **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes i documents; en aquest ordre invers per les claus
+  foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/`
+  (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/provaDocs` i `/tmp/provaImm` són temporals.
 - Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
 
 ## Pròxim pas
 
-**1. Prova d'empaquetat** (abans de seguir amb funcionalitat nova; tot el que s'ha fet des del pas 15 només s'ha vist amb
-`npm run dev`): `npm run build:linux`, instal·lar el `.deb` **al portàtil** (o a la VM amb un `HOME` fals, perquè no toqui les
-dades reals; l'app empaquetada i `npm run dev` comparteixen `~/Lloguers/`) i provar-hi: pantalla d'idioma del primer arrencament,
-llista i formulari de contractes, el menú d'accions, **adjuntar** documents (diàleg del sistema), **obrir** un fitxer amb
-l'aplicació del sistema (`shell.openPath`), eliminar un document i eliminar un contracte (que s'emporti la carpeta), i la finestra
-de devolució. Mirar també el `chrome-sandbox` (vegeu Fase E). Desinstal·lar després.
+Cap pas en curs: el bloc "Modificar Gestió de Immobles" de `NOTES.md` està complet. Opcions, per decidir amb l'usuari:
 
-**2. Fase 3** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar, com es va fer amb els
-contractes): canvi de signants (annex), corregir l'immoble d'un contracte mal assignat, historial de revisions de lloguer i menú
-"Contractes vigents" amb els seus avisos (la clau `menu.contractes` ja existeix als JSON).
+**1. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): navegació entre pantalles, el botó "Descartar" del diàleg de
+canvis sense desar, i els botons Desar i Cancel·lar a sota dels formularis d'Immobles i Contractes (moure'ls a la capçalera).
 
-**3. Menors**: contingut de "Quant a" i de Configuració, pantalla per crear i editar tipus de document.
+**2. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar, com es va fer amb els
+contractes): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable; els documents no es mouen perquè van
+per `id_contracte`), historial de revisions de lloguer, canvi de signants (annex).
+
+**3. Nova publicació**: pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el `.deb`
+(la migració 003 s'hi aplicarà).
+
+**4. Altres de `NOTES.md`** (la secció de notes disperses, que l'usuari marca "a ignorar per Claude": només si ell les demana): propietaris
+dels immobles, documents d'inquilins, configuració de la ruta de la BD...
 
 ## Versions reals vs. la guia
 
@@ -384,12 +450,23 @@ Un bloc nou de `window.api` (aquí `documents`) havia quedat **dins** del bloc a
 no dona error de sintaxi, però el bloc no penja de `api`. Les proves des de les DevTools passaven igualment, perquè la consola no
 comprova tipus. Solució: tancar bé les claus. El segon error (`unknown` no assignable) n'és només la conseqüència.
 
+### 16. `flatMap` amb dues branques de tipus diferent (TS2322)
+
+`dades.flatMap((d) => cond ? d.contractes.map(...) : [{ ..., contracte: null }])` no compila: TypeScript infereix el tipus de la primera
+branca. Solució: declarar el tipus del resultat, `dades.flatMap<Fila>(...)`.
+
+### 17. Una prova de `ON DELETE CASCADE` esborrava més del compte
+
+`DELETE FROM inmobles WHERE via = 'PROVA'` esborra **tots** els immobles `PROVA` de la còpia, i els que tenen contractes fallen per clau
+forana. Solució: filtrar per una clau única (la referència cadastral) i provar-ho sobre una BD des de zero. A les proves amb recompte fix
+(`dades[9]`), usar `.at(-1)` i `length`: el diàleg del sistema recorda l'última carpeta i es pot triar un altre nombre de fitxers.
+
 ## Altres pendents
 
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD
-  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`/`registrarDevolucio`/`adjuntarDocuments`).
+  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`/`registrarDevolucio`/`adjuntarDocuments`/`adjuntarDocumentsImmoble`).
   Només cosmètic.
-- Configuració només té el selector d'idioma, i Quant a només el títol (la versió es pot llegir de `package.json`).
+- Configuració només té el selector d'idioma.
 - Pantalla per crear i editar tipus de document (a Configuració): fora de la fase 1. Quan es faci, caldrà decidir si es pot
   esborrar l'últim tipus d'una classe amb lògica (el sembrat el recrea a l'arrencada).
 - Els noms dels tipus de document sembrats queden en l'idioma del primer arrencat (són dada de l'usuari).
@@ -399,16 +476,18 @@ comprova tipus. Solució: tancar bé les claus. El segon error (`unknown` no ass
 - Casos límit assumits: una revisió de lloguer feta el mateix dia que `data_inici` no es distingeix de "mai revisat"; una
   correcció d'una data de revisió ha de poder retrocedir (ara es pot revisar amb una data anterior, mentre sigui `>= data_inici`).
 - Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans),
-  correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els documents), historial de revisions
-  de lloguer, menú "Contractes vigents".
+  correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els documents), historial de revisions de lloguer.
+- Editar un contracte des d'"Últims contractes" torna a la llista de contractes de l'immoble (no a la vista d'origen).
+- La icona dels menús d'accions (`IconDots` o `IconMenu2`) és una decisió estètica pendent d'uniformar.
+- `Immobles.tsx` i `FitxaImmoble.tsx` fan cadascun una crida a `contractes.ultims()` només per saber si hi ha avisos.
 - `inmobles` té dates sense cap `CHECK` (conté dades reals; el selector de dates ja protegeix l'app).
-- La icona del menú d'accions dels contractes és `IconMenu2` (abans `IconDots`); decisió estètica pendent de confirmar.
 - `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren (`App.tsx.bak` es va fer fora de Git:
   comprovar-ho amb `git status` abans de `git add -A`).
-- Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida.
+- Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida; icones de macOS/Windows i suport
+  per a Windows (a `NOTES.md`).
 
 ## Git
 
-- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit confirmat: "Documents: obrir, editar i eliminar
-  des de la fitxa del contracte" (pas 18-3). Després s'han proposat els del pas 18-4, el menú d'accions i la fase 2; **cal confirmar que
-  s'han fet** (vegeu "Pendent de confirmar").
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit confirmat: "Migració 003: documents_immoble" i
+  els del backend dels documents d'immoble (WIP). Queda per confirmar el de la UI dels documents d'immoble i el d'aquest `PROGRES.md`
+  (vegeu "Pendent de confirmar").

@@ -1,4 +1,5 @@
-import { Button, Fieldset, Group, SimpleGrid, Stack, TextInput } from '@mantine/core'
+import { useEffect } from 'react'
+import { Fieldset, SimpleGrid, Stack, Tabs, TextInput } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
@@ -32,16 +33,36 @@ interface Valors {
   ced_hab_caduc: string | null
 }
 
+// Què rep la capçalera (que dibuixa la fitxa) del formulari.
+export interface AccionsCapcalera {
+  // Executa una acció que canvia de pantalla; si hi ha canvis sense desar, pregunta abans.
+  anarAmbGuarda: (accio: () => void) => void
+  // `id` del formulari: el botó Desar de la capçalera hi queda enllaçat amb l'atribut `form`.
+  idFormulari: string
+  // Torna a la llista d'Immobles (amb la mateixa protecció).
+  tornar: () => void
+}
+
 interface Props {
   immoble: Immoble | null
   // Es crida després de desar (alta o edició) amb l'immoble tal com ha quedat a la BD.
   onDesat: (immoble: Immoble) => void
-  // La fitxa dibuixa la capçalera (títol, avisos i botons) a dalt del formulari. Rep una funció per
-  // executar una acció de sortida preguntant abans si hi ha canvis sense desar.
-  capcalera: (anarAmbGuarda: (accio: () => void) => void) => React.ReactNode
+  // La fitxa dibuixa la capçalera (títol, avisos i botons) a dalt del formulari.
+  capcalera: (accions: AccionsCapcalera) => React.ReactNode
+  // Pestanya activa: viu a la fitxa perquè es conservi quan el formulari es torna a muntar en desar.
+  pestanya: string
+  onPestanya: (pestanya: string) => void
 }
 
-function FormulariImmoble({ immoble, onDesat, capcalera }: Props): React.JSX.Element {
+const ID_FORMULARI = 'formulari-immoble'
+
+function FormulariImmoble({
+  immoble,
+  onDesat,
+  capcalera,
+  pestanya,
+  onPestanya
+}: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -140,8 +161,9 @@ function FormulariImmoble({ immoble, onDesat, capcalera }: Props): React.JSX.Ele
         <CanvisSenseDesar
           onDesar={async () => {
             // Si hi ha errors de validació o el desat falla, ens quedem a la pantalla: es tanca el diàleg
-            // i els errors es veuen al formulari.
+            // i els errors es veuen al formulari (tots els camps obligatoris són a la primera pestanya).
             const validacio = form.validate()
+            if (validacio.hasErrors) onPestanya('adreca')
             const desat = validacio.hasErrors ? null : await desarValors(form.values)
             modals.closeAll()
             if (desat !== null) accio()
@@ -155,123 +177,144 @@ function FormulariImmoble({ immoble, onDesat, capcalera }: Props): React.JSX.Ele
     })
   }
 
+  const tornar = (): void => anarAmbGuarda(() => navigate('/immobles'))
+
+  // Escape = Tornar, amb la mateixa protecció. No actua si hi ha una finestra o un desplegable obert
+  // (calendari, diàleg de canvis sense desar...): llavors Escape només tanca això.
+  useEffect(() => {
+    function alTeclat(e: KeyboardEvent): void {
+      if (e.key !== 'Escape' || e.defaultPrevented) return
+      if (document.querySelector('[role="dialog"], .mantine-Popover-dropdown')) return
+      tornar()
+    }
+    window.addEventListener('keydown', alTeclat)
+    return () => window.removeEventListener('keydown', alTeclat)
+  })
+
   return (
     <>
-      {capcalera(anarAmbGuarda)}
+      {capcalera({ anarAmbGuarda, idFormulari: ID_FORMULARI, tornar })}
 
-      <form onSubmit={form.onSubmit(desar)}>
-        <Stack>
-          <Fieldset legend={t('immobles.seccions.adreca')}>
-            <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <TextInput
-                withAsterisk
-                label={t('immobles.camps.via')}
-                {...form.getInputProps('via')}
-              />
-              <TextInput
-                withAsterisk
-                label={t('immobles.camps.numVia')}
-                {...form.getInputProps('num_via')}
-              />
-              <TextInput
-                withAsterisk
-                label={t('immobles.camps.pis')}
-                {...form.getInputProps('pis')}
-              />
-              <TextInput label={t('immobles.camps.porta')} {...form.getInputProps('porta')} />
-              <TextInput
-                withAsterisk
-                label={t('immobles.camps.codiPostal')}
-                {...form.getInputProps('codi_postal')}
-              />
-              <TextInput
-                withAsterisk
-                label={t('immobles.camps.localitat')}
-                {...form.getInputProps('localitat')}
-              />
-              <TextInput
-                withAsterisk
-                label={t('immobles.camps.provincia')}
-                {...form.getInputProps('provincia')}
-              />
-            </SimpleGrid>
-          </Fieldset>
+      {/* Si la validació falla, es canvia a la primera pestanya: hi són tots els camps obligatoris. */}
+      <form id={ID_FORMULARI} onSubmit={form.onSubmit(desar, () => onPestanya('adreca'))}>
+        <Tabs value={pestanya} onChange={(v) => v && onPestanya(v)} keepMounted>
+          <Tabs.List>
+            <Tabs.Tab value="adreca">{t('immobles.pestanyes.adreca')}</Tabs.Tab>
+            <Tabs.Tab value="certificat">{t('immobles.pestanyes.certificat')}</Tabs.Tab>
+          </Tabs.List>
 
-          <Fieldset legend={t('immobles.seccions.cadastre')}>
-            <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <TextInput
-                withAsterisk
-                label={t('immobles.camps.refCatastral')}
-                {...form.getInputProps('ref_catastral')}
-              />
-              <TextInput
-                withAsterisk
-                inputMode="decimal"
-                label={t('immobles.camps.superficie')}
-                {...form.getInputProps('superficie_m2')}
-              />
-              <TextInput
-                inputMode="decimal"
-                label={t('immobles.camps.superficiePati')}
-                {...form.getInputProps('superficie_pati')}
-              />
-            </SimpleGrid>
-          </Fieldset>
+          <Tabs.Panel value="adreca" pt="md">
+            <Stack>
+              <Fieldset legend={t('immobles.seccions.adreca')}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <TextInput
+                    withAsterisk
+                    label={t('immobles.camps.via')}
+                    {...form.getInputProps('via')}
+                  />
+                  <TextInput
+                    withAsterisk
+                    label={t('immobles.camps.numVia')}
+                    {...form.getInputProps('num_via')}
+                  />
+                  <TextInput
+                    withAsterisk
+                    label={t('immobles.camps.pis')}
+                    {...form.getInputProps('pis')}
+                  />
+                  <TextInput label={t('immobles.camps.porta')} {...form.getInputProps('porta')} />
+                  <TextInput
+                    withAsterisk
+                    label={t('immobles.camps.codiPostal')}
+                    {...form.getInputProps('codi_postal')}
+                  />
+                  <TextInput
+                    withAsterisk
+                    label={t('immobles.camps.localitat')}
+                    {...form.getInputProps('localitat')}
+                  />
+                  <TextInput
+                    withAsterisk
+                    label={t('immobles.camps.provincia')}
+                    {...form.getInputProps('provincia')}
+                  />
+                </SimpleGrid>
+              </Fieldset>
 
-          <Fieldset legend={t('immobles.seccions.certificat')}>
-            <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <TextInput
-                label={t('immobles.camps.registre')}
-                {...form.getInputProps('cert_en_reg')}
-              />
-              <TextInput
-                label={t('immobles.camps.classe')}
-                {...form.getInputProps('cert_en_class')}
-              />
-              <DatePickerInput
-                clearable
-                valueFormat="DD/MM/YYYY"
-                label={t('immobles.camps.data')}
-                {...form.getInputProps('cert_en_data')}
-              />
-              <DatePickerInput
-                clearable
-                valueFormat="DD/MM/YYYY"
-                label={t('immobles.camps.caducitat')}
-                {...form.getInputProps('cert_en_caduc')}
-              />
-            </SimpleGrid>
-          </Fieldset>
+              <Fieldset legend={t('immobles.seccions.cadastre')}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <TextInput
+                    withAsterisk
+                    label={t('immobles.camps.refCatastral')}
+                    {...form.getInputProps('ref_catastral')}
+                  />
+                  <TextInput
+                    withAsterisk
+                    inputMode="decimal"
+                    label={t('immobles.camps.superficie')}
+                    {...form.getInputProps('superficie_m2')}
+                  />
+                  <TextInput
+                    inputMode="decimal"
+                    label={t('immobles.camps.superficiePati')}
+                    {...form.getInputProps('superficie_pati')}
+                  />
+                </SimpleGrid>
+              </Fieldset>
+            </Stack>
+          </Tabs.Panel>
 
-          <Fieldset legend={t('immobles.seccions.cedula')}>
-            <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <TextInput
-                label={t('immobles.camps.registre')}
-                {...form.getInputProps('ced_hab_reg')}
-              />
-              <div />
-              <DatePickerInput
-                clearable
-                valueFormat="DD/MM/YYYY"
-                label={t('immobles.camps.data')}
-                {...form.getInputProps('ced_hab_data')}
-              />
-              <DatePickerInput
-                clearable
-                valueFormat="DD/MM/YYYY"
-                label={t('immobles.camps.caducitat')}
-                {...form.getInputProps('ced_hab_caduc')}
-              />
-            </SimpleGrid>
-          </Fieldset>
+          <Tabs.Panel value="certificat" pt="md">
+            <Stack>
+              <Fieldset legend={t('immobles.seccions.certificat')}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <TextInput
+                    label={t('immobles.camps.registre')}
+                    {...form.getInputProps('cert_en_reg')}
+                  />
+                  <TextInput
+                    label={t('immobles.camps.classe')}
+                    {...form.getInputProps('cert_en_class')}
+                  />
+                  <DatePickerInput
+                    clearable
+                    valueFormat="DD/MM/YYYY"
+                    label={t('immobles.camps.data')}
+                    {...form.getInputProps('cert_en_data')}
+                  />
+                  <DatePickerInput
+                    clearable
+                    valueFormat="DD/MM/YYYY"
+                    label={t('immobles.camps.caducitat')}
+                    {...form.getInputProps('cert_en_caduc')}
+                  />
+                </SimpleGrid>
+              </Fieldset>
 
-          <Group justify="flex-end">
-            <Button variant="default" onClick={() => navigate('/immobles')}>
-              {t('comu.cancellar')}
-            </Button>
-            <Button type="submit">{t('comu.desar')}</Button>
-          </Group>
-        </Stack>
+              <Fieldset legend={t('immobles.seccions.cedula')}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <TextInput
+                    label={t('immobles.camps.registre')}
+                    {...form.getInputProps('ced_hab_reg')}
+                  />
+                  <div />
+                  <DatePickerInput
+                    clearable
+                    valueFormat="DD/MM/YYYY"
+                    label={t('immobles.camps.data')}
+                    {...form.getInputProps('ced_hab_data')}
+                  />
+                  <DatePickerInput
+                    clearable
+                    valueFormat="DD/MM/YYYY"
+                    label={t('immobles.camps.caducitat')}
+                    {...form.getInputProps('ced_hab_caduc')}
+                  />
+                </SimpleGrid>
+              </Fieldset>
+            </Stack>
+          </Tabs.Panel>
+        </Tabs>
       </form>
     </>
   )

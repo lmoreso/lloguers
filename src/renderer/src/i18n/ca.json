@@ -127,6 +127,10 @@
     "eliminar": {
       "titol": "Eliminar immoble",
       "confirmacio": "Segur que vols eliminar {{nom}}? S'esborraran també els seus documents. Aquesta acció no es pot desfer."    },
+    "pestanyes": {
+      "adreca": "Adreça i cadastre",
+      "certificat": "Certificat i cèdula"
+    },      
     "seccions": {
       "adreca": "Adreça",
       "cadastre": "Cadastre",
