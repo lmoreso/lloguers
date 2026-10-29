@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Anchor, Badge, Group, Image, Stack, Text, Title } from '@mantine/core'
+import { Anchor, Badge, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import icona from '../assets/icon.png'
 import { esOk } from '../utils/resultat'
@@ -7,17 +7,51 @@ import { IconBrandGithub } from '@tabler/icons-react'
 
 // Noms propis i adreces: no es tradueixen.
 const AUTOR = 'Lluís Moreso Bosch'
+const URL_AUTOR = 'https://www.linkedin.com/in/consultornominameta4bcn/'
 const URL_CLAUDE = 'https://claude.ai'
 const TECNOLOGIES = [
-  { nom: 'Electron', url: 'https://www.electronjs.org' },
-  { nom: 'React', url: 'https://react.dev' },
-  { nom: 'TypeScript', url: 'https://www.typescriptlang.org' },
-  { nom: 'Vite', url: 'https://vite.dev' },
-  { nom: 'Mantine', url: 'https://mantine.dev' },
-  { nom: 'SQLite', url: 'https://www.sqlite.org' },
-  { nom: 'better-sqlite3', url: 'https://github.com/WiseLibs/better-sqlite3' },
-  { nom: 'i18next', url: 'https://www.i18next.com' },
-  { nom: 'GitHub', url: 'https://github.com/lmoreso/lloguers' }
+  {
+    nom: 'Node.js',
+    url: 'https://nodejs.org',
+    label: "Node.js® is a JavaScript runtime built on Chrome's V8 JavaScript engine"
+  },
+  {
+    nom: 'Electron',
+    url: 'https://www.electronjs.org',
+    label: 'Build cross-platform desktop apps with JavaScript, HTML, and CSS'
+  },
+  {
+    nom: 'React',
+    url: 'https://react.dev',
+    label: 'The library for web and native user interfaces'
+  },
+  {
+    nom: 'TypeScript',
+    url: 'https://www.typescriptlang.org',
+    label: 'TypeScript is JavaScript with syntax for types'
+  },
+  { nom: 'Vite', url: 'https://vite.dev', label: 'The Build Tool for the Web' },
+  {
+    nom: 'Mantine',
+    url: 'https://mantine.dev',
+    label: 'A fully featured React components library and hooks for building web applications'
+  },
+  {
+    nom: 'SQLite',
+    url: 'https://www.sqlite.org',
+    label:
+      'SQLite is a C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine'
+  },
+  {
+    nom: 'better-sqlite3',
+    url: 'https://github.com/WiseLibs/better-sqlite3',
+    label: 'A simple and fast SQLite3 driver for Node.js'
+  },
+  {
+    nom: 'i18next',
+    url: 'https://www.i18next.com',
+    label: 'i18next is a powerful internationalization framework for web applications'
+  }
 ]
 
 function QuantA(): React.JSX.Element {
@@ -66,7 +100,11 @@ function QuantA(): React.JSX.Element {
         <Text fw={700}>{t('quantA.autor')}</Text>
         <Text>
           {'© 2026 - '}
-          {AUTOR}
+          <Tooltip label={URL_AUTOR}>
+            <Anchor component="button" type="button" onClick={() => obrir(URL_AUTOR)}>
+              {AUTOR}
+            </Anchor>
+          </Tooltip>
         </Text>
       </div>
 
@@ -76,26 +114,30 @@ function QuantA(): React.JSX.Element {
         </Text>
         <Group gap="xs">
           {TECNOLOGIES.map((x) => (
-            <Badge
-              key={x.nom}
-              component="button"
-              type="button"
-              variant="light"
-              color="gray"
-              style={{ cursor: 'pointer' }}
-              onClick={() => obrir(x.url)}
-            >
-              {x.nom}
-            </Badge>
+            <Tooltip key={x.nom} label={x.label + ' (' + x.url + ')'}>
+              <Badge
+                key={x.nom}
+                component="button"
+                type="button"
+                variant="light"
+                color="gray"
+                style={{ cursor: 'pointer' }}
+                onClick={() => obrir(x.url)}
+              >
+                {x.nom}
+              </Badge>
+            </Tooltip>
           ))}
         </Group>
       </div>
 
       <Text>
         {t('quantA.claudeAbans')}{' '}
-        <Anchor component="button" type="button" onClick={() => obrir(URL_CLAUDE)}>
-          Claude
-        </Anchor>
+        <Tooltip label={URL_CLAUDE}>
+          <Anchor component="button" type="button" onClick={() => obrir(URL_CLAUDE)}>
+            Claude
+          </Anchor>
+        </Tooltip>
         {t('quantA.claudeDespres')}
       </Text>
 
@@ -103,13 +145,15 @@ function QuantA(): React.JSX.Element {
         <Text fw={700}>{t('quantA.llicenciaTitol')}</Text>
         <Text>
           {t('quantA.llicenciaAbans')}
-          <Anchor
-            component="button"
-            type="button"
-            onClick={() => obrir('https://choosealicense.com/es/licenses/mit/')}
-          >
-            {t('quantA.llicencia')}
-          </Anchor>
+          <Tooltip label="https://choosealicense.com/es/licenses/mit/">
+            <Anchor
+              component="button"
+              type="button"
+              onClick={() => obrir('https://choosealicense.com/es/licenses/mit/')}
+            >
+              {t('quantA.llicencia')}
+            </Anchor>
+          </Tooltip>
           {'.'}
         </Text>
       </div>
@@ -118,13 +162,15 @@ function QuantA(): React.JSX.Element {
         <Text fw={700}>{t('quantA.gitHubTitol')}</Text>
         <Text>
           {t('quantA.gitHubAbans')}{' '}
-          <Anchor
-            component="button"
-            type="button"
-            onClick={() => obrir('https://github.com/lmoreso/lloguers')}
-          >
-            <IconBrandGithub size={16} /> {'GitHub'}
-          </Anchor>
+          <Tooltip label="https://github.com/lmoreso/lloguers">
+            <Anchor
+              component="button"
+              type="button"
+              onClick={() => obrir('https://github.com/lmoreso/lloguers')}
+            >
+              <IconBrandGithub size={16} /> {'GitHub'}
+            </Anchor>
+          </Tooltip>
           {'.'}
         </Text>
       </div>

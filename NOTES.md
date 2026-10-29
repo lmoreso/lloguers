@@ -536,12 +536,40 @@ const files = dades.flatMap<Fila>((d) =>
 - Pantalla de documents: botons "Afegir", "Tornar" (a l'edició de l'immoble) i "Contractes".
 - "Afegir document" obre una finestra amb el tipus, la data (opcional) i el comentari (**obligatori**); el botó per triar fitxers està desactivat fins que el comentari té text. Es poden triar diversos fitxers (tipus, data i comentari comuns): es crea **una fila per fitxer**, ordenats pel nom. Si n'hi ha més d'un, el Main numera el comentari al principi (`1. Façana`, `2. Façana`; amb zero davant a partir de 10: `01.`...); amb un de sol, es desa tal qual. Tot o res. El comentari és obligatori també en "Editar" (que només canvia tipus, data i comentari: el fitxer no se substitueix; per canviar-lo s'elimina i se'n torna a adjuntar un).
 
+### Documents únics i camps nous d'immoble (decisions tancades)
+
+- **Tipus nou**: `fitxa_cadastral` ("Fitxa cadastral"). Es treu el `CHECK` de `tipus` a `documents_immoble` (migració 004): els
+  tipus els valida el Main amb la llista del codi (`TIPUS_DOCUMENT_IMMOBLE`), com la `classe` dels tipus de document de contracte.
+  El comentari passa a ser opcional (`NULL` permès).
+- **Documents únics**: certificat energètic, cèdula d'habitabilitat i fitxa cadastral admeten **un sol document per immoble**.
+  Es garanteix només a l'app (cap índex únic): l'edició d'immoble ofereix *Afegir* només si no n'hi ha, i la pantalla de
+  documents no permet afegir-ne ni triar-ne el tipus. Si una BD de proves ja en té dos, el menú en mostra el primer.
+- **Edició d'immoble**: dins de les seccions Certificat, Cèdula i Cadastre, una icona amb menú (tooltip): sense document,
+  *Afegir*; amb document, *Visualitzar*, *Editar* i *Eliminar*. *Afegir* i *Editar* demanen només el comentari (opcional). La
+  **data** d'un certificat o d'una cèdula no es demana ni es copia: es mostra la de la secció (`cert_en_data`, `ced_hab_data`); a la
+  fitxa cadastral, que no en té, sí que s'ofereix la data (`data_document`). Els documents es desen a l'instant, independentment de
+  Desar. En un immoble nou, la icona està desactivada fins que es desa.
+- **Camps nous a `inmobles`** (migració 004, sense `CHECK`; validacions només a l'app i al Main): `val_cadastral_total`,
+  `val_cadastral_constr`, `any_construccio` (entre 1800 i l'any actual), `data_compra`, `valor_compra` (imports >= 0) i
+  `ced_hab_superficie_util`. Regles, cadascuna només si hi són els dos camps: superfície útil <= superfície; valor cadastral de
+  la construcció <= total; data de compra >= 1 de gener de l'any de construcció.
+- Si la validació falla, el formulari canvia a la pestanya del **primer camp amb error**.
+- **Pantalla de documents**: sense botó Contractes; *Afegir* (esquerra) i *Tornar* (dreta); comentari opcional (amb diversos
+  fitxers es numera igualment: `1.`, `2.`...); *Afegir* i *Editar* només ofereixen Fotos i Altres; els tres tipus únics només es
+  poden visualitzar i eliminar.
+  
 ### Disseny de la UI (pendent de revisar)
 
 - **Pantalles noves: cap botó a sota.** Les accions van a la capçalera, al costat del títol.
 - Pendent de revisar més endavant: la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar
   (resulta confús) i els botons Desar i Cancel·lar a sota dels formularis (Immobles, Contractes), que es perden si el
   formulari és llarg.
+- **Edició d'immoble (feta)**: títol "Editar immoble" amb subtítol "Id N: adreça"; dues pestanyes ("Adreça i cadastre" i
+  "Certificat i cèdula") amb la capçalera visible a totes dues; **una sola fila de botons** a dalt (accions a l'esquerra, Tornar i
+  Desar a la dreta) i res a sota. Tornar té protecció de canvis sense desar. Escape fa el mateix que Tornar (no actua amb un
+  diàleg o un calendari obert); Intro desa. El botó Desar de la capçalera queda enllaçat amb el formulari per l'atribut `form`.
+- Pendent d'aplicar el mateix criteri (botons a la capçalera) al formulari de contracte. El botó "Descartar" del diàleg de canvis
+  sense desar continua pendent de revisar.  
   
 ### Nova Taula dels Documents del Immoble
 
@@ -586,17 +614,57 @@ const files = dades.flatMap<Fila>((d) =>
   - El botó Cancelar passa a dirse Tancar o Tornar i amb protecció per si hi han modificacions pendents de guardar. A ser posible que detecti la tecla Escape.
   - El botó Desar hauria de capturar la tecla Enter.
   - Els dos botons inferiors passen al mateix nivell que els superiors, però alineats a la dreta.
+- Nou botonet amb icona a dintre de la Cédula amb menú desplegable per visualitzar o afegir el document corresponent, editar-lo i eliminar-lo. Nomes permet un document, per això dic visualitzar o afegir.
+- Nou botonet amb icona a dintre del Certificat amb menú desplegable per visualitzar o afegir el document corresponent, editar-lo i eliminar-lo. Nomes permet un document, per això dic visualitzar o afegir.
+- Nous camps a dins de Cadastre:
+  - Valor Cadastral Total (€).
+  - Valor Cadastral de la Construcció (€).
+  - Any de construcció.
+  - Data de Compra.
+  - Valor de Compra (€).
+- Nou botonet amb icona a dintre del Cadastre amb menú desplegable per visualitzar o afegir el nou Tipus de Document 'Fitxa del Cadastre', editar-lo i eliminar-lo. Nomes permet un document, per això dic visualitzar o afegir.
+- Nou camp a la cédula d'habitabilitat: 'Superficie Util'.
+- Validacions a la App, no a la BD:
+  - Si estan informats els dos camps de superfície, Superficie Util <= Superficie.
+  - Si estan informats els dos camps, Valor Cadastral de la Construcció <= Valor Cadastral Total.
+  - Si estan informats els dos camps, Data de compra >= 1 de gener del 'Any de construcció'.
  
-### Llista Immobles
-- Als Avisos falta posar el nº de avisos als contractes vigents, per exemple '2 avisos al últim contracte'.
-
 ### Documents del Immoble
 - Eliminar el botó 'Contractes'.
 - Els dos botons que queden, al mateix lloc que a Editar Immobles, 'Nou Immoble' alineat a l'esquerra i 'Tornar' a la dreta.
 - El camp Comentari deixa de ser obligatori. Si no hi ha comentari en multlipes fitxers es posa la numeració igualment al comentari.
-- La Cédula i El Certificat, en aquesta pantalla, nomes es poden Visualitzar i Eliminar, ni Afegir ni Editar, això es farà desde la mateixa pantalla de Immobles.
+- La Cédula, el Certificat i el nou tipus de document 'Fitxa cadastral', en aquesta pantalla, nomes es poden Visualitzar i Eliminar, ni Afegir ni Editar, això es farà desde la mateixa pantalla de Immobles.
+
+### Resposta a Claude (pendent a 28/10/26):
+
+#### Què hi ha darrere de cada punt:
+1. Documents únics a l’edició d’immoble
+- El botonet amb tooltip.
+- Al Afegir i Editar nomes el comentari, la data la agafa de Immobles. A Fitxa Cadastral, com no hi ha data, oferir també la data.
+- Amb aquest sistema la App ja garantitza que seràn documewts únics, no cal fer cap validació adicional.
+
+#### Dos problemes tècnics que has de saber
+1. La taula documents_immoble s’ha de reconstruir:
+- Eliminem el check de la BD, així serà mes fàcil afegir documents nous en el futur.
+- Si s'ha de reconstruir per treure el NOT NULL, endevant.
+2. Un error de validació pot caure a l’altra pestanya:
+- D'acord.
+
+#### Decisions que només pots prendre tu
+1. D'acord, Afegir a l’esquerra i Tornar a la dreta.
+2. D'acord, Fitxa cadastral.
+3. Una migració nova (004).
+4. Un sol document per tipus, imposat per la BD: com he dit mes amunt, la funcionalitat de la App ja assegura que hi haurà un sol document.
+5. Què vol dir “Editar” d’un document únic: ja ho he dit mes amunt.
+6. Com s’afegeix un document únic: D'acord, però la data la tens a Immobles en dos dels casos.
+7. D'acord.
+8. D'acord.
+9. D'acord.
+10. D'acord.
 
 
+### Llista Immobles
+- Als Avisos falta posar el nº de avisos als contractes vigents, per exemple '2 avisos al últim contracte'.
 
 ## Correccions i Noves funcionalitats (notes disperses a ignorar per Claude)
 
