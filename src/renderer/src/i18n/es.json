@@ -154,12 +154,22 @@
       "data": "Fecha",
       "caducitat": "Caducidad",
       "id": "Id",
-      "avisos": "Avisos"      
+      "avisos": "Avisos",
+      "valCadastralTotal": "Valor catastral total (€)",
+      "valCadastralConstr": "Valor catastral de la construcción (€)",
+      "anyConstruccio": "Año de construcción",
+      "dataCompra": "Fecha de compra",
+      "valorCompra": "Valor de compra (€)",
+      "superficieUtil": "Superficie útil (m²)"            
     },
     "titol": "Inmueble",
     "subtitol": "Id {{id}}: {{adreca}}",
     "nouBoto": "Inmueble nuevo",    
     "validacio": {
+      "utilMajor": "La superficie útil no puede ser superior a la superficie.",
+      "construccioMajor": "El valor de la construcción no puede ser superior al valor catastral total.",
+      "anyInvalid": "Introduce un año entre 1800 y {{max}}.",
+      "compraAnterior": "La fecha de compra no puede ser anterior al año de construcción.",      
       "numero": "Introduce un número válido."
     },
     "noTrobat": "No se ha encontrado este inmueble.",

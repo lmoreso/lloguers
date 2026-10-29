@@ -12,7 +12,8 @@ import type { Immoble, ImmobleDades } from '../../../shared/tipus'
 import { aNumero, buitANull } from '../utils/formulari'
 
 // Els camps de text són sempre string al formulari; a la BD els buits són NULL.
-// Les dates són text ISO AAAA-MM-DD (o null), tal com les desa la BD.
+// Les dates són text ISO AAAA-MM-DD (o null), tal com les desa la BD. Els números (superfícies, imports i
+// l'any) són text, amb coma o punt decimal; es converteixen en desar.
 interface Valors {
   via: string
   num_via: string
@@ -24,13 +25,43 @@ interface Valors {
   ref_catastral: string
   superficie_m2: string
   superficie_pati: string
+  val_cadastral_total: string
+  val_cadastral_constr: string
+  any_construccio: string
+  data_compra: string | null
+  valor_compra: string
   cert_en_reg: string
   cert_en_class: string
   cert_en_data: string | null
   cert_en_caduc: string | null
   ced_hab_reg: string
+  ced_hab_superficie_util: string
   ced_hab_data: string | null
   ced_hab_caduc: string | null
+}
+
+// Camps de la primera pestanya ("Adreça i cadastre"). Els de la segona són la resta.
+const CAMPS_ADRECA = [
+  'via',
+  'num_via',
+  'pis',
+  'porta',
+  'codi_postal',
+  'localitat',
+  'provincia',
+  'ref_catastral',
+  'superficie_m2',
+  'superficie_pati',
+  'val_cadastral_total',
+  'val_cadastral_constr',
+  'any_construccio',
+  'data_compra',
+  'valor_compra'
+]
+
+// Pestanya on hi ha el primer camp amb error: si n'hi ha cap a la primera, aquesta; si no, la segona.
+function pestanyaDelPrimerError(errors: Record<string, unknown>): string {
+  return CAMPS_ADRECA.some((k) => k in errors) ? 'adreca' : 'certificat'
 }
 
 // Què rep la capçalera (que dibuixa la fitxa) del formulari.
@@ -65,6 +96,14 @@ function FormulariImmoble({
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const anyActual = new Date().getFullYear()
+
+  // Un nombre >= 0 o buit (els imports i les superfícies opcionals).
+  const nombreOpcional = (v: string): string | null => {
+    if (!v.trim()) return null
+    const n = aNumero(v)
+    return n === null || n < 0 ? t('immobles.validacio.numero') : null
+  }
 
   const form = useForm<Valors>({
     initialValues: {
@@ -78,11 +117,17 @@ function FormulariImmoble({
       ref_catastral: immoble?.ref_catastral ?? '',
       superficie_m2: String(immoble?.superficie_m2 ?? ''),
       superficie_pati: String(immoble?.superficie_pati ?? ''),
+      val_cadastral_total: String(immoble?.val_cadastral_total ?? ''),
+      val_cadastral_constr: String(immoble?.val_cadastral_constr ?? ''),
+      any_construccio: String(immoble?.any_construccio ?? ''),
+      data_compra: immoble?.data_compra ?? null,
+      valor_compra: String(immoble?.valor_compra ?? ''),
       cert_en_reg: immoble?.cert_en_reg ?? '',
       cert_en_class: immoble?.cert_en_class ?? '',
       cert_en_data: immoble?.cert_en_data ?? null,
       cert_en_caduc: immoble?.cert_en_caduc ?? null,
       ced_hab_reg: immoble?.ced_hab_reg ?? '',
+      ced_hab_superficie_util: String(immoble?.ced_hab_superficie_util ?? ''),
       ced_hab_data: immoble?.ced_hab_data ?? null,
       ced_hab_caduc: immoble?.ced_hab_caduc ?? null
     },
@@ -99,10 +144,42 @@ function FormulariImmoble({
         const n = aNumero(v)
         return n === null || n < 0 ? t('immobles.validacio.numero') : null
       },
-      superficie_pati: (v) => {
+      superficie_pati: nombreOpcional,
+      valor_compra: nombreOpcional,
+      val_cadastral_total: nombreOpcional,
+      // La construcció no pot valer més que el total (si hi són els dos).
+      val_cadastral_constr: (v, vals) => {
+        const e = nombreOpcional(v)
+        if (e) return e
+        const constr = aNumero(v)
+        const total = aNumero(vals.val_cadastral_total)
+        return constr !== null && total !== null && constr > total
+          ? t('immobles.validacio.construccioMajor')
+          : null
+      },
+      any_construccio: (v) => {
         if (!v.trim()) return null
-        const n = aNumero(v)
-        return n === null || n < 0 ? t('immobles.validacio.numero') : null
+        const n = Number(v)
+        return Number.isInteger(n) && n >= 1800 && n <= anyActual
+          ? null
+          : t('immobles.validacio.anyInvalid', { max: anyActual })
+      },
+      // La compra no pot ser anterior a l'1 de gener de l'any de construcció (si hi són els dos).
+      data_compra: (v, vals) => {
+        const any = Number(vals.any_construccio)
+        return v && vals.any_construccio.trim() && Number.isInteger(any) && v < `${any}-01-01`
+          ? t('immobles.validacio.compraAnterior')
+          : null
+      },
+      // La superfície útil no pot superar la superfície (si hi són les dues).
+      ced_hab_superficie_util: (v, vals) => {
+        const e = nombreOpcional(v)
+        if (e) return e
+        const util = aNumero(v)
+        const sup = aNumero(vals.superficie_m2)
+        return util !== null && sup !== null && util > sup
+          ? t('immobles.validacio.utilMajor')
+          : null
       }
     }
   })
@@ -128,12 +205,12 @@ function FormulariImmoble({
       ced_hab_reg: buitANull(v.ced_hab_reg),
       ced_hab_data: v.ced_hab_data,
       ced_hab_caduc: v.ced_hab_caduc,
-      ced_hab_superficie_util: immoble?.ced_hab_superficie_util ?? null,
-      val_cadastral_total: immoble?.val_cadastral_total ?? null,
-      val_cadastral_constr: immoble?.val_cadastral_constr ?? null,
-      any_construccio: immoble?.any_construccio ?? null,
-      data_compra: immoble?.data_compra ?? null,
-      valor_compra: immoble?.valor_compra ?? null
+      ced_hab_superficie_util: aNumero(v.ced_hab_superficie_util),
+      val_cadastral_total: aNumero(v.val_cadastral_total),
+      val_cadastral_constr: aNumero(v.val_cadastral_constr),
+      any_construccio: v.any_construccio.trim() ? Number(v.any_construccio) : null, // ja validat
+      data_compra: v.data_compra,
+      valor_compra: aNumero(v.valor_compra)
     }
     let desat: Immoble | null = null
     if (immoble) {
@@ -166,10 +243,10 @@ function FormulariImmoble({
       children: (
         <CanvisSenseDesar
           onDesar={async () => {
-            // Si hi ha errors de validació o el desat falla, ens quedem a la pantalla: es tanca el diàleg
-            // i els errors es veuen al formulari (tots els camps obligatoris són a la primera pestanya).
+            // Si hi ha errors de validació o el desat falla, ens quedem a la pantalla: es tanca el diàleg,
+            // es canvia a la pestanya del primer error i els errors es veuen al formulari.
             const validacio = form.validate()
-            if (validacio.hasErrors) onPestanya('adreca')
+            if (validacio.hasErrors) onPestanya(pestanyaDelPrimerError(validacio.errors))
             const desat = validacio.hasErrors ? null : await desarValors(form.values)
             modals.closeAll()
             if (desat !== null) accio()
@@ -201,8 +278,11 @@ function FormulariImmoble({
     <>
       {capcalera({ anarAmbGuarda, idFormulari: ID_FORMULARI, tornar })}
 
-      {/* Si la validació falla, es canvia a la primera pestanya: hi són tots els camps obligatoris. */}
-      <form id={ID_FORMULARI} onSubmit={form.onSubmit(desar, () => onPestanya('adreca'))}>
+      {/* Si la validació falla, es canvia a la pestanya del primer camp amb error. */}
+      <form
+        id={ID_FORMULARI}
+        onSubmit={form.onSubmit(desar, (errors) => onPestanya(pestanyaDelPrimerError(errors)))}
+      >
         <Tabs value={pestanya} onChange={(v) => v && onPestanya(v)} keepMounted>
           <Tabs.List>
             <Tabs.Tab value="adreca">{t('immobles.pestanyes.adreca')}</Tabs.Tab>
@@ -265,6 +345,33 @@ function FormulariImmoble({
                     label={t('immobles.camps.superficiePati')}
                     {...form.getInputProps('superficie_pati')}
                   />
+                  <div />
+                  <TextInput
+                    inputMode="decimal"
+                    label={t('immobles.camps.valCadastralTotal')}
+                    {...form.getInputProps('val_cadastral_total')}
+                  />
+                  <TextInput
+                    inputMode="decimal"
+                    label={t('immobles.camps.valCadastralConstr')}
+                    {...form.getInputProps('val_cadastral_constr')}
+                  />
+                  <TextInput
+                    inputMode="numeric"
+                    label={t('immobles.camps.anyConstruccio')}
+                    {...form.getInputProps('any_construccio')}
+                  />
+                  <DatePickerInput
+                    clearable
+                    valueFormat="DD/MM/YYYY"
+                    label={t('immobles.camps.dataCompra')}
+                    {...form.getInputProps('data_compra')}
+                  />
+                  <TextInput
+                    inputMode="decimal"
+                    label={t('immobles.camps.valorCompra')}
+                    {...form.getInputProps('valor_compra')}
+                  />
                 </SimpleGrid>
               </Fieldset>
             </Stack>
@@ -303,7 +410,11 @@ function FormulariImmoble({
                     label={t('immobles.camps.registre')}
                     {...form.getInputProps('ced_hab_reg')}
                   />
-                  <div />
+                  <TextInput
+                    inputMode="decimal"
+                    label={t('immobles.camps.superficieUtil')}
+                    {...form.getInputProps('ced_hab_superficie_util')}
+                  />
                   <DatePickerInput
                     clearable
                     valueFormat="DD/MM/YYYY"

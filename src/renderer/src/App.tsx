@@ -6,7 +6,7 @@ import Lloguers from './lloguers'
 
 function App(): React.JSX.Element {
   const { t } = useTranslation()
-  const opcioIni = 'Lloguers' as 'Inici' | 'Proves' | 'Lloguers'
+  const opcioIni = 'Proves' as 'Inici' | 'Proves' | 'Lloguers'
 
   const [mostrarProves, setMostrarProves] = useState(opcioIni === 'Proves')
   const [mostrarLloguers, setMostrarLloguers] = useState(opcioIni === 'Lloguers')

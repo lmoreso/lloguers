@@ -154,12 +154,22 @@
       "data": "Data",
       "caducitat": "Caducitat",
       "id": "Id",
-      "avisos": "Avisos"
+      "avisos": "Avisos",
+      "valCadastralTotal": "Valor cadastral total (€)",
+      "valCadastralConstr": "Valor cadastral de la construcció (€)",
+      "anyConstruccio": "Any de construcció",
+      "dataCompra": "Data de compra",
+      "valorCompra": "Valor de compra (€)",
+      "superficieUtil": "Superfície útil (m²)"      
     },
     "titol": "Immoble",
     "subtitol": "Id {{id}}: {{adreca}}",
     "nouBoto": "Immoble nou",    
     "validacio": {
+      "utilMajor": "La superfície útil no pot ser superior a la superfície.",
+      "construccioMajor": "El valor de la construcció no pot ser superior al valor cadastral total.",
+      "anyInvalid": "Introdueix un any entre 1800 i {{max}}.",
+      "compraAnterior": "La data de compra no pot ser anterior a l'any de construcció.",      
       "numero": "Introdueix un número vàlid."
     },
     "noTrobat": "No s'ha trobat aquest immoble.",
