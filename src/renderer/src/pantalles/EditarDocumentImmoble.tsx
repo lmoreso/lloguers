@@ -19,7 +19,7 @@ function EditarDocumentImmoble({ document, onDesat }: Props): React.JSX.Element 
   const { t } = useTranslation()
   const [tipus, setTipus] = useState<TipusDocumentImmoble>(document.tipus)
   const [data, setData] = useState<string | null>(document.data_document)
-  const [comentari, setComentari] = useState(document.comentaris)
+  const [comentari, setComentari] = useState(document.comentaris ?? '')
   const [error, setError] = useState<string | null>(null)
 
   async function desar(): Promise<void> {

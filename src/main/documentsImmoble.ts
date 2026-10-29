@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { db, docsDir } from './database'
 import { fitxerNoTrobat, nomSegur, rutaDins } from './fitxers'
-import { TIPUS_DOCUMENT_IMMOBLE } from '../shared/tipus'
+import { TIPUS_DOCUMENT_IMMOBLE, TIPUS_UNICS_IMMOBLE } from '../shared/tipus'
 import type { DocumentImmoble, DocumentImmobleDades } from '../shared/tipus'
 
 const COLUMNES = 'id, id_inmoble, tipus, nom_original, comentaris, data_document'
@@ -41,13 +41,15 @@ export async function adjuntarDocumentsImmoble(
     throw new Error('Tipus de document invàlid')
   }
   const comentari = typeof dades.comentaris === 'string' ? dades.comentaris.trim() : ''
-  if (!comentari) throw new Error('El comentari és obligatori')
+  // Els tipus únics admeten un sol document per immoble: al diàleg s'hi tria un sol fitxer.
+  const unic = (TIPUS_UNICS_IMMOBLE as readonly unknown[]).includes(dades.tipus)
+
   const data = dades.data_document ?? null
   if (data !== null && typeof data !== 'string') throw new Error('Data invàlida')
 
   const opcions: OpenDialogOptions = {
     title: typeof titolDialeg === 'string' ? titolDialeg : undefined,
-    properties: ['openFile', 'multiSelections']
+    properties: unic ? ['openFile'] : ['openFile', 'multiSelections']
   }
   const finestra = BrowserWindow.getFocusedWindow()
   const triats = finestra
@@ -62,8 +64,10 @@ export async function adjuntarDocumentsImmoble(
       .localeCompare(path.basename(b), undefined, { numeric: true, sensitivity: 'base' })
   )
   const n = origens.length
-  const comentariDe = (i: number): string =>
-    n === 1 ? comentari : `${String(i + 1).padStart(String(n).length, '0')}. ${comentari}`
+  const comentariDe = (i: number): string | null =>
+    n === 1
+      ? comentari || null
+      : `${String(i + 1).padStart(String(n).length, '0')}.${comentari ? ` ${comentari}` : ''}`
 
   // Tot o res: si un fitxer falla, es desfan les files i s'esborren els fitxers ja copiats.
   const carpeta = carpetaImmoble(idInmoble)
@@ -105,17 +109,19 @@ export async function adjuntarDocumentsImmoble(
   return ids.map((id) => obtenirDocumentImmoble(id) as DocumentImmoble)
 }
 
-// Canvia el tipus, la data i el comentari. El tipus i el comentari els valida el CHECK de la BD.
+// Canvia el tipus, la data i el comentari (opcional). El tipus ja no el valida la BD: el valida el Main.
 export function actualitzarDocumentImmoble(id: number, d: DocumentImmobleDades): void {
+  if (!d || !(TIPUS_DOCUMENT_IMMOBLE as readonly unknown[]).includes(d.tipus)) {
+    throw new Error('Tipus de document invàlid')
+  }
+  if (d.comentaris !== null && typeof d.comentaris !== 'string') {
+    throw new Error('Comentari invàlid')
+  }
+  const comentaris = typeof d.comentaris === 'string' ? d.comentaris.trim() || null : null
   db.prepare(
     `UPDATE documents_immoble SET tipus=@tipus, comentaris=@comentaris, data_document=@data_document
      WHERE id=@id`
-  ).run({
-    tipus: d.tipus,
-    comentaris: d.comentaris,
-    data_document: d.data_document ?? null,
-    id
-  })
+  ).run({ tipus: d.tipus, comentaris, data_document: d.data_document ?? null, id })
 }
 
 // Esborra la fila i el fitxer del disc. Si el fitxer ja no hi és, no és un error.

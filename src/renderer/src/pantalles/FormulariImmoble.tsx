@@ -127,7 +127,13 @@ function FormulariImmoble({
       cert_en_caduc: v.cert_en_caduc,
       ced_hab_reg: buitANull(v.ced_hab_reg),
       ced_hab_data: v.ced_hab_data,
-      ced_hab_caduc: v.ced_hab_caduc
+      ced_hab_caduc: v.ced_hab_caduc,
+      ced_hab_superficie_util: immoble?.ced_hab_superficie_util ?? null,
+      val_cadastral_total: immoble?.val_cadastral_total ?? null,
+      val_cadastral_constr: immoble?.val_cadastral_constr ?? null,
+      any_construccio: immoble?.any_construccio ?? null,
+      data_compra: immoble?.data_compra ?? null,
+      valor_compra: immoble?.valor_compra ?? null
     }
     let desat: Immoble | null = null
     if (immoble) {

@@ -10,6 +10,7 @@
     "desat": "Document desat.",
     "eliminat": "Document eliminat.",
     "tipus": {
+      "fitxa_cadastral": "Fitxa cadastral",      
       "certificat_energetic": "Certificat energètic",
       "cedula_habitabilitat": "Cèdula d'habitabilitat",
       "fotos": "Fotos",

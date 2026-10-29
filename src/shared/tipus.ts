@@ -20,6 +20,12 @@ export interface Immoble {
   ced_hab_reg: string | null
   ced_hab_data: string | null
   ced_hab_caduc: string | null
+  ced_hab_superficie_util: number | null
+  val_cadastral_total: number | null
+  val_cadastral_constr: number | null
+  any_construccio: number | null
+  data_compra: string | null // ISO AAAA-MM-DD
+  valor_compra: number | null
 }
 
 // Camps editables al formulari (sense id)
@@ -151,15 +157,24 @@ export interface DocumentLlistat extends DocumentContracte {
   tipus_classe: ClasseDocument
 }
 
-// Tipus de document d'un immoble: llista fixa (el nom visible surt de la traducció).
-// Afegir-ne un exigeix una migració nova (el CHECK de la taula).
+// Tipus de document d'un immoble: llista al codi (el nom visible surt de la traducció). La BD no els valida:
+// els valida el Main. Afegir-ne un és codi (aquí, als JSON i a la lògica que l'usi).
 export const TIPUS_DOCUMENT_IMMOBLE = [
   'certificat_energetic',
   'cedula_habitabilitat',
+  'fitxa_cadastral',
   'fotos',
   'altres'
 ] as const
 export type TipusDocumentImmoble = (typeof TIPUS_DOCUMENT_IMMOBLE)[number]
+
+// Tipus que admeten un sol document per immoble. Ho garanteix la pantalla (només s'hi pot afegir si no n'hi ha
+// cap), no la BD.
+export const TIPUS_UNICS_IMMOBLE = [
+  'certificat_energetic',
+  'cedula_habitabilitat',
+  'fitxa_cadastral'
+] as const
 
 // Un document adjunt d'un immoble. La ruta del fitxer no s'exposa: només la fa servir el Main.
 export interface DocumentImmoble {
@@ -167,7 +182,7 @@ export interface DocumentImmoble {
   id_inmoble: number
   tipus: TipusDocumentImmoble
   nom_original: string
-  comentaris: string
+  comentaris: string | null
   data_document: string | null // ISO AAAA-MM-DD
 }
 
