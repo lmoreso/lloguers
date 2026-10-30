@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react'
-import { ActionIcon, Button, Group, Menu, Table, Text, Title, Tooltip } from '@mantine/core'
+import { ActionIcon, Button, Group, Menu, Stack, Table, Text, Title, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import {
-  IconDots,
-  IconExternalLink,
-  IconFileText,
-  IconPencil,
-  IconPlus,
-  IconTrash
-} from '@tabler/icons-react'
+import { IconDots, IconExternalLink, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -17,9 +10,12 @@ import { formatData } from '../utils/dates'
 import { esOk } from '../utils/resultat'
 import AfegirDocumentImmoble from './AfegirDocumentImmoble'
 import EditarDocumentImmoble from './EditarDocumentImmoble'
+import { TIPUS_UNICS_IMMOBLE } from '../../../shared/tipus'
 import type { DocumentImmoble, Immoble } from '../../../shared/tipus'
 
 // Documents d'un immoble (/immobles/:id/documents). Les accions van a la capçalera, no a sota.
+// Els tipus únics (certificat, cèdula i fitxa cadastral) aquí només es poden visualitzar i eliminar: s'afegeixen
+// i s'editen des de l'edició de l'immoble.
 function DocumentsImmoble(): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -48,6 +44,16 @@ function DocumentsImmoble(): React.JSX.Element {
   }, [id, versio])
 
   const recarregar = (): void => setVersio((v) => v + 1)
+
+  const esUnic = (d: DocumentImmoble): boolean =>
+    (TIPUS_UNICS_IMMOBLE as readonly string[]).includes(d.tipus)
+
+  // La data d'un certificat o d'una cèdula és la de la seva secció a l'immoble; la dels altres tipus, la del document.
+  function dataDe(d: DocumentImmoble): string | null {
+    if (d.tipus === 'certificat_energetic') return immoble?.cert_en_data ?? null
+    if (d.tipus === 'cedula_habitabilitat') return immoble?.ced_hab_data ?? null
+    return d.data_document
+  }
 
   // S'obre amb l'aplicació del sistema. Si el fitxer ja no és al disc, esOk mostra l'error traduït.
   async function visualitzar(d: DocumentImmoble): Promise<void> {
@@ -101,27 +107,21 @@ function DocumentsImmoble(): React.JSX.Element {
 
       {immoble && (
         <>
-          <Group justify="space-between" align="flex-start" mb="md">
+          <Stack gap="sm" mb="md">
             <div>
               <Title order={2}>{t('documentsImmoble.titol')}</Title>
               <Text c="dimmed">{adreca(immoble)}</Text>
             </div>
-            <Group gap="xs">
+            {/* Mateixa fila que a l'edició d'immoble: Afegir a l'esquerra, Tornar a la dreta. */}
+            <Group justify="space-between">
               <Button leftSection={<IconPlus size={16} />} onClick={afegir}>
                 {t('comu.afegir')}
-              </Button>
-              <Button
-                variant="default"
-                leftSection={<IconFileText size={16} />}
-                onClick={() => navigate(`/immobles/${immoble.id}/contractes`)}
-              >
-                {t('contractes.titol')}
               </Button>
               <Button variant="default" onClick={() => navigate(`/immobles/${immoble.id}`)}>
                 {t('comu.tornar')}
               </Button>
             </Group>
-          </Group>
+          </Stack>
 
           {documents.length === 0 && <Text c="dimmed">{t('documentsImmoble.buit')}</Text>}
 
@@ -141,7 +141,7 @@ function DocumentsImmoble(): React.JSX.Element {
                   <Table.Tr key={d.id}>
                     <Table.Td>{t(`documentsImmoble.tipus.${d.tipus}`)}</Table.Td>
                     <Table.Td>{d.nom_original}</Table.Td>
-                    <Table.Td>{formatData(d.data_document)}</Table.Td>
+                    <Table.Td>{formatData(dataDe(d))}</Table.Td>
                     <Table.Td>{d.comentaris}</Table.Td>
                     <Table.Td style={{ width: 1 }}>
                       <Menu position="bottom-end" withinPortal>
@@ -159,12 +159,14 @@ function DocumentsImmoble(): React.JSX.Element {
                           >
                             {t('documentsImmoble.visualitzar')}
                           </Menu.Item>
-                          <Menu.Item
-                            leftSection={<IconPencil size={16} />}
-                            onClick={() => editar(d)}
-                          >
-                            {t('comu.editar')}
-                          </Menu.Item>
+                          {!esUnic(d) && (
+                            <Menu.Item
+                              leftSection={<IconPencil size={16} />}
+                              onClick={() => editar(d)}
+                            >
+                              {t('comu.editar')}
+                            </Menu.Item>
+                          )}
                           <Menu.Divider />
                           <Menu.Item
                             color="red"

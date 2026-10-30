@@ -176,6 +176,10 @@ export const TIPUS_UNICS_IMMOBLE = [
   'fitxa_cadastral'
 ] as const
 
+// Tipus que es poden afegir i editar des de la pantalla de documents de l'immoble (els únics es gestionen des
+// de l'edició de l'immoble).
+export const TIPUS_LLIURES_IMMOBLE: readonly TipusDocumentImmoble[] = ['fotos', 'altres']
+
 // Un document adjunt d'un immoble. La ruta del fitxer no s'exposa: només la fa servir el Main.
 export interface DocumentImmoble {
   id: number

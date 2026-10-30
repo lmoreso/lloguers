@@ -34,7 +34,7 @@
       "titol": "Afegir documents",
       "triar": "Triar fitxers",
       "dialeg": "Tria els documents a adjuntar",
-      "ajuda": "Obligatori. Si tries més d'un fitxer, s'hi afegirà un número al principi (1. …, 2. …)."
+      "ajuda": "Opcional. Si tries més d'un fitxer, s'hi afegirà un número al principi (1. …, 2. …)."
     },
     "editar": {
       "titol": "Editar document"
@@ -94,6 +94,12 @@
     "titol": "Quant a",
     "versio": "Versió",
     "descripcio": "Aplicació d'escriptori per gestionar immobles, inquilins i contractes de lloguer, amb la fiança i els documents adjunts de cada contracte.",
+    "caracteristiques": "Característiques principals",
+    "descripcio2": " - Crea i Edita Immobles. Adjunta-hi documents com la fitxa cadastral, el certificat energètic o la cèdula d'habitabilitat.",
+    "descripcio3": "L'aplicació t'avisarà quan un document estigui a punt de caducar o ja hagi caducat, o si tens pendent d'adjuntar algun document.",
+    "descripcio4": " - Crea i Edita Contractes. Gestiona les fiances del INCASOL.",
+    "descripcio5": "L'aplicació t'avisarà quan falti algún document, quan el contracte estigui a punt d'acabar o quan toqui revisar el lloguer.",
+    "descripcio6": " - Gestiona els inquilins i les seves dades. Adjunta-hi documents com el DNI, nómines o qualsevol altre document que vulguis.",
     "autor": "Autor",
     "tecnologies": "Tecnologies",
     "claudeAbans": "Desenvolupada amb l'ajuda de",
@@ -102,7 +108,10 @@
     "llicenciaAbans": "Programari de codi obert - ",
     "llicencia": "Llicència MIT",
     "gitHubTitol": "Col·labora i Comparteix",
-    "gitHubAbans": "Col·labora i comparteix el projecte a "
+    "gitHubAbans": "Col·labora i comparteix el projecte a ",
+    "disclaimerTitol": "Avís legal i limitació de responsabilitat",
+    "disclaimer": "Aquesta aplicació es proporciona «tal com és», sense garanties de cap tipus, expresses o implícites. L'autor no es fa responsable de possibles errors, pèrdues de dades, danys o perjudicis derivats del seu ús. L'usuari és responsable de verificar l'exactitud de la informació introduïda, mantenir còpies de seguretat i comprovar el compliment de la normativa legal vigent. Aquesta aplicació és una eina de gestió i no substitueix l'assessorament professional, jurídic, fiscal o immobiliari.",
+    "disclaimer2":  "L'usuari és l'únic responsable de les dades personals i dels documents que introdueixi o emmagatzemi a l'aplicació, així com de garantir que el seu tractament compleixi el Reglament general de protecció de dades (RGPD) i la Llei orgànica de protecció de dades personals i garantia dels drets digitals (LOPDGDD). Ha de garantir la licitud del tractament, la confidencialitat, la seguretat i l'accés restringit a aquestes dades, especialment quan continguin informació sensible o categories especials de dades. Així mateix, és responsabilitat seva mantenir el registre d'activitats de tractament quan sigui legalment exigible."
   },
   "inquilins": {
     "nou": "Nou inquilí",

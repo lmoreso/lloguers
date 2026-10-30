@@ -34,7 +34,7 @@
       "titol": "Añadir documentos",
       "triar": "Elegir archivos",
       "dialeg": "Elige los documentos a adjuntar",
-      "ajuda": "Obligatorio. Si eliges más de un archivo, se añadirá un número al principio (1. …, 2. …)."
+      "ajuda": "Opcional. Si eliges más de un archivo, se añadirá un número al principio (1. …, 2. …)."
     },
     "editar": {
       "titol": "Editar documento"
@@ -94,6 +94,12 @@
     "titol": "Acerca de",
     "versio": "Versión",
     "descripcio": "Aplicación de escritorio para gestionar inmuebles, inquilinos y contratos de alquiler, con la fianza y los documentos adjuntos de cada contrato.",
+    "caracteristiques": "Características principales",
+    "descripcio2": " - Crea y edita inmuebles. Adjunta documentos como la ficha catastral, el certificado energético o la cédula de habitabilidad.",
+    "descripcio3": "La aplicación te avisará cuando un documento esté a punto de caducar o ya haya caducado, o si tienes pendiente adjuntar algún documento.",
+    "descripcio4": " - Crea y edita contratos. Gestiona las fianzas del INCASÒL.",
+    "descripcio5": "La aplicación te avisará cuando falte algún documento, cuando el contrato esté a punto de finalizar o cuando toque revisar el alquiler.",
+    "descripcio6": " - Gestiona los inquilinos y sus datos. Adjunta documentos como el DNI, las nóminas o cualquier otro documento que quieras.",
     "autor": "Autor",
     "tecnologies": "Tecnologías",
     "claudeAbans": "Desarrollada con la ayuda de",
@@ -102,7 +108,10 @@
     "llicenciaAbans": "Software de código abierto - ",
     "llicencia": "Licencia MIT",
     "gitHubTitol": "Colabora i Comparte",
-    "gitHubAbans": "Colabora i comparte el proyecto en "
+    "gitHubAbans": "Colabora i comparte el proyecto en ",
+    "disclaimerTitol": "Aviso legal y limitación de responsabilidad",
+    "disclaimer": "Esta aplicación se proporciona «tal cual», sin garantías de ningún tipo, expresas o implícitas. El autor no se hace responsable de posibles errores, pérdidas de datos, daños o perjuicios derivados de su uso. El usuario es responsable de verificar la exactitud de la información introducida, mantener copias de seguridad y comprobar el cumplimiento de la normativa legal vigente. Esta aplicación es una herramienta de gestión y no sustituye el asesoramiento profesional, jurídico, fiscal o inmobiliario.",
+    "disclaimer2": "El usuario es el único responsable de los datos personales y de los documentos que introduzca o almacene en la aplicación, así como de garantizar que su tratamiento cumpla con el Reglamento General de Protección de Datos (RGPD) y la Ley Orgánica de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD). Debe garantizar la licitud del tratamiento, la confidencialidad, la seguridad y el acceso restringido a dichos datos, especialmente cuando contengan información sensible o categorías especiales de datos. Asimismo, es responsabilidad suya mantener el registro de actividades de tratamiento cuando sea legalmente exigible."
   },
   "inquilins": {
     "nou": "Nuevo inquilino",

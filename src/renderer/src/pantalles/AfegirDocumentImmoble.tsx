@@ -6,7 +6,7 @@ import { notifications } from '@mantine/notifications'
 import { IconPaperclip } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
-import { TIPUS_DOCUMENT_IMMOBLE } from '../../../shared/tipus'
+import { TIPUS_LLIURES_IMMOBLE } from '../../../shared/tipus'
 import type { TipusDocumentImmoble } from '../../../shared/tipus'
 
 interface Props {
@@ -14,8 +14,8 @@ interface Props {
   onAfegits: () => void // es crida quan s'ha adjuntat algun document
 }
 
-// Contingut de la finestra "Afegir documents": tipus, data (opcional) i comentari (obligatori), comuns
-// a tots els fitxers que es triïn. El diàleg de selecció s'obre al Main en prémer "Triar fitxers".
+// Contingut de la finestra "Afegir documents": tipus (fotos o altres), data i comentari (tots dos opcionals),
+// comuns a tots els fitxers que es triïn. El diàleg de selecció s'obre al Main en prémer "Triar fitxers".
 function AfegirDocumentImmoble({ idInmoble, onAfegits }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const [tipus, setTipus] = useState<TipusDocumentImmoble>('fotos')
@@ -48,7 +48,7 @@ function AfegirDocumentImmoble({ idInmoble, onAfegits }: Props): React.JSX.Eleme
       <Select
         allowDeselect={false}
         label={t('documentsImmoble.camps.tipus')}
-        data={TIPUS_DOCUMENT_IMMOBLE.map((c) => ({
+        data={TIPUS_LLIURES_IMMOBLE.map((c) => ({
           value: c,
           label: t(`documentsImmoble.tipus.${c}`)
         }))}
@@ -63,7 +63,6 @@ function AfegirDocumentImmoble({ idInmoble, onAfegits }: Props): React.JSX.Eleme
         onChange={setData}
       />
       <Textarea
-        withAsterisk
         autosize
         minRows={2}
         label={t('documentsImmoble.camps.comentaris')}
@@ -75,12 +74,7 @@ function AfegirDocumentImmoble({ idInmoble, onAfegits }: Props): React.JSX.Eleme
         <Button variant="default" disabled={adjuntant} onClick={() => modals.closeAll()}>
           {t('comu.cancellar')}
         </Button>
-        <Button
-          leftSection={<IconPaperclip size={16} />}
-          loading={adjuntant}
-          disabled={comentari.trim() === ''}
-          onClick={triar}
-        >
+        <Button leftSection={<IconPaperclip size={16} />} loading={adjuntant} onClick={triar}>
           {t('documentsImmoble.afegir.triar')}
         </Button>
       </Group>

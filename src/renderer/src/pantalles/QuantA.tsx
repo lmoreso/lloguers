@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Anchor, Badge, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core'
+import { Anchor, Badge, Fieldset, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import icona from '../assets/icon.png'
 import { esOk } from '../utils/resultat'
@@ -96,6 +96,114 @@ function QuantA(): React.JSX.Element {
 
       <Text>{t('quantA.descripcio')}</Text>
 
+      <Fieldset
+        legend={t('quantA.caracteristiques')}
+        fw={700}
+        styles={{
+          legend: {
+            fontSize: '16px',
+            fontWeight: 700
+          }
+        }}
+      >
+        <Text>{t('quantA.descripcio2')}</Text>
+        <Text>{t('quantA.descripcio3')}</Text>
+        <Text>{t('quantA.descripcio4')}</Text>
+        <Text>{t('quantA.descripcio5')}</Text>
+        <Text>{t('quantA.descripcio6')}</Text>
+      </Fieldset>
+      <Fieldset
+        legend={t('quantA.disclaimerTitol')}
+        fw={700}
+        styles={{
+          legend: {
+            fontSize: '16px',
+            fontWeight: 700
+          }
+        }}
+      >
+        <Text>{t('quantA.disclaimer')}</Text>
+        <Text>{t('quantA.disclaimer2')}</Text>
+      </Fieldset>
+      <Fieldset
+        legend={t('quantA.tecnologies')}
+        fw={700}
+        styles={{
+          legend: {
+            fontSize: '16px',
+            fontWeight: 700
+          }
+        }}
+      >
+        <div>
+          <Group gap="xs">
+            {TECNOLOGIES.map((x) => (
+              <Tooltip key={x.nom} label={x.label + ' (' + x.url + ')'}>
+                <Badge
+                  key={x.nom}
+                  component="button"
+                  type="button"
+                  variant="light"
+                  color="gray"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => obrir(x.url)}
+                >
+                  {x.nom}
+                </Badge>
+              </Tooltip>
+            ))}
+          </Group>
+        </div>
+
+        <Text mt={20}>
+          {t('quantA.claudeAbans')}{' '}
+          <Tooltip label={URL_CLAUDE}>
+            <Anchor component="button" type="button" onClick={() => obrir(URL_CLAUDE)}>
+              Claude
+            </Anchor>
+          </Tooltip>
+          {t('quantA.claudeDespres')}
+        </Text>
+
+        <div>
+          <Text fw={700} mt={15}>
+            {t('quantA.llicenciaTitol')}
+          </Text>
+          <Text mt={4}>
+            {t('quantA.llicenciaAbans')}
+            <Tooltip label="https://choosealicense.com/es/licenses/mit/">
+              <Anchor
+                component="button"
+                type="button"
+                onClick={() => obrir('https://choosealicense.com/es/licenses/mit/')}
+              >
+                {t('quantA.llicencia')}
+              </Anchor>
+            </Tooltip>
+            {'.'}
+          </Text>
+        </div>
+
+        <div>
+          <Text fw={700} mt={15}>
+            {t('quantA.gitHubTitol')}
+          </Text>
+          <Text mt={4}>
+            {t('quantA.gitHubAbans')}{' '}
+            <Tooltip label="https://github.com/lmoreso/lloguers">
+              <Anchor
+                component="button"
+                type="button"
+                onClick={() => obrir('https://github.com/lmoreso/lloguers')}
+              >
+                <IconBrandGithub size={16} /> {'GitHub'}
+              </Anchor>
+            </Tooltip>
+            {'.'}
+          </Text>
+        </div>
+      </Fieldset>
+
       <div>
         <Text fw={700}>{t('quantA.autor')}</Text>
         <Text>
@@ -105,73 +213,6 @@ function QuantA(): React.JSX.Element {
               {AUTOR}
             </Anchor>
           </Tooltip>
-        </Text>
-      </div>
-
-      <div>
-        <Text fw={700} mb={4}>
-          {t('quantA.tecnologies')}
-        </Text>
-        <Group gap="xs">
-          {TECNOLOGIES.map((x) => (
-            <Tooltip key={x.nom} label={x.label + ' (' + x.url + ')'}>
-              <Badge
-                key={x.nom}
-                component="button"
-                type="button"
-                variant="light"
-                color="gray"
-                style={{ cursor: 'pointer' }}
-                onClick={() => obrir(x.url)}
-              >
-                {x.nom}
-              </Badge>
-            </Tooltip>
-          ))}
-        </Group>
-      </div>
-
-      <Text>
-        {t('quantA.claudeAbans')}{' '}
-        <Tooltip label={URL_CLAUDE}>
-          <Anchor component="button" type="button" onClick={() => obrir(URL_CLAUDE)}>
-            Claude
-          </Anchor>
-        </Tooltip>
-        {t('quantA.claudeDespres')}
-      </Text>
-
-      <div>
-        <Text fw={700}>{t('quantA.llicenciaTitol')}</Text>
-        <Text>
-          {t('quantA.llicenciaAbans')}
-          <Tooltip label="https://choosealicense.com/es/licenses/mit/">
-            <Anchor
-              component="button"
-              type="button"
-              onClick={() => obrir('https://choosealicense.com/es/licenses/mit/')}
-            >
-              {t('quantA.llicencia')}
-            </Anchor>
-          </Tooltip>
-          {'.'}
-        </Text>
-      </div>
-
-      <div>
-        <Text fw={700}>{t('quantA.gitHubTitol')}</Text>
-        <Text>
-          {t('quantA.gitHubAbans')}{' '}
-          <Tooltip label="https://github.com/lmoreso/lloguers">
-            <Anchor
-              component="button"
-              type="button"
-              onClick={() => obrir('https://github.com/lmoreso/lloguers')}
-            >
-              <IconBrandGithub size={16} /> {'GitHub'}
-            </Anchor>
-          </Tooltip>
-          {'.'}
         </Text>
       </div>
     </Stack>
