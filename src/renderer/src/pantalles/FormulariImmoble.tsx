@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Fieldset, SimpleGrid, Stack, Tabs, TextInput } from '@mantine/core'
+import { useEffect, useState } from 'react'
+import { Fieldset, Group, SimpleGrid, Stack, Tabs, TextInput } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
@@ -8,8 +8,14 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import CanvisSenseDesar from '../components/CanvisSenseDesar'
 import { esOk } from '../utils/resultat'
-import type { Immoble, ImmobleDades } from '../../../shared/tipus'
+import type {
+  DocumentImmoble,
+  Immoble,
+  ImmobleDades,
+  TipusDocumentImmoble
+} from '../../../shared/tipus'
 import { aNumero, buitANull } from '../utils/formulari'
+import DocumentUnicImmoble from './DocumentUnicImmoble'
 
 // Els camps de text són sempre string al formulari; a la BD els buits són NULL.
 // Les dates són text ISO AAAA-MM-DD (o null), tal com les desa la BD. Els números (superfícies, imports i
@@ -97,6 +103,40 @@ function FormulariImmoble({
   const { t } = useTranslation()
   const navigate = useNavigate()
   const anyActual = new Date().getFullYear()
+
+  // Documents de l'immoble (els de tipus únic són els que es mostren a les icones de les seccions). Es desen a
+  // l'instant i no formen part del formulari: no afecten el diàleg de canvis sense desar.
+  const [documents, setDocuments] = useState<DocumentImmoble[]>([])
+  const [versioDocs, setVersioDocs] = useState(0)
+  const idImmoble = immoble?.id ?? null
+
+  useEffect(() => {
+    if (idImmoble === null) return
+    let cancelat = false
+    window.api.documentsImmoble.obtenir(idImmoble).then((resposta) => {
+      if (cancelat) return
+      if (esOk(resposta)) setDocuments(resposta.dades)
+    })
+    // Si el component es desmunta abans que arribi la resposta, no s'actualitza l'estat.
+    return () => {
+      cancelat = true
+    }
+  }, [idImmoble, versioDocs])
+
+  // Títol d'una secció amb la icona del seu document únic al costat.
+  function legenda(titol: string, tipus: TipusDocumentImmoble): React.ReactNode {
+    return (
+      <Group gap={6} wrap="nowrap">
+        <span>{titol}</span>
+        <DocumentUnicImmoble
+          idInmoble={idImmoble}
+          tipus={tipus}
+          doc={documents.find((d) => d.tipus === tipus)}
+          onCanvi={() => setVersioDocs((v) => v + 1)}
+        />
+      </Group>
+    )
+  }
 
   // Un nombre >= 0 o buit (els imports i les superfícies opcionals).
   const nombreOpcional = (v: string): string | null => {
@@ -327,7 +367,7 @@ function FormulariImmoble({
                 </SimpleGrid>
               </Fieldset>
 
-              <Fieldset legend={t('immobles.seccions.cadastre')}>
+              <Fieldset legend={legenda(t('immobles.seccions.cadastre'), 'fitxa_cadastral')}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }}>
                   <TextInput
                     withAsterisk
@@ -379,7 +419,7 @@ function FormulariImmoble({
 
           <Tabs.Panel value="certificat" pt="md">
             <Stack>
-              <Fieldset legend={t('immobles.seccions.certificat')}>
+              <Fieldset legend={legenda(t('immobles.seccions.certificat'), 'certificat_energetic')}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }}>
                   <TextInput
                     label={t('immobles.camps.registre')}
@@ -404,7 +444,7 @@ function FormulariImmoble({
                 </SimpleGrid>
               </Fieldset>
 
-              <Fieldset legend={t('immobles.seccions.cedula')}>
+              <Fieldset legend={legenda(t('immobles.seccions.cedula'), 'cedula_habitabilitat')}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }}>
                   <TextInput
                     label={t('immobles.camps.registre')}

@@ -22,6 +22,14 @@
       "data": "Data del document",
       "comentaris": "Comentaris"
     },
+    "unic": {
+      "afegirTitol": "Afegir: {{tipus}}",
+      "editarTitol": "Editar: {{tipus}}",
+      "dialeg": "Tria el document a adjuntar",
+      "triar": "Triar fitxer",
+      "amb": "Document adjuntat",
+      "sense": "Sense document adjuntat"
+    },    
     "afegir": {
       "titol": "Afegir documents",
       "triar": "Triar fitxers",

@@ -22,6 +22,14 @@
       "data": "Fecha del documento",
       "comentaris": "Comentarios"
     },
+    "unic": {
+      "afegirTitol": "Añadir: {{tipus}}",
+      "editarTitol": "Editar: {{tipus}}",
+      "dialeg": "Elige el documento a adjuntar",
+      "triar": "Elegir archivo",
+      "amb": "Documento adjuntado",
+      "sense": "Sin documento adjuntado"
+    },    
     "afegir": {
       "titol": "Añadir documentos",
       "triar": "Elegir archivos",
