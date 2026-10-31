@@ -80,7 +80,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 23.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus) i fase 2 (devolució de la fiança). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22) i els documents d'immoble (23). **La BD és a `user_version = 3`.** L'empaquetat s'ha provat fins al pas 21 (`.deb` v1.0.2 a l'anfitrió, amb dades reals); **els passos 22 i 23 no s'han empaquetat encara**.
+**Fases A, B i C fetes; Fase D feta fins al pas 24.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus) i fase 2 (devolució de la fiança). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23) i els camps nous i els documents únics d'immoble (24). **La BD és a `user_version = 4`.** L'empaquetat s'ha provat fins al pas 21 (`.deb` v1.0.2 a l'anfitrió, amb dades reals); **els passos 22 a 24 no s'han empaquetat encara**.
 
 ### Fase A: base (feta)
 
@@ -246,13 +246,17 @@ a **tots**, Editar i (després d'una línia) Eliminar en vermell. Les confirmaci
 - **Llista d'Immobles**: columna Id, "Avisos" en lloc de "Caducitats", menú d'accions (Contractes, Documents, Editar, Eliminar) i
   l'etiqueta **"Contractes amb avisos"** quan algun dels contractes que surten a "Últims contractes" té algun avís. Les alertes de
   l'immoble són a `utils/avisosImmoble.ts`.
-- **Edició d'immoble** (`FitxaImmoble.tsx` + `FormulariImmoble.tsx`): capçalera amb títol "Immoble" i subtítol "Id N: adreça" (o "Nou
-  immoble"), barra taronja amb les caducitats i l'avís dels contractes, i botons Contractes, Documents, Immoble nou i Eliminar. **Desar es
-  queda a la pantalla** (refresca subtítol i avisos); un immoble nou passa a `/immobles/:id`. Si hi ha canvis sense desar
-  (`form.isDirty()`), els botons de la capçalera preguntan (`CanvisSenseDesar.tsx`: Desar i continuar / Descartar / Cancel·lar). **No
-  cobreix el menú lateral ni `Ctrl+R`**: `HashRouter` no té `useBlocker` (cal un router de dades).
+- **Edició d'immoble** (`FitxaImmoble.tsx` + `FormulariImmoble.tsx`): títol "Editar immoble" amb subtítol "Id N: adreça" (o "Nou
+  immoble", sense subtítol); barra taronja amb les caducitats i l'avís dels contractes; **dues pestanyes** ("Adreça i cadastre" i
+  "Certificat i cèdula") amb la capçalera visible a totes dues; **una sola fila de botons** a dalt (Contractes, Documents, Immoble nou i
+  Eliminar a l'esquerra; **Tornar i Desar a la dreta**) i res a sota. El botó Desar queda enllaçat amb el formulari per l'atribut `form`.
+  **Desar es queda a la pantalla** (refresca subtítol i avisos; la pestanya activa viu a la fitxa perquè es conservi); un immoble nou
+  passa a `/immobles/:id`. **Intro** desa i **Escape** fa el mateix que Tornar (no actua amb un diàleg o un calendari obert). Si hi ha
+  canvis sense desar (`form.isDirty()`), Tornar i els botons Contractes, Documents i Immoble nou preguntan (`CanvisSenseDesar.tsx`:
+  Desar i continuar / Descartar / Cancel·lar). **No cobreix el menú lateral ni `Ctrl+R`**: `HashRouter` no té `useBlocker` (cal un router
+  de dades). Si la validació falla, el formulari canvia a la pestanya del primer camp amb error.
 - **A revisar (decisió de l'usuari)**: la navegació entre pantalles, el botó "Descartar" (resulta confús) i els botons Desar i Cancel·lar
-  a sota dels formularis (Immobles, Contractes), que es perden si el formulari és llarg.
+  a sota del formulari de Contractes (a Immobles ja són a la capçalera), que es perden si el formulari és llarg.
 
 **Pas 23: documents de l'immoble, fet.**
 
@@ -270,7 +274,33 @@ a **tots**, Editar i (després d'una línia) Eliminar en vermell. Les confirmaci
 - **UI**: `DocumentsImmoble.tsx` a `/immobles/:id/documents` (capçalera amb Afegir, Contractes i Tornar; cap botó a sota; llista amb menú
   Visualitzar, Editar, Eliminar), `AfegirDocumentImmoble.tsx` (el botó per triar fitxers està desactivat fins que hi ha comentari) i
   `EditarDocumentImmoble.tsx` (tipus, data i comentari; el fitxer no se substitueix). Entrades al menú d'Immobles i botó Documents a l'edició.
-  La confirmació d'eliminar un immoble avisa que s'esborren també els documents.
+  La confirmació d'eliminar un immoble avisa que s'esborren també els documents. (El `CHECK` de tipus, el comentari obligatori i la
+  pantalla tal com és aquí van canviar al pas 24.)
+
+**Pas 24: camps nous i documents únics d'immoble, fet.**
+
+- **Migració `004_camps_immoble_documents.sql`**: sis columnes noves a `inmobles`, sense `CHECK` (les validacions són a l'app i al Main):
+  `val_cadastral_total`, `val_cadastral_constr`, `any_construccio`, `data_compra`, `valor_compra` i `ced_hab_superficie_util`. I
+  `documents_immoble` es **reconstrueix**: sense `CHECK` de tipus (el tipus el valida el Main) i amb el comentari opcional; es copien
+  les files amb els **mateixos `id`** (el nom del fitxer al disc en porta el prefix) i es **conserva el comptador d'`AUTOINCREMENT`**
+  (vegeu la incidència 18). `user_version = 4`. Provada sobre còpies i des de zero.
+- **Tipus** (`tipus.ts`): `TIPUS_DOCUMENT_IMMOBLE` (ara cinc, amb `fitxa_cadastral`), `TIPUS_UNICS_IMMOBLE` (certificat energètic, cèdula
+  d'habitabilitat i fitxa cadastral: un sol document per immoble, garantit només per l'app) i `TIPUS_LLIURES_IMMOBLE` (fotos i altres).
+- **Backend**: `src/main/validacionsImmoble.ts` (`validarImmoble`): superfície útil <= superfície; valor cadastral de la construcció <= total;
+  data de compra >= 1 de gener de l'any de construcció (cada regla només si hi són els dos camps); any entre 1800 i l'any actual; imports >= 0.
+  `inmobles.ts` desa els camps nous (un objecte sense ells es desa amb `NULL`). `documentsImmoble.ts`: comentari opcional; amb diversos
+  fitxers sense comentari es numera igualment (`1.`, `2.`...); un tipus únic només deixa triar un fitxer al diàleg; `actualitzar` valida el tipus.
+- **Formulari d'immoble**: els camps nous (Cadastre: valors cadastrals, any, data i valor de compra; Cèdula: superfície útil) i les mateixes
+  validacions, amb l'error al camp que sobra.
+- **Documents únics a l'edició** (`DocumentUnicImmoble.tsx`, `AfegirDocumentUnic.tsx`, `EditarDocumentUnic.tsx`): una icona de clip al costat del
+  títol de Cadastre, Certificat i Cèdula, amb un menú (sense document: Afegir; amb document: Visualitzar, Editar i Eliminar). Afegir i Editar
+  demanen només el comentari (opcional) i, a la fitxa cadastral, la data (els altres dos tipus fan servir la de la secció). Es desen a
+  l'instant, independentment de Desar; en un immoble nou, la icona està desactivada.
+- **Pantalla de documents**: sense botó Contractes; Afegir (esquerra) i Tornar (dreta) a la capçalera; comentari opcional; Afegir i Editar només
+  ofereixen Fotos i Altres; els tres tipus únics només es poden visualitzar i eliminar; la columna Data mostra la de la secció de l'immoble
+  per al certificat i la cèdula.
+- Provat des de les DevTools: validacions de cada regla (límits inclosos), objecte sense camps nous, numeració, tipus únic amb un sol fitxer,
+  `actualitzar` amb tipus invàlid, comentari en blanc i data mal escrita.
 
 ### Fase E: empaquetat (feta al portàtil)
 
@@ -297,34 +327,39 @@ Al portàtil (14-10-2026):
 
 ### Pendent de confirmar
 
-- **Commit** del pas 23-3 (UI dels documents d'immoble) i d'aquest `PROGRES.md`; `git push`.
-- **`NOTES.md`**: afegir a "Modificar Gestió de Immobles" els blocs "Decisions (tancades)" i "Disseny de la UI (pendent de revisar)", i
-  actualitzar el punt dels documents (comentari obligatori; una fila per fitxer amb numeració). Marcar els passos 20 a 23.
-- **Anfitrió (dades reals)**: quan s'hi instal·li una versió nova, fer abans una còpia de seguretat de `~/Lloguers/lloguers.sqlite`; la
-  migració 003 s'hi aplicarà sola en la primera arrencada (només afegeix una taula).
+- **Commit** del pas 24-5 i d'aquest `PROGRES.md`; `git push`.
+- **`NOTES.md`**: afegir a "Modificar Gestió de Immobles" els blocs "Decisions (tancades)", "Documents únics i camps nous d'immoble
+  (decisions tancades)" i "Disseny de la UI (pendent de revisar)", l'estat de l'edició d'immoble (pestanyes, botons a la capçalera, Escape i
+  Intro) i actualitzar el punt dels documents (comentari opcional; una fila per fitxer amb numeració). Marcar els passos 20 a 24.
+- **Anfitrió (dades reals)**: quan s'hi instal·li una versió nova, fer abans una còpia de seguretat de `~/Lloguers/lloguers.sqlite`; les
+  migracions 003 i 004 s'hi aplicaran soles en la primera arrencada (la 004 reconstrueix `documents_immoble`, que allà serà buida).
 - **Portàtil**: `git pull`, `npm install`, `npm install-scripts ls`, i **esborrar la seva BD de proves** (té la 002 antiga i contractes de
   prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`, esborrar `-wal`/`-shm` i arrencar perquè l'app la creï amb la
-  001 + 002 + 003. Comprovar `user_version = 3`, 7 tipus i que `'2025-1-1'` es rebutja.
+  001 + 002 + 003 + 004. Comprovar `user_version = 4`, 7 tipus i que `'2025-1-1'` es rebutja.
 - **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes i documents; en aquest ordre invers per les claus
   foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/`
-  (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/provaDocs` i `/tmp/provaImm` són temporals.
+  (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/provaDocs`, `/tmp/provaImm` i `/tmp/provaImm2` són temporals.
 - Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
 
 ## Pròxim pas
 
-Cap pas en curs: el bloc "Modificar Gestió de Immobles" de `NOTES.md` està complet. Opcions, per decidir amb l'usuari:
+Cap pas en curs. Opcions, per decidir amb l'usuari:
 
-**1. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): navegació entre pantalles, el botó "Descartar" del diàleg de
-canvis sense desar, i els botons Desar i Cancel·lar a sota dels formularis d'Immobles i Contractes (moure'ls a la capçalera).
+**1. Aplicar als contractes el mateix criteri que a Immobles**: el formulari de contracte (`FormulariContracte.tsx` + `FitxaContracte.tsx`)
+encara té Cancel·lar i Desar a sota. La capçalera la dibuixa `FitxaContracte` i el formulari té pestanyes (Dades i Documents), així que el
+disseny és una mica diferent (cal decidir què fa Desar a la pestanya Documents).
 
-**2. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar, com es va fer amb els
+**2. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): la navegació entre pantalles i el botó "Descartar" del diàleg de
+canvis sense desar.
+
+**3. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar, com es va fer amb els
 contractes): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable; els documents no es mouen perquè van
-per `id_contracte`), historial de revisions de lloguer, canvi de signants (annex).
+per `id_contracte`; el trigger de solapament ja valida el nou immoble), historial de revisions de lloguer, canvi de signants (annex).
 
-**3. Nova publicació**: pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el `.deb`
-(la migració 003 s'hi aplicarà).
+**4. Nova publicació**: pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el `.deb`
+(les migracions 003 i 004 s'hi aplicaran).
 
-**4. Altres de `NOTES.md`** (la secció de notes disperses, que l'usuari marca "a ignorar per Claude": només si ell les demana): propietaris
+**5. Altres de `NOTES.md`** (la secció de notes disperses, que l'usuari marca "a ignorar per Claude": només si ell les demana): propietaris
 dels immobles, documents d'inquilins, configuració de la ruta de la BD...
 
 ## Versions reals vs. la guia
@@ -461,12 +496,22 @@ branca. Solució: declarar el tipus del resultat, `dades.flatMap<Fila>(...)`.
 forana. Solució: filtrar per una clau única (la referència cadastral) i provar-ho sobre una BD des de zero. A les proves amb recompte fix
 (`dades[9]`), usar `.at(-1)` i `length`: el diàleg del sistema recorda l'última carpeta i es pot triar un altre nombre de fitxers.
 
+### 18. Reconstruir una taula `AUTOINCREMENT` reinicia el comptador
+
+Recrear una taula amb `AUTOINCREMENT` (crear la nova, copiar les files, esborrar la vella i reanomenar) deixa `sqlite_sequence` al màxim
+dels `id` copiats: si n'havies esborrat els últims, els números es tornarien a reutilitzar, i en un camp com `documents_immoble` (el nom del
+fitxer al disc en porta l'`id`) això podria barrejar fitxers. Solució (migració 004): guardar el valor d'abans en una taula temporal i
+restaurar-lo amb un `UPDATE sqlite_sequence`. Es comprova comparant `SELECT seq FROM sqlite_sequence` abans i després.
+
 ## Altres pendents
 
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD
   (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`/`registrarDevolucio`/`adjuntarDocuments`/`adjuntarDocumentsImmoble`).
   Només cosmètic.
 - Configuració només té el selector d'idioma.
+- El formulari de contracte encara té Cancel·lar i Desar a sota (vegeu "Pròxim pas").
+- Les validacions dels camps nous d'immoble (superfície útil, valors cadastrals, any i data de compra) són a l'app i al Main, no a la BD (decisió de l'usuari).
+- Si una BD de proves té dos documents del mateix tipus únic en un immoble, el menú de l'edició en mostra el primer; no hi ha cap validació.
 - Pantalla per crear i editar tipus de document (a Configuració): fora de la fase 1. Quan es faci, caldrà decidir si es pot
   esborrar l'últim tipus d'una classe amb lògica (el sembrat el recrea a l'arrencada).
 - Els noms dels tipus de document sembrats queden en l'idioma del primer arrencat (són dada de l'usuari).
@@ -488,6 +533,5 @@ forana. Solució: filtrar per una clau única (la referència cadastral) i prova
 
 ## Git
 
-- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit confirmat: "Migració 003: documents_immoble" i
-  els del backend dels documents d'immoble (WIP). Queda per confirmar el de la UI dels documents d'immoble i el d'aquest `PROGRES.md`
-  (vegeu "Pendent de confirmar").
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últims commits confirmats: la migració 004 i les parts del pas 24 fins al
+  24-4; queda per confirmar el del pas 24-5 i el d'aquest `PROGRES.md` (vegeu "Pendent de confirmar").

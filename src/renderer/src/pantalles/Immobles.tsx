@@ -108,10 +108,10 @@ function Immobles(): React.JSX.Element {
             {immobles.map((i) => (
               <Table.Tr key={i.id}>
                 <Table.Td>
-                  <Tooltip label={t('comu.editar')}>
+                  <Tooltip label={t('immobles.editar')}>
                     <ActionIcon
                       variant="subtle"
-                      aria-label={t('comu.editar')}
+                      aria-label={t('immobles.editar')}
                       onClick={() => navigate(`/immobles/${i.id}`)}
                     >
                       <IconPencil size={18} />
@@ -147,6 +147,13 @@ function Immobles(): React.JSX.Element {
                       </Tooltip>
                     </Menu.Target>
                     <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<IconPencil size={16} />}
+                        onClick={() => navigate(`/immobles/${i.id}`)}
+                      >
+                        {t('immobles.editar')}
+                      </Menu.Item>
+                      <Menu.Divider />
                       <Menu.Item
                         leftSection={<IconFileText size={16} />}
                         onClick={() => navigate(`/immobles/${i.id}/contractes`)}

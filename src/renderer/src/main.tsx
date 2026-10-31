@@ -17,6 +17,10 @@ import i18n from './i18n'
 import type { Idioma } from '../../shared/tipus'
 import { CLASSES_DOCUMENT } from '../../shared/tipus'
 import type { NomsClasses } from '../../shared/tipus'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+dayjs.extend(customParseFormat)
 
 async function arrencar(): Promise<void> {
   // 1. Es demana la configuració al Main abans de pintar res.

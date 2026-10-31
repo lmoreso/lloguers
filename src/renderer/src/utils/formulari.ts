@@ -7,3 +7,9 @@ export function aNumero(s: string): number | null {
   const n = Number(net)
   return net !== '' && Number.isFinite(n) ? n : null
 }
+
+// Valor d'un camp numèric (NumberInput): un número, o un text mentre s'escriu o si és buit.
+export function aNumeroForm(v: number | string): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  return aNumero(v)
+}
