@@ -101,36 +101,36 @@ function QuantA(): React.JSX.Element {
         fw={700}
         styles={{
           legend: {
-            fontSize: '16px',
+            fontSize: '14px',
             fontWeight: 700
           }
         }}
       >
-        <Text>{t('quantA.descripcio2')}</Text>
-        <Text>{t('quantA.descripcio3')}</Text>
-        <Text>{t('quantA.descripcio4')}</Text>
-        <Text>{t('quantA.descripcio5')}</Text>
-        <Text>{t('quantA.descripcio6')}</Text>
+        <Text fz="sm">{t('quantA.descripcio2')}</Text>
+        <Text fz="sm">{t('quantA.descripcio3')}</Text>
+        <Text fz="sm">{t('quantA.descripcio4')}</Text>
+        <Text fz="sm">{t('quantA.descripcio5')}</Text>
+        <Text fz="sm">{t('quantA.descripcio6')}</Text>
       </Fieldset>
-      <Fieldset
-        legend={t('quantA.disclaimerTitol')}
-        fw={700}
-        styles={{
-          legend: {
-            fontSize: '16px',
-            fontWeight: 700
-          }
-        }}
-      >
-        <Text>{t('quantA.disclaimer')}</Text>
-        <Text>{t('quantA.disclaimer2')}</Text>
-      </Fieldset>
+
+      <div>
+        <Text fw={700}>{t('quantA.autor')}</Text>
+        <Text>
+          {'© 2026 - '}
+          <Tooltip label={URL_AUTOR}>
+            <Anchor component="button" type="button" onClick={() => obrir(URL_AUTOR)}>
+              {AUTOR}
+            </Anchor>
+          </Tooltip>
+        </Text>
+      </div>
+
       <Fieldset
         legend={t('quantA.tecnologies')}
         fw={700}
         styles={{
           legend: {
-            fontSize: '16px',
+            fontSize: '14px',
             fontWeight: 700
           }
         }}
@@ -138,7 +138,7 @@ function QuantA(): React.JSX.Element {
         <div>
           <Group gap="xs">
             {TECNOLOGIES.map((x) => (
-              <Tooltip key={x.nom} label={x.label + ' (' + x.url + ')'}>
+              <Tooltip key={x.nom} label={x.label + ' (' + x.url + ')'} w={300} multiline>
                 <Badge
                   key={x.nom}
                   component="button"
@@ -155,29 +155,33 @@ function QuantA(): React.JSX.Element {
           </Group>
         </div>
 
-        <Text mt={20}>
+        <Text mt={20} fz="sm">
           {t('quantA.claudeAbans')}{' '}
           <Tooltip label={URL_CLAUDE}>
             <Anchor component="button" type="button" onClick={() => obrir(URL_CLAUDE)}>
-              Claude
+              <Text span fz="sm">
+                Claude
+              </Text>
             </Anchor>
           </Tooltip>
           {t('quantA.claudeDespres')}
         </Text>
 
         <div>
-          <Text fw={700} mt={15}>
+          <Text fw={700} mt={15} fz="sm">
             {t('quantA.llicenciaTitol')}
           </Text>
           <Text mt={4}>
-            {t('quantA.llicenciaAbans')}
+            <Text span fz="sm">
+              {t('quantA.llicenciaAbans')}
+            </Text>
             <Tooltip label="https://choosealicense.com/es/licenses/mit/">
               <Anchor
                 component="button"
                 type="button"
                 onClick={() => obrir('https://choosealicense.com/es/licenses/mit/')}
               >
-                {t('quantA.llicencia')}
+                <Text fz="sm">{t('quantA.llicencia')}</Text>
               </Anchor>
             </Tooltip>
             {'.'}
@@ -185,10 +189,10 @@ function QuantA(): React.JSX.Element {
         </div>
 
         <div>
-          <Text fw={700} mt={15}>
+          <Text fw={700} mt={15} fz="sm">
             {t('quantA.gitHubTitol')}
           </Text>
-          <Text mt={4}>
+          <Text mt={4} fz="sm">
             {t('quantA.gitHubAbans')}{' '}
             <Tooltip label="https://github.com/lmoreso/lloguers">
               <Anchor
@@ -196,7 +200,10 @@ function QuantA(): React.JSX.Element {
                 type="button"
                 onClick={() => obrir('https://github.com/lmoreso/lloguers')}
               >
-                <IconBrandGithub size={16} /> {'GitHub'}
+                <IconBrandGithub size={14} />
+                <Text span fz="sm">
+                  {' GitHub'}
+                </Text>
               </Anchor>
             </Tooltip>
             {'.'}
@@ -204,17 +211,19 @@ function QuantA(): React.JSX.Element {
         </div>
       </Fieldset>
 
-      <div>
-        <Text fw={700}>{t('quantA.autor')}</Text>
-        <Text>
-          {'© 2026 - '}
-          <Tooltip label={URL_AUTOR}>
-            <Anchor component="button" type="button" onClick={() => obrir(URL_AUTOR)}>
-              {AUTOR}
-            </Anchor>
-          </Tooltip>
-        </Text>
-      </div>
+      <Fieldset
+        legend={t('quantA.disclaimerTitol')}
+        fw={700}
+        styles={{
+          legend: {
+            fontSize: '14px',
+            fontWeight: 700
+          }
+        }}
+      >
+        <Text fz="sm">{t('quantA.disclaimer')}</Text>
+        <Text fz="sm">{t('quantA.disclaimer2')}</Text>
+      </Fieldset>
     </Stack>
   )
 }

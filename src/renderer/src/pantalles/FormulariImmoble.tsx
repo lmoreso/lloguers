@@ -377,9 +377,20 @@ function FormulariImmoble({
                   <TextInput
                     withAsterisk
                     inputMode="decimal"
-                    label={t('immobles.camps.superficie')}
+                    label={t('immobles.camps.superficie_m2')}
                     {...form.getInputProps('superficie_m2')}
                   />
+                  {/* <NumberInput
+                    withAsterisk
+                    label={t('immobles.camps.superficie')}
+                    suffix=" m2"
+                    decimalScale={2}
+                    decimalSeparator=","
+                    thousandSeparator="."
+                    fixedDecimalScale
+                    hideControls
+                    {...form.getInputProps('superficie_m2')}
+                  /> */}
                   <TextInput
                     inputMode="decimal"
                     label={t('immobles.camps.superficiePati')}

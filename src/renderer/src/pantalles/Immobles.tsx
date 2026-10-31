@@ -22,6 +22,7 @@ import { IconDots, IconFileText, IconPencil, IconTrash, IconFiles } from '@table
 import { adreca } from '../utils/adreca'
 import { teAvisos } from '../utils/avisosContracte'
 import { alertes } from '../utils/avisosImmoble'
+import { formatM2 } from '@renderer/utils/formats'
 
 function Immobles(): React.JSX.Element {
   const { t } = useTranslation()
@@ -90,11 +91,15 @@ function Immobles(): React.JSX.Element {
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
+              {/* La primera columna és només per l'icona d'editar. */}
+              <Table.Th></Table.Th>
               <Table.Th>{t('immobles.camps.id')}</Table.Th>
               <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
               <Table.Th>{t('immobles.camps.localitat')}</Table.Th>
               <Table.Th>{t('immobles.camps.refCatastral')}</Table.Th>
-              <Table.Th>{t('immobles.camps.superficie')}</Table.Th>
+              <Table.Th ta="right" pr="sm">
+                {t('immobles.camps.superficie')}
+              </Table.Th>
               <Table.Th>{t('immobles.camps.avisos')}</Table.Th>
               <Table.Th>{t('comu.accions')}</Table.Th>
             </Table.Tr>
@@ -102,11 +107,24 @@ function Immobles(): React.JSX.Element {
           <Table.Tbody>
             {immobles.map((i) => (
               <Table.Tr key={i.id}>
+                <Table.Td>
+                  <Tooltip label={t('comu.editar')}>
+                    <ActionIcon
+                      variant="subtle"
+                      aria-label={t('comu.editar')}
+                      onClick={() => navigate(`/immobles/${i.id}`)}
+                    >
+                      <IconPencil size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Table.Td>
                 <Table.Td>{i.id}</Table.Td>
                 <Table.Td>{adreca(i)}</Table.Td>
                 <Table.Td>{i.localitat}</Table.Td>
                 <Table.Td>{i.ref_catastral}</Table.Td>
-                <Table.Td>{i.superficie_m2}</Table.Td>
+                <Table.Td ta="right" pr="sm">
+                  {formatM2(i.superficie_m2)}
+                </Table.Td>
                 <Table.Td>
                   <Stack gap={4} align="flex-start">
                     {alertes(i).map((a) => (
@@ -140,12 +158,6 @@ function Immobles(): React.JSX.Element {
                         onClick={() => navigate(`/immobles/${i.id}/documents`)}
                       >
                         {t('documentsImmoble.boto')}
-                      </Menu.Item>
-                      <Menu.Item
-                        leftSection={<IconPencil size={16} />}
-                        onClick={() => navigate(`/immobles/${i.id}`)}
-                      >
-                        {t('comu.editar')}
                       </Menu.Item>
                       <Menu.Divider />
                       <Menu.Item

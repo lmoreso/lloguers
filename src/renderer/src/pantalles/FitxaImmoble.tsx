@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Group, Stack, Text, Title } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconFileText, IconPlus, IconTrash, IconFiles } from '@tabler/icons-react'
+import {
+  IconFileText,
+  IconPlus,
+  IconTrash,
+  IconFiles,
+  IconCornerUpLeft,
+  IconCheck
+} from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -108,8 +115,18 @@ function FitxaImmoble(): React.JSX.Element {
 
         <Group justify="space-between">
           <Group gap="xs">
+            <Button type="submit" form={idFormulari} leftSection={<IconCheck size={16} />}>
+              {t('comu.desar')}
+            </Button>
             {immoble && (
               <>
+                <Button
+                  variant="default"
+                  leftSection={<IconPlus size={16} />}
+                  onClick={() => anarAmbGuarda(() => navigate('/immobles/nou'))}
+                >
+                  {t('immobles.nouBoto')}
+                </Button>
                 <Button
                   variant="default"
                   leftSection={<IconFileText size={16} />}
@@ -128,13 +145,6 @@ function FitxaImmoble(): React.JSX.Element {
                 </Button>
                 <Button
                   variant="default"
-                  leftSection={<IconPlus size={16} />}
-                  onClick={() => anarAmbGuarda(() => navigate('/immobles/nou'))}
-                >
-                  {t('immobles.nouBoto')}
-                </Button>
-                <Button
-                  variant="default"
                   color="red"
                   leftSection={<IconTrash size={16} />}
                   onClick={() => demanarEliminar(immoble)}
@@ -145,11 +155,8 @@ function FitxaImmoble(): React.JSX.Element {
             )}
           </Group>
           <Group gap="xs">
-            <Button variant="default" onClick={tornar}>
+            <Button variant="default" onClick={tornar} leftSection={<IconCornerUpLeft size={16} />}>
               {t('comu.tornar')}
-            </Button>
-            <Button type="submit" form={idFormulari}>
-              {t('comu.desar')}
             </Button>
           </Group>
         </Group>
