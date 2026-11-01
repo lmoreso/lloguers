@@ -66,7 +66,7 @@ declare global {
         obtenir: (idContracte: number) => Promise<Resultat<DocumentLlistat[]>>
         adjuntar: (
           idContracte: number,
-          idTipus: number,
+          dades: DocumentDades,
           titolDialeg: string
         ) => Promise<Resultat<DocumentContracte[]>>
         actualitzar: (id: number, dades: DocumentDades) => Promise<Resultat<void>>

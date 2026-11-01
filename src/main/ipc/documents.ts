@@ -14,12 +14,12 @@ export function registrarIpcDocuments(): void {
     executar(() => obtenirDocuments(idContracte))
   )
 
-  // El diàleg de selecció s'obre al Main: el Renderer només envia el contracte, el tipus i el
-  // títol del diàleg (ja traduït). No envia mai rutes.
+  // El diàleg de selecció s'obre al Main: el Renderer només envia el contracte, les dades comunes (tipus, data
+  // i comentari opcional) i el títol del diàleg (ja traduït). No envia mai rutes.
   ipcMain.handle(
     'documents:adjuntar',
-    (_, idContracte: number, idTipus: number, titolDialeg: string) =>
-      executarAsync(() => adjuntarDocuments(idContracte, idTipus, titolDialeg))
+    (_, idContracte: number, dades: DocumentDades, titolDialeg: string) =>
+      executarAsync(() => adjuntarDocuments(idContracte, dades, titolDialeg))
   )
 
   ipcMain.handle('documents:actualitzar', (_, id: number, dades: DocumentDades) =>

@@ -13,7 +13,7 @@ export function obtenirDocument(id: number): DocumentContracte | undefined {
     DocumentContracte | undefined
 }
 
-// Documents d'un contracte, l'últim adjuntat primer, amb el nom i la classe del tipus (JOIN).
+// Documents d'un contracte, per ordre d'adjuntat, amb el nom i la classe del tipus (JOIN).
 // La ruta del fitxer no surt mai del Main.
 export function obtenirDocuments(idContracte: number): DocumentLlistat[] {
   return db
@@ -23,23 +23,34 @@ export function obtenirDocuments(idContracte: number): DocumentLlistat[] {
        FROM documents_contracte d
        JOIN tipus_document t ON t.id = d.id_tipus
        WHERE d.id_contracte = ?
-       ORDER BY d.id DESC`
+       ORDER BY d.id`
     )
     .all(idContracte) as DocumentLlistat[]
 }
 
-// Obre el diàleg de selecció (múltiple) i adjunta els fitxers triats al contracte, tots amb el
-// mateix tipus. El Renderer no envia mai rutes: només el contracte, el tipus i el títol (ja traduït).
-// Retorna els documents creats, o una llista buida si l'usuari cancel·la.
+// Obre el diàleg de selecció (múltiple) i adjunta els fitxers triats al contracte: una fila per fitxer, amb el
+// mateix tipus, data i comentari (opcional). Si n'hi ha més d'un, el comentari es numera ("1. Sala", "2. Sala"...;
+// sense comentari, només "1.", "2."...) en l'ordre dels noms dels fitxers. El Renderer no envia mai rutes.
+// Retorna els documents creats, o una llista buida si l'usuari cancel·la. Tot o res.
 export async function adjuntarDocuments(
   idContracte: number,
-  idTipus: number,
+  dades: DocumentDades,
   titolDialeg: string
 ): Promise<DocumentContracte[]> {
-  // L'id del contracte forma part d'una ruta del disc: ha de ser un enter.
-  if (!Number.isInteger(idContracte) || !Number.isInteger(idTipus)) {
-    throw new Error('Contracte o tipus invàlid')
+  // El Renderer no és de fiar: es valida tot ABANS d'obrir el diàleg. L'id del contracte forma part d'una
+  // ruta del disc: ha de ser un enter.
+  if (!Number.isInteger(idContracte)) throw new Error('Contracte invàlid')
+  if (!dades || !Number.isInteger(dades.id_tipus)) throw new Error('Tipus de document invàlid')
+  if (
+    dades.comentaris !== null &&
+    dades.comentaris !== undefined &&
+    typeof dades.comentaris !== 'string'
+  ) {
+    throw new Error('Comentari invàlid')
   }
+  const comentari = typeof dades.comentaris === 'string' ? dades.comentaris.trim() : ''
+  const data = dades.data_document ?? null
+  if (data !== null && typeof data !== 'string') throw new Error('Data invàlida')
 
   const opcions: OpenDialogOptions = {
     title: typeof titolDialeg === 'string' ? titolDialeg : undefined,
@@ -51,21 +62,33 @@ export async function adjuntarDocuments(
     : await dialog.showOpenDialog(opcions)
   if (triats.canceled || triats.filePaths.length === 0) return []
 
+  // Ordre pel nom, amb ordre numèric (foto2 abans de foto10).
+  const origens = [...triats.filePaths].sort((a, b) =>
+    path
+      .basename(a)
+      .localeCompare(path.basename(b), undefined, { numeric: true, sensitivity: 'base' })
+  )
+  const n = origens.length
+  const comentariDe = (i: number): string | null =>
+    n === 1
+      ? comentari || null
+      : `${String(i + 1).padStart(String(n).length, '0')}.${comentari ? ` ${comentari}` : ''}`
+
   // Tot o res: si un fitxer falla, es desfan les files i s'esborren els fitxers ja copiats.
+  const carpeta = path.join(docsDir, String(idContracte))
   const copiats: string[] = []
   const ids: number[] = []
   try {
     db.transaction(() => {
-      const carpeta = path.join(docsDir, String(idContracte))
       fs.mkdirSync(carpeta, { recursive: true })
-      for (const origen of triats.filePaths) {
+      origens.forEach((origen, i) => {
         // Primer la fila (amb la ruta buida), per saber l'id i prefixar el nom amb ell.
         const r = db
           .prepare(
-            `INSERT INTO documents_contracte (id_contracte, id_tipus, nom_original, ruta)
-             VALUES (?, ?, ?, '')`
+            `INSERT INTO documents_contracte (id_contracte, id_tipus, nom_original, ruta, comentaris, data_document)
+             VALUES (?, ?, ?, '', ?, ?)`
           )
-          .run(idContracte, idTipus, path.basename(origen))
+          .run(idContracte, dades.id_tipus, path.basename(origen), comentariDe(i), data)
         const id = Number(r.lastInsertRowid)
         const fitxer = `${id}_${nomSegur(path.basename(origen))}`
         const desti = path.join(carpeta, fitxer)
@@ -77,10 +100,15 @@ export async function adjuntarDocuments(
           id
         )
         ids.push(id)
-      }
+      })
     })()
   } catch (e) {
     for (const f of copiats) fs.rmSync(f, { force: true })
+    try {
+      fs.rmdirSync(carpeta) // només s'esborra si ha quedat buida
+    } catch {
+      // no existeix o no és buida: no passa res
+    }
     throw e
   }
   return ids.map((id) => obtenirDocument(id) as DocumentContracte)

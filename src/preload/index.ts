@@ -81,10 +81,10 @@ const api = {
       ipcRenderer.invoke('documents:obtenir', idContracte),
     adjuntar: (
       idContracte: number,
-      idTipus: number,
+      dades: DocumentDades,
       titolDialeg: string
     ): Promise<Resultat<DocumentContracte[]>> =>
-      ipcRenderer.invoke('documents:adjuntar', idContracte, idTipus, titolDialeg),
+      ipcRenderer.invoke('documents:adjuntar', idContracte, dades, titolDialeg),
     actualitzar: (id: number, dades: DocumentDades): Promise<Resultat<void>> =>
       ipcRenderer.invoke('documents:actualitzar', id, dades),
     eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('documents:eliminar', id),
