@@ -7,7 +7,8 @@ import {
   IconLock,
   IconPencil,
   IconReceiptRefund,
-  IconTrash
+  IconTrash,
+  IconFiles
 } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -93,6 +94,10 @@ function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
     })
   }
 
+  function documents(): void {
+    navigate(`/immobles/${c.id_inmoble}/contractes/${c.id}/documents`)
+  }
+
   return (
     <Menu position="bottom-end" withinPortal>
       <Menu.Target>
@@ -118,6 +123,9 @@ function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
             {t('contractes.accions.devolucio')}
           </Menu.Item>
         )}
+        <Menu.Item leftSection={<IconFiles size={16} />} onClick={documents}>
+          {t('contractes.accions.documents')}
+        </Menu.Item>
         <Menu.Item leftSection={<IconPencil size={16} />} onClick={editar}>
           {t('comu.editar')}
         </Menu.Item>

@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Button, Group, Select, Stack, Textarea } from '@mantine/core'
-import { DatePickerInput } from '@mantine/dates'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { useTranslation } from 'react-i18next'
 import { buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
 import type { DocumentLlistat, TipusDocument } from '../../../shared/tipus'
+import { CampData } from '../components/CampData'
 
 interface Props {
   document: DocumentLlistat
@@ -45,13 +45,7 @@ function EditarDocument({ document, tipus, onDesat }: Props): React.JSX.Element 
         value={idTipus}
         onChange={setIdTipus}
       />
-      <DatePickerInput
-        clearable
-        valueFormat="DD/MM/YYYY"
-        label={t('documents.camps.data')}
-        value={data}
-        onChange={setData}
-      />
+      <CampData clearable label={t('documents.camps.data')} value={data} onChange={setData} />{' '}
       <Textarea
         autosize
         minRows={2}

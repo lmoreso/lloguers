@@ -1,5 +1,6 @@
 import { DateInput, type DateInputProps } from '@mantine/dates'
 import dayjs from 'dayjs'
+import { useTranslation } from 'react-i18next'
 
 interface MyDateInputProps extends Omit<
   DateInputProps,
@@ -23,12 +24,20 @@ const dateParser: DateInputProps['dateParser'] = (input) => {
 
   return parsed.isValid() ? parsed.format('YYYY-MM-DD') : null
 }
-
+/**
+ * Un camp de data personalitzat.
+ * El format de visualització és DD/MM/YYYY, i s'accepten també anys amb només dos dígits.
+ * Si algún dia s'implementes l'idioma angles, caldrà canviar el format de visualització a MM/DD/YYYY.
+ * @param props
+ * @returns
+ */
 export function CampData(props: MyDateInputProps): React.JSX.Element {
+  const { i18n } = useTranslation()
+
   return (
     <DateInput
       {...props}
-      locale="ca"
+      locale={i18n.language}
       dateParser={dateParser}
       valueFormat="DD/MM/YYYY"
       placeholder="DD/MM/AAAA"

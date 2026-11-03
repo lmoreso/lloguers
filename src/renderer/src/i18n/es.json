@@ -234,6 +234,14 @@
       "data": "Fecha del documento",
       "comentaris": "Comentarios"
     },
+    "titol": "Documentos del contrato",
+    "subtitol": "{{adreca}} · Contrato del {{inici}}",
+    "visualitzar": "Visualizar",
+    "afegir": {
+      "titol": "Añadir documentos",
+      "triar": "Elegir archivos",
+      "ajuda": "Opcional. Si eliges más de un archivo, se añadirá un número al principio (1. …, 2. …)."
+    },
     "avis": {
       "model3": "Hay fecha de solicitud de la devolución, pero falta adjuntar su documento (modelo 3).",      
       "model2": "Hay fecha del modelo 2, pero falta adjuntar su documento.",
@@ -321,6 +329,7 @@
       "titol": "Acciones",
       "tancar": "Cerrar contrato",
       "revisarLloguer": "Revisar alquiler",
+      "documents": "Documentos",
       "devolucio": "Devolución de la fianza"      
     },
     "revisar": {

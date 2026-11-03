@@ -234,6 +234,14 @@
       "data": "Data del document",
       "comentaris": "Comentaris"
     },
+    "titol": "Documents del contracte",
+    "subtitol": "{{adreca}} · Contracte del {{inici}}",
+    "visualitzar": "Visualitzar",
+    "afegir": {
+      "titol": "Afegir documents",
+      "triar": "Triar fitxers",
+      "ajuda": "Opcional. Si tries més d'un fitxer, s'hi afegirà un número al principi (1. …, 2. …)."
+    },    
     "avis": {
       "model3": "Hi ha la data de sol·licitud de la devolució, però falta adjuntar-ne el document (model 3).",
       "model2": "Hi ha la data del model 2, però falta adjuntar-ne el document.",
@@ -321,6 +329,7 @@
       "titol": "Accions",
       "tancar": "Tancar contracte",
       "revisarLloguer": "Revisar lloguer",
+      "documents": "Documents",      
       "devolucio": "Devolució de la fiança"
     },
     "revisar": {

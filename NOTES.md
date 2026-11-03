@@ -635,33 +635,31 @@ const files = dades.flatMap<Fila>((d) =>
 - El camp Comentari deixa de ser obligatori. Si no hi ha comentari en multlipes fitxers es posa la numeració igualment al comentari.
 - La Cédula, el Certificat i el nou tipus de document 'Fitxa cadastral', en aquesta pantalla, nomes es poden Visualitzar i Eliminar, ni Afegir ni Editar, això es farà desde la mateixa pantalla de Immobles.
 
-### Resposta a Claude (pendent a 28/10/26):
+### Fase 4: formulari de contracte reorganitzat (decisions tancades)
 
-#### Què hi ha darrere de cada punt:
-1. Documents únics a l’edició d’immoble
-- El botonet amb tooltip.
-- Al Afegir i Editar nomes el comentari, la data la agafa de Immobles. A Fitxa Cadastral, com no hi ha data, oferir també la data.
-- Amb aquest sistema la App ja garantitza que seràn documewts únics, no cal fer cap validació adicional.
-
-#### Dos problemes tècnics que has de saber
-1. La taula documents_immoble s’ha de reconstruir:
-- Eliminem el check de la BD, així serà mes fàcil afegir documents nous en el futur.
-- Si s'ha de reconstruir per treure el NOT NULL, endevant.
-2. Un error de validació pot caure a l’altra pestanya:
-- D'acord.
-
-#### Decisions que només pots prendre tu
-1. D'acord, Afegir a l’esquerra i Tornar a la dreta.
-2. D'acord, Fitxa cadastral.
-3. Una migració nova (004).
-4. Un sol document per tipus, imposat per la BD: com he dit mes amunt, la funcionalitat de la App ja assegura que hi haurà un sol document.
-5. Què vol dir “Editar” d’un document únic: ja ho he dit mes amunt.
-6. Com s’afegeix un document únic: D'acord, però la data la tens a Immobles en dos dels casos.
-7. D'acord.
-8. D'acord.
-9. D'acord.
-10. D'acord.
-
+- **Formulari** amb dues pestanyes: **Dades** i **Fiança INCASOL**. Una sola fila de botons a dalt: *Desar* (`IconCheck`) i *Documents*
+  a l'esquerra, *Tornar* (`IconCornerUpLeft`) a la dreta; res a sota. **Ctrl+S** desa; **Intro no desa**. Escape = Tornar, amb la
+  protecció de canvis sense desar. Desar es queda a la pantalla; un contracte nou passa a l'edició amb els clips actius.
+- **Dades, bloc 1**: dades del contracte (immoble, inquilins, dates, comentari) i Lloguer: primera fila *Lloguer inicial* i *Fiança
+  adicional* (obligatòria, per defecte 0 €); segona fila *Lloguer actual* i *Última revisió* (només lectura) amb un botó **Revisar
+  lloguer** que **no escriu a la BD**: només canvia els dos valors del formulari. *Revisar lloguer* surt del menú de la llista.
+- **Dades, bloc 2 (tancament i devolució a l'inquilí)**: *Data de fi* (sempre editable: és com es tanca i es reobre), *Motiu de fi*
+  (No renovació / Voluntària / Nou contracte / Altres), *Import a retornar* i *Motiu de la devolució*. Els tres últims, desactivats (fons gris)
+  mentre no hi ha data de fi; si s'esborra la data de fi, es buiden i es tornen a desactivar. **No hi ha botó ni acció Tancar** (surt del menú).
+- **Fiança INCASOL**: *Ingrés* (import, NC, data del model 2, data de l'ingrés, núm. de registre i data de la notificació), *Devolució*
+  (NC, data de sol·licitud i data d'abonament; **NC i data de sol·licitud van junts**) i *Comentari* (general de la fiança; columna pròpia, per
+  a incidències amb l'INCASOL). Els camps de la devolució, desactivats mentre el contracte és obert.
+- **Avisos**: en desar un contracte que passa d'obert a tancat i té fiança, es notifica que queda pendent gestionar la devolució. Amb NC i
+  sol·licitud informats: avís de **document Model 3** i de **falta la data d'abonament**. "Falten documents" i "Devolució pendent" es mantenen.
+- **Documents únics, amb clip** (igual que a Immobles): Contracte (a Dades del contracte), Model 2 i Notificació (a Ingrés) i Model 3
+  (a Devolució). *Afegir* obre directament el diàleg del sistema (un sol fitxer, **sense comentari**); el menú té *Visualitzar* i *Eliminar*
+  (sense *Editar*). La **data** no es desa: es mostra la de la secció (inici, model 2, notificació, sol·licitud). Tipus lliure nou:
+  **Documents de l'inquilí**, només des de la pantalla de documents, sense clip.
+- **Tipus de document fixos al codi**: s'eliminen la taula `tipus_document`, la `classe` i el sembrat. Tipus: `contracte`, `annex`,
+  `fianca_model2`, `fianca_notificacio`, `fianca_model3`, `rebut`, `altres`, `documents_inquili`. `documents_contracte.tipus` (text, validat pel Main).
+- **Només `ADD COLUMN`** a `contractes` (`fianca_adicional`, `devolucio_nc`, `fianca_comentari`, `motiu_fi`): reconstruir-la esborraria els
+  documents en cascada. Les regles noves es validen a l'app i al Main, no a la BD. Desapareixen `registrarDevolucio`, `DevolucioDades`,
+  `DevolucioFianca`, `tancarContracte`, `TancarContracte`, `revisarLloguer` i les entrades corresponents del menú.
 
 ### Llista Immobles
 - Als Avisos falta posar el nº de avisos als contractes vigents, per exemple '2 avisos al últim contracte'.
