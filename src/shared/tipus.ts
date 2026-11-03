@@ -45,44 +45,42 @@ export interface Inquili {
 // Camps editables al formulari (sense id)
 export type InquiliDades = Omit<Inquili, 'id'>
 
+// Motius de tancament d'un contracte: llista fixa (el nom visible surt de la traducció). El valida el Main.
+export const MOTIUS_FI = ['no_renovacio', 'voluntaria', 'nou_contracte', 'altres'] as const
+export type MotiuFi = (typeof MOTIUS_FI)[number]
+
 export interface Contracte {
   id: number
   id_inmoble: number
   data_inici: string // ISO AAAA-MM-DD
   data_fi: string | null // null = contracte vigent
+  motiu_fi: MotiuFi | null // només amb el contracte tancat
   id_inquili: number
   id_inquili_2: number | null
   d_fi_prevista: string // ISO AAAA-MM-DD
   lloguer_inicial: number
   lloguer_actual: number
   data_ultima_revisio: string // ISO AAAA-MM-DD
+  fianca_adicional: number
   fianca_import: number | null
   fianca_nc: string | null
   fianca_data_model2: string | null
   fianca_data_ingres: string | null
   fianca_data_notificacio: string | null
   fianca_num_registre: string | null
+  fianca_comentari: string | null // incidències amb l'INCASOL
+  // Devolució de la fiança: les dades només es poden informar amb el contracte tancat.
+  devolucio_nc: string | null // el NC i la data de sol·licitud van junts
   devolucio_data_sollicitud: string | null
-  devolucio_data_cobrament: string | null
-  devolucio_import: number | null
+  devolucio_data_cobrament: string | null // abonament de l'INCASOL
+  devolucio_import: number | null // import a retornar a l'inquilí
   devolucio_motiu: string | null
   comentaris: string | null
 }
 
-// Camps editables al formulari de la fase 1. Queden fora:
-// - `lloguer_actual` i `data_ultima_revisio`: només els canvia l'acció Revisar lloguer
-//   (al crear, el Main els fixa a partir de `lloguer_inicial` i `data_inici`).
-// - Les dades de devolució: tenen el seu propi flux a la fase 2.
-export type ContracteDades = Omit<
-  Contracte,
-  | 'id'
-  | 'lloguer_actual'
-  | 'data_ultima_revisio'
-  | 'devolucio_data_sollicitud'
-  | 'devolucio_data_cobrament'
-  | 'devolucio_import'
-  | 'devolucio_motiu'
->
+// Camps editables d'un contracte (tots tret de l'id). En crear, el Main fixa `lloguer_actual` i
+// `data_ultima_revisio` a partir de `lloguer_inicial` i `data_inici`; en actualitzar, `id_inmoble` s'ignora.
+export type ContracteDades = Omit<Contracte, 'id'>
 
 // Fila del llistat: el contracte més els noms dels inquilins (JOIN al Main).
 // El llistat és sempre d'un sol immoble, així que l'adreça no cal.
@@ -96,11 +94,6 @@ export interface ContracteLlistat extends Contracte {
   te_doc_notificacio: boolean
   te_doc_model3: boolean
 }
-// Dades de la devolució de la fiança (fase 2). Només es poden informar amb el contracte tancat.
-export type DevolucioDades = Pick<
-  Contracte,
-  'devolucio_data_sollicitud' | 'devolucio_data_cobrament' | 'devolucio_import' | 'devolucio_motiu'
->
 
 // Una entrada de la vista "Últims contractes": un immoble amb els seus contractes en curs o l'últim.
 // La llista és buida si l'immoble no té cap contracte.

@@ -1,23 +1,22 @@
 import { ipcMain } from 'electron'
 import { executar } from '../errors'
 import {
-  obtenirContractes,
-  obtenirContracte,
-  crearContracte,
   actualitzarContracte,
+  crearContracte,
   eliminarContracte,
-  tancarContracte,
-  revisarLloguer,
-  registrarDevolucio,
+  obtenirContracte,
+  obtenirContractes,
   obtenirUltimsContractes
 } from '../contractes'
-import type { ContracteDades, DevolucioDades } from '../../shared/tipus'
+import type { ContracteDades } from '../../shared/tipus'
 
 export function registrarIpcContractes(): void {
-  // Sempre d'un immoble: s'hi entra només des d'Immobles.
+  // Sempre d'un immoble: s'hi entra des d'Immobles.
   ipcMain.handle('contractes:obtenir', (_, idInmoble: number) =>
     executar(() => obtenirContractes(idInmoble))
   )
+
+  ipcMain.handle('contractes:ultims', () => executar(() => obtenirUltimsContractes()))
 
   ipcMain.handle('contractes:obtenirUn', (_, id: number) =>
     executar(() => obtenirContracte(id) ?? null)
@@ -32,20 +31,4 @@ export function registrarIpcContractes(): void {
   )
 
   ipcMain.handle('contractes:eliminar', (_, id: number) => executar(() => eliminarContracte(id)))
-
-  ipcMain.handle('contractes:tancar', (_, id: number, dataFi: string) =>
-    executar(() => tancarContracte(id, dataFi))
-  )
-
-  ipcMain.handle(
-    'contractes:revisarLloguer',
-    (_, id: number, lloguerNou: number, dataRevisio: string) =>
-      executar(() => revisarLloguer(id, lloguerNou, dataRevisio))
-  )
-
-  ipcMain.handle('contractes:devolucio', (_, id: number, dades: DevolucioDades) =>
-    executar(() => registrarDevolucio(id, dades))
-  )
-
-  ipcMain.handle('contractes:ultims', () => executar(() => obtenirUltimsContractes()))
 }

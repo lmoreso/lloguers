@@ -143,7 +143,18 @@ function FormulariContracte({ immoble, contracte, inquilins }: Props): React.JSX
       fianca_data_ingres: v.fianca_data_ingres,
       fianca_data_notificacio: v.fianca_data_notificacio,
       fianca_num_registre: buitANull(v.fianca_num_registre),
-      comentaris: buitANull(v.comentaris)
+      comentaris: buitANull(v.comentaris),
+      // Provisional fins al pas 26-4 (formulari reorganitzat): es conserva el que ja hi ha desat.
+      motiu_fi: contracte?.motiu_fi ?? null,
+      lloguer_actual: contracte?.lloguer_actual ?? (aNumero(v.lloguer_inicial) as number),
+      data_ultima_revisio: contracte?.data_ultima_revisio ?? (v.data_inici as string),
+      fianca_adicional: contracte?.fianca_adicional ?? 0,
+      fianca_comentari: contracte?.fianca_comentari ?? null,
+      devolucio_nc: contracte?.devolucio_nc ?? null,
+      devolucio_data_sollicitud: contracte?.devolucio_data_sollicitud ?? null,
+      devolucio_data_cobrament: contracte?.devolucio_data_cobrament ?? null,
+      devolucio_import: contracte?.devolucio_import ?? null,
+      devolucio_motiu: contracte?.devolucio_motiu ?? null
     }
     const correcte = contracte
       ? esOk(await window.api.contractes.actualitzar(contracte.id, dades))

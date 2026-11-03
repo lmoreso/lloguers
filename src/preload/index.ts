@@ -12,7 +12,6 @@ import type {
   ContracteLlistat,
   DocumentContracte,
   DocumentDades,
-  DevolucioDades,
   ImmobleAmbContractes,
   DocumentImmoble,
   DocumentImmobleDades
@@ -48,25 +47,15 @@ const api = {
   contractes: {
     obtenir: (idInmoble: number): Promise<Resultat<ContracteLlistat[]>> =>
       ipcRenderer.invoke('contractes:obtenir', idInmoble),
+    ultims: (): Promise<Resultat<ImmobleAmbContractes[]>> =>
+      ipcRenderer.invoke('contractes:ultims'),
     obtenirUn: (id: number): Promise<Resultat<Contracte | null>> =>
       ipcRenderer.invoke('contractes:obtenirUn', id),
     crear: (dades: ContracteDades): Promise<Resultat<Contracte>> =>
       ipcRenderer.invoke('contractes:crear', dades),
     actualitzar: (id: number, dades: ContracteDades): Promise<Resultat<void>> =>
       ipcRenderer.invoke('contractes:actualitzar', id, dades),
-    eliminar: (id: number): Promise<Resultat<void>> =>
-      ipcRenderer.invoke('contractes:eliminar', id),
-    tancar: (id: number, dataFi: string): Promise<Resultat<void>> =>
-      ipcRenderer.invoke('contractes:tancar', id, dataFi),
-    revisarLloguer: (
-      id: number,
-      lloguerNou: number,
-      dataRevisio: string
-    ): Promise<Resultat<void>> =>
-      ipcRenderer.invoke('contractes:revisarLloguer', id, lloguerNou, dataRevisio),
-    devolucio: (id: number, dades: DevolucioDades): Promise<Resultat<void>> =>
-      ipcRenderer.invoke('contractes:devolucio', id, dades),
-    ultims: (): Promise<Resultat<ImmobleAmbContractes[]>> => ipcRenderer.invoke('contractes:ultims')
+    eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('contractes:eliminar', id)
   },
   documents: {
     obtenir: (idContracte: number): Promise<Resultat<DocumentContracte[]>> =>

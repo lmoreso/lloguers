@@ -12,8 +12,7 @@ import type {
   Inquili,
   InquiliDades,
   Resultat,
-  DevolucioDades,
-  ImmobleAmbContracte,
+  ImmobleAmbContractes,
   DocumentImmoble,
   DocumentImmobleDades
 } from '../shared/tipus'
@@ -42,18 +41,11 @@ declare global {
       }
       contractes: {
         obtenir: (idInmoble: number) => Promise<Resultat<ContracteLlistat[]>>
+        ultims: () => Promise<Resultat<ImmobleAmbContractes[]>>
         obtenirUn: (id: number) => Promise<Resultat<Contracte | null>>
         crear: (dades: ContracteDades) => Promise<Resultat<Contracte>>
         actualitzar: (id: number, dades: ContracteDades) => Promise<Resultat<void>>
         eliminar: (id: number) => Promise<Resultat<void>>
-        tancar: (id: number, dataFi: string) => Promise<Resultat<void>>
-        revisarLloguer: (
-          id: number,
-          lloguerNou: number,
-          dataRevisio: string
-        ) => Promise<Resultat<void>>
-        devolucio: (id: number, dades: DevolucioDades) => Promise<Resultat<void>>
-        ultims: () => Promise<Resultat<ImmobleAmbContracte[]>>
       }
       documents: {
         obtenir: (idContracte: number) => Promise<Resultat<DocumentContracte[]>>

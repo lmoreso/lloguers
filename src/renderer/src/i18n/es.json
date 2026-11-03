@@ -62,7 +62,7 @@
       "titol": "Cambios sin guardar",
       "text": "Hay cambios sin guardar. ¿Qué quieres hacer?",
       "desarContinuar": "Guardar y continuar",
-      "descartar": "Descartar"
+      "descartar": "Descartar"      
     },    
     "accions": "Acciones",    
     "afegir": "Añadir",
@@ -77,7 +77,8 @@
     "carregant": "Cargando…",
     "obligatori": "Este campo es obligatorio.",
     "tornar": "Volver",
-    "capResultat": "Sin resultados"    
+    "capResultat": "Sin resultados",
+    "acceptar": "Aceptar"    
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El período se solapa con otro contrato de este inmueble.",

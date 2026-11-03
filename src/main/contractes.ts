@@ -1,25 +1,47 @@
 import { db } from './database'
+import { esborrarCarpetaContracte } from './documents'
+import { obtenirInmobles } from './inmobles'
+import { MOTIUS_FI } from '../shared/tipus'
 import type {
   Contracte,
   ContracteDades,
   ContracteLlistat,
-  DevolucioDades,
   ImmobleAmbContractes
 } from '../shared/tipus'
-import { esborrarCarpetaContracte } from './documents'
-import { obtenirInmobles } from './inmobles'
 
-const COLUMNES = `id, id_inmoble, data_inici, data_fi, id_inquili, id_inquili_2, d_fi_prevista,
-  lloguer_inicial, lloguer_actual, data_ultima_revisio, fianca_import, fianca_nc,
-  fianca_data_model2, fianca_data_ingres, fianca_data_notificacio, fianca_num_registre,
-  devolucio_data_sollicitud, devolucio_data_cobrament, devolucio_import, devolucio_motiu,
-  comentaris`
+// Camps editables d'un contracte: tots els de la taula tret de l'id i dels d'auditoria.
+const CAMPS: (keyof ContracteDades)[] = [
+  'id_inmoble',
+  'data_inici',
+  'data_fi',
+  'motiu_fi',
+  'id_inquili',
+  'id_inquili_2',
+  'd_fi_prevista',
+  'lloguer_inicial',
+  'lloguer_actual',
+  'data_ultima_revisio',
+  'fianca_adicional',
+  'fianca_import',
+  'fianca_nc',
+  'fianca_data_model2',
+  'fianca_data_ingres',
+  'fianca_data_notificacio',
+  'fianca_num_registre',
+  'fianca_comentari',
+  'devolucio_nc',
+  'devolucio_data_sollicitud',
+  'devolucio_data_cobrament',
+  'devolucio_import',
+  'devolucio_motiu',
+  'comentaris'
+]
+
+const COLUMNES = ['id', ...CAMPS].join(', ')
 
 // Les mateixes columnes amb el prefix de la taula, més els noms dels dos inquilins (JOIN) i si el
 // contracte té algun document de les classes de la fiança (EXISTS: 0 o 1).
-const COLUMNES_LLISTAT = `${COLUMNES.split(',')
-  .map((c) => `c.${c.trim()}`)
-  .join(', ')},
+const COLUMNES_LLISTAT = `${['id', ...CAMPS].map((c) => `c.${c}`).join(', ')},
   q.nom AS inquili_nom, q.cognoms AS inquili_cognoms,
   q2.nom AS inquili2_nom, q2.cognoms AS inquili2_cognoms,
   EXISTS (SELECT 1 FROM documents_contracte d
@@ -29,7 +51,7 @@ const COLUMNES_LLISTAT = `${COLUMNES.split(',')
   EXISTS (SELECT 1 FROM documents_contracte d
     WHERE d.id_contracte = c.id AND d.tipus = 'fianca_model3') AS te_doc_model3`
 
-// Fila tal com surt de SQLite: els dos indicadors són 0 o 1. El Main els converteix a boolean.
+// Fila tal com surt de SQLite: els tres indicadors són 0 o 1. El Main els converteix a boolean.
 type FilaLlistat = Omit<
   ContracteLlistat,
   'te_doc_model2' | 'te_doc_notificacio' | 'te_doc_model3'
@@ -62,133 +84,6 @@ export function obtenirContractes(idInmoble: number): ContracteLlistat[] {
     )
     .all(idInmoble) as FilaLlistat[]
   return files.map(aLlistat)
-}
-
-export function obtenirContracte(id: number): Contracte | undefined {
-  return db.prepare(`SELECT ${COLUMNES} FROM contractes WHERE id = ?`).get(id) as
-    Contracte | undefined
-}
-
-// En crear, el lloguer actual i la data de l'última revisió surten del lloguer inicial i de la
-// data d'inici (el formulari no els demana). Un trigger no podria: la columna NOT NULL fallaria abans.
-export function crearContracte(d: ContracteDades): Contracte {
-  const r = db
-    .prepare(
-      `INSERT INTO contractes (id_inmoble, data_inici, data_fi, id_inquili, id_inquili_2,
-        d_fi_prevista, lloguer_inicial, lloguer_actual, data_ultima_revisio, fianca_import,
-        fianca_nc, fianca_data_model2, fianca_data_ingres, fianca_data_notificacio,
-        fianca_num_registre, comentaris)
-       VALUES (@id_inmoble, @data_inici, @data_fi, @id_inquili, @id_inquili_2,
-        @d_fi_prevista, @lloguer_inicial, @lloguer_inicial, @data_inici, @fianca_import,
-        @fianca_nc, @fianca_data_model2, @fianca_data_ingres, @fianca_data_notificacio,
-        @fianca_num_registre, @comentaris)`
-    )
-    .run(d)
-  return obtenirContracte(Number(r.lastInsertRowid)) as Contracte
-}
-
-// L'immoble no es pot canviar: `id_inmoble` s'ignora. Les dades de devolució i les de
-// Revisar lloguer tampoc es toquen aquí, excepte l'arrossegament de més avall.
-export function actualitzarContracte(id: number, d: ContracteDades): void {
-  db.transaction(() => {
-    const antic = obtenirContracte(id)
-    if (!antic) return
-
-    // La sol·licitud de devolució no pot ser anterior a la fi del contracte: si es mou la data de fi
-    // cap endavant, ha de seguir sent coherent. (Si s'esborra la data de fi amb devolució informada,
-    // ho rebutja el CHECK de la BD; la UI ho avisa abans.)
-    if (
-      antic.devolucio_data_sollicitud !== null &&
-      d.data_fi !== null &&
-      d.data_fi > antic.devolucio_data_sollicitud
-    ) {
-      throw new Error('La data de fi no pot ser posterior a la sol·licitud de devolució')
-    }
-
-    // Mentre el contracte no s'ha revisat mai (la data de l'última revisió és la d'inici), el
-    // lloguer actual i la data de revisió segueixen el lloguer inicial i la data d'inici.
-    // Un cop revisat, són independents i només els canvia l'acció Revisar lloguer.
-    const maiRevisat = antic.data_ultima_revisio === antic.data_inici
-
-    const camps: Partial<ContracteDades> = { ...d }
-    delete camps.id_inmoble
-
-    db.prepare(
-      `UPDATE contractes SET data_inici=@data_inici, data_fi=@data_fi, id_inquili=@id_inquili,
-        id_inquili_2=@id_inquili_2, d_fi_prevista=@d_fi_prevista,
-        lloguer_inicial=@lloguer_inicial, lloguer_actual=@lloguer_actual,
-        data_ultima_revisio=@data_ultima_revisio, fianca_import=@fianca_import,
-        fianca_nc=@fianca_nc, fianca_data_model2=@fianca_data_model2,
-        fianca_data_ingres=@fianca_data_ingres,
-        fianca_data_notificacio=@fianca_data_notificacio,
-        fianca_num_registre=@fianca_num_registre, comentaris=@comentaris
-       WHERE id=@id`
-    ).run({
-      ...camps,
-      id,
-      lloguer_actual: maiRevisat ? d.lloguer_inicial : antic.lloguer_actual,
-      data_ultima_revisio: maiRevisat ? d.data_inici : antic.data_ultima_revisio
-    })
-  })()
-}
-
-// Esborra el contracte. Les files de documents_contracte s'esborren en cascada; els fitxers del disc
-// (la carpeta del contracte) s'esborren després, un cop confirmat l'esborrat de la fila.
-export function eliminarContracte(id: number): void {
-  db.prepare('DELETE FROM contractes WHERE id = ?').run(id)
-  esborrarCarpetaContracte(id)
-}
-
-// Acció Tancar: informa la data de fi. El CHECK (data_fi >= data_inici) i els triggers de
-// solapament validen la resta. Es rebutja un valor que no sigui text: un null reobriria el contracte.
-export function tancarContracte(id: number, dataFi: string): void {
-  if (typeof dataFi !== 'string') throw new Error('Data de fi invàlida')
-  db.prepare('UPDATE contractes SET data_fi = ? WHERE id = ?').run(dataFi, id)
-}
-
-// Acció Revisar lloguer: l'import i la data es canvien alhora. L'import pot ser igual a l'actual
-// (lloguer congelat). El CHECK imposa que la data no sigui anterior a l'inici del contracte.
-export function revisarLloguer(id: number, lloguerNou: number, dataRevisio: string): void {
-  if (typeof lloguerNou !== 'number' || !Number.isFinite(lloguerNou) || lloguerNou < 0) {
-    throw new Error('Lloguer invàlid')
-  }
-  if (typeof dataRevisio !== 'string') throw new Error('Data de revisió invàlida')
-  db.prepare('UPDATE contractes SET lloguer_actual = ?, data_ultima_revisio = ? WHERE id = ?').run(
-    lloguerNou,
-    dataRevisio,
-    id
-  )
-}
-// Acció Devolució de la fiança: informa (o corregeix) les quatre dades. Cap és obligatòria. Substitueix
-// el que hi havia: per esborrar la devolució, s'envien tots quatre a null. La BD ja només ho deixa fer amb
-// el contracte tancat (CHECK_VIOLAT) i rebutja les dates mal escrites; l'ordre de les dates el valida el Main.
-export function registrarDevolucio(id: number, d: DevolucioDades): void {
-  const esData = (v: unknown): boolean => v === null || typeof v === 'string'
-  if (!esData(d.devolucio_data_sollicitud) || !esData(d.devolucio_data_cobrament)) {
-    throw new Error('Data de devolució invàlida')
-  }
-  const imp = d.devolucio_import
-  if (imp !== null && (typeof imp !== 'number' || !Number.isFinite(imp) || imp < 0)) {
-    throw new Error('Import de devolució invàlid')
-  }
-  if (d.devolucio_motiu !== null && typeof d.devolucio_motiu !== 'string') {
-    throw new Error('Motiu de devolució invàlid')
-  }
-
-  const sol = d.devolucio_data_sollicitud
-  const cob = d.devolucio_data_cobrament
-  if (sol !== null && cob !== null && cob < sol) {
-    throw new Error('El cobrament no pot ser anterior a la sol·licitud')
-  }
-  const c = obtenirContracte(id)
-  if (c && c.data_fi !== null && sol !== null && sol < c.data_fi) {
-    throw new Error('La sol·licitud no pot ser anterior a la fi del contracte')
-  }
-
-  db.prepare(
-    `UPDATE contractes SET devolucio_data_sollicitud=@sol, devolucio_data_cobrament=@cob,
-      devolucio_import=@imp, devolucio_motiu=@motiu WHERE id=@id`
-  ).run({ sol, cob, imp, motiu: d.devolucio_motiu, id })
 }
 
 // Els contractes de cada immoble que encara no han acabat (sense data de fi, o amb data de fi d'avui o
@@ -229,4 +124,127 @@ export function obtenirUltimsContractes(): ImmobleAmbContractes[] {
     immoble,
     contractes: perImmoble.get(immoble.id) ?? []
   }))
+}
+
+export function obtenirContracte(id: number): Contracte | undefined {
+  return db.prepare(`SELECT ${COLUMNES} FROM contractes WHERE id = ?`).get(id) as
+    Contracte | undefined
+}
+
+// ---- Validació (el Renderer no és de fiar; les columnes noves no porten CHECK) ----
+
+// Un text, o buit (null/undefined/en blanc -> null).
+function text(nom: string, v: unknown): string | null {
+  if (v === null || v === undefined) return null
+  if (typeof v !== 'string') throw new Error(`${nom} invàlid`)
+  return v.trim() || null
+}
+
+function nombreOpcional(nom: string, v: unknown): number | null {
+  if (v === null || v === undefined) return null
+  if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) throw new Error(`${nom} invàlid`)
+  return v
+}
+
+function nombreObligatori(nom: string, v: unknown): number {
+  const n = nombreOpcional(nom, v)
+  if (n === null) throw new Error(`${nom} és obligatori`)
+  return n
+}
+
+// Normalitza i valida un contracte. Retorna les dades netes, o llança un error.
+function preparar(d: ContracteDades): ContracteDades {
+  if (!d) throw new Error('Contracte invàlid')
+  const p: ContracteDades = {
+    ...d,
+    data_fi: d.data_fi ?? null,
+    id_inquili_2: d.id_inquili_2 ?? null,
+    fianca_data_model2: d.fianca_data_model2 ?? null,
+    fianca_data_ingres: d.fianca_data_ingres ?? null,
+    fianca_data_notificacio: d.fianca_data_notificacio ?? null,
+    devolucio_data_sollicitud: d.devolucio_data_sollicitud ?? null,
+    devolucio_data_cobrament: d.devolucio_data_cobrament ?? null,
+    comentaris: text('comentaris', d.comentaris),
+    fianca_nc: text('fianca_nc', d.fianca_nc),
+    fianca_num_registre: text('fianca_num_registre', d.fianca_num_registre),
+    fianca_comentari: text('fianca_comentari', d.fianca_comentari),
+    devolucio_nc: text('devolucio_nc', d.devolucio_nc),
+    devolucio_motiu: text('devolucio_motiu', d.devolucio_motiu),
+    motiu_fi: text('motiu_fi', d.motiu_fi) as ContracteDades['motiu_fi'],
+    lloguer_inicial: nombreObligatori('lloguer_inicial', d.lloguer_inicial),
+    lloguer_actual: nombreObligatori('lloguer_actual', d.lloguer_actual),
+    fianca_adicional: nombreObligatori('fianca_adicional', d.fianca_adicional ?? 0),
+    fianca_import: nombreOpcional('fianca_import', d.fianca_import),
+    devolucio_import: nombreOpcional('devolucio_import', d.devolucio_import)
+  }
+
+  if (p.motiu_fi !== null && !(MOTIUS_FI as readonly unknown[]).includes(p.motiu_fi)) {
+    throw new Error('Motiu de tancament invàlid')
+  }
+  // El NC i la data de sol·licitud de la devolució s'informen junts.
+  if ((p.devolucio_nc === null) !== (p.devolucio_data_sollicitud === null)) {
+    throw new Error("El NC i la data de sol·licitud de la devolució s'han d'informar junts")
+  }
+  // Les dades de tancament només amb el contracte tancat. (La BD ja ho exigeix per a la resta de la devolució.)
+  if (p.data_fi === null && (p.devolucio_nc !== null || p.motiu_fi !== null)) {
+    throw new Error('Les dades de tancament només es poden informar amb el contracte tancat')
+  }
+  const sol = p.devolucio_data_sollicitud
+  const cob = p.devolucio_data_cobrament
+  if (sol !== null && cob !== null && cob < sol) {
+    throw new Error("L'abonament no pot ser anterior a la sol·licitud")
+  }
+  if (sol !== null && p.data_fi !== null && sol < p.data_fi) {
+    throw new Error('La sol·licitud no pot ser anterior a la fi del contracte')
+  }
+  return p
+}
+
+// ---- CRUD ----
+
+const SQL_INSERT = `INSERT INTO contractes (${CAMPS.join(', ')})
+  VALUES (${CAMPS.map((c) => `@${c}`).join(', ')})`
+
+// L'immoble no es pot canviar: no entra a l'UPDATE.
+const CAMPS_UPDATE = CAMPS.filter((c) => c !== 'id_inmoble')
+const SQL_UPDATE = `UPDATE contractes SET ${CAMPS_UPDATE.map((c) => `${c}=@${c}`).join(', ')}
+  WHERE id=@id`
+
+// En crear, el lloguer actual i la data de l'última revisió surten del lloguer inicial i de la data d'inici
+// (el formulari no els demana): s'ignora el que arribi. Un trigger no podria: la columna NOT NULL fallaria abans.
+export function crearContracte(d: ContracteDades): Contracte {
+  const p = preparar({ ...d, lloguer_actual: d.lloguer_inicial, data_ultima_revisio: d.data_inici })
+  const r = db.prepare(SQL_INSERT).run(Object.fromEntries(CAMPS.map((c) => [c, p[c]])))
+  return obtenirContracte(Number(r.lastInsertRowid)) as Contracte
+}
+
+// L'immoble no es pot canviar (`id_inmoble` s'ignora). Mentre el contracte no s'ha revisat mai (la data de
+// l'última revisió és la d'inici), si el lloguer actual i la data de revisió arriben iguals als desats, segueixen
+// el lloguer inicial i la data d'inici. Si arriben diferents, és una revisió feta des del formulari: s'accepta
+// (la BD exigeix que la data sigui >= data_inici).
+export function actualitzarContracte(id: number, d: ContracteDades): void {
+  db.transaction(() => {
+    const antic = obtenirContracte(id)
+    if (!antic) return
+    const p = preparar(d)
+    const maiRevisat = antic.data_ultima_revisio === antic.data_inici
+    const senseRevisar =
+      p.lloguer_actual === antic.lloguer_actual &&
+      p.data_ultima_revisio === antic.data_ultima_revisio
+    if (maiRevisat && senseRevisar) {
+      p.lloguer_actual = p.lloguer_inicial
+      p.data_ultima_revisio = p.data_inici
+    }
+    db.prepare(SQL_UPDATE).run({
+      ...Object.fromEntries(CAMPS_UPDATE.map((c) => [c, p[c]])),
+      id
+    })
+  })()
+}
+
+// Esborra el contracte. Les files de documents_contracte s'esborren en cascada; els fitxers del disc (la carpeta
+// del contracte) s'esborren després, un cop confirmat l'esborrat de la fila.
+export function eliminarContracte(id: number): void {
+  db.prepare('DELETE FROM contractes WHERE id = ?').run(id)
+  esborrarCarpetaContracte(id)
 }

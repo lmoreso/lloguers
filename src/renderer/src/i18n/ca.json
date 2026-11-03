@@ -77,7 +77,8 @@
     "carregant": "Carregant…",
     "obligatori": "Aquest camp és obligatori.",
     "tornar": "Tornar",
-    "capResultat": "Cap resultat"
+    "capResultat": "Cap resultat",
+    "acceptar": "Acceptar"
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
