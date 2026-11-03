@@ -6,7 +6,6 @@ import './database'
 import { registrarIpcInmobles } from './ipc/inmobles'
 import { registrarIpcInquilins } from './ipc/inquilins'
 import { registrarIpcConfig } from './ipc/config'
-import { registrarIpcTipusDocument } from './ipc/tipusDocument'
 import { registrarIpcContractes } from './ipc/contractes'
 import { registrarIpcDocuments } from './ipc/documents'
 import { registrarIpcApp } from './ipc/app'
@@ -63,8 +62,6 @@ app.whenReady().then(() => {
   registrarIpcInquilins()
 
   registrarIpcConfig()
-
-  registrarIpcTipusDocument()
 
   registrarIpcContractes()
 

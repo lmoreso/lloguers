@@ -114,48 +114,41 @@ export interface ImmobleAmbContractes {
 export const IDIOMES = ['ca', 'es'] as const
 export type Idioma = (typeof IDIOMES)[number]
 
-// Classes internes de document: la llista tancada que el programa coneix (la lògica de la fiança
-// busca sempre per classe, mai per nom ni per id). No es valida a la BD: ho fa el Main.
-// Afegir-ne una és codi nou: aquí, a documents.classes dels JSON i a la lògica que la usi.
-export const CLASSES_DOCUMENT = [
+// Tipus de document d'un contracte: llista fixa al codi (el nom visible surt de la traducció). La BD no els
+// valida: els valida el Main. Afegir-ne un és codi (aquí, als JSON i a la lògica que l'usi).
+export const TIPUS_DOCUMENT_CONTRACTE = [
   'contracte',
   'annex',
   'fianca_model2',
   'fianca_notificacio',
   'fianca_model3',
   'rebut',
-  'altres'
+  'altres',
+  'documents_inquili'
 ] as const
-export type ClasseDocument = (typeof CLASSES_DOCUMENT)[number]
+export type TipusDocumentContracte = (typeof TIPUS_DOCUMENT_CONTRACTE)[number]
 
-export interface TipusDocument {
-  id: number
-  nom: string
-  classe: ClasseDocument
-}
+// Tipus que admeten un sol document per contracte (tindran un clip a la seva secció del formulari). Ho
+// garanteix la pantalla, no la BD.
+export const TIPUS_UNICS_CONTRACTE = [
+  'contracte',
+  'fianca_model2',
+  'fianca_notificacio',
+  'fianca_model3'
+] as const
 
-// Nom de cada classe en l'idioma actiu: el Renderer l'envia al Main per sembrar.
-export type NomsClasses = Record<ClasseDocument, string>
-
-// Un document adjunt d'un contracte, tal com el veu el Renderer. La ruta del fitxer al disc
-// (`ruta` a la BD) no s'hi exposa: només la fa servir el Main.
+// Un document adjunt d'un contracte. La ruta del fitxer no s'exposa: només la fa servir el Main.
 export interface DocumentContracte {
   id: number
   id_contracte: number
-  id_tipus: number
+  tipus: TipusDocumentContracte
   nom_original: string
   comentaris: string | null
   data_document: string | null // ISO AAAA-MM-DD
 }
 
-// Camps editables d'un document ja adjuntat.
-export type DocumentDades = Pick<DocumentContracte, 'id_tipus' | 'comentaris' | 'data_document'>
-
-// Fila del llistat: el document més el nom i la classe del seu tipus (JOIN al Main).
-export interface DocumentLlistat extends DocumentContracte {
-  tipus_nom: string
-  tipus_classe: ClasseDocument
-}
+// Camps editables d'un document ja adjuntat, i els comuns a tots els fitxers en adjuntar-ne diversos.
+export type DocumentDades = Pick<DocumentContracte, 'tipus' | 'comentaris' | 'data_document'>
 
 // Tipus de document d'un immoble: llista al codi (el nom visible surt de la traducció). La BD no els valida:
 // els valida el Main. Afegir-ne un és codi (aquí, als JSON i a la lògica que l'usi).

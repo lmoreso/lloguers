@@ -212,14 +212,15 @@
       "titol": "Eliminar document",
       "confirmacio": "Segur que vols eliminar {{nom}}? S'esborrarà també el fitxer del disc. Aquesta acció no es pot desfer."
     },
-    "classes": {
+    "tipus": {
       "contracte": "Contracte",
       "annex": "Annex",
       "fianca_model2": "Fiança – Model 2",
       "fianca_notificacio": "Fiança – Notificació de pagament de l'INCASOL",
       "fianca_model3": "Fiança – Model 3 (devolució)",
       "rebut": "Rebut",
-      "altres": "Altres"
+      "altres": "Altres",
+      "documents_inquili": "Documents de l'inquilí"
     },
     "adjuntar": {
       "boto": "Adjuntar",

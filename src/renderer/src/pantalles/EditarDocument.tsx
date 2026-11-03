@@ -3,29 +3,28 @@ import { Button, Group, Select, Stack, Textarea } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { useTranslation } from 'react-i18next'
+import { CampData } from '../components/CampData'
 import { buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
-import type { DocumentLlistat, TipusDocument } from '../../../shared/tipus'
-import { CampData } from '../components/CampData'
+import { TIPUS_DOCUMENT_CONTRACTE } from '../../../shared/tipus'
+import type { DocumentContracte, TipusDocumentContracte } from '../../../shared/tipus'
 
 interface Props {
-  document: DocumentLlistat
-  tipus: TipusDocument[]
+  document: DocumentContracte
   onDesat: () => void
 }
 
 // Contingut de la finestra d'edició d'un document ja adjuntat. El fitxer no es canvia:
 // només el tipus, la data del document i els comentaris.
-function EditarDocument({ document, tipus, onDesat }: Props): React.JSX.Element {
+function EditarDocument({ document, onDesat }: Props): React.JSX.Element {
   const { t } = useTranslation()
-  const [idTipus, setIdTipus] = useState<string | null>(String(document.id_tipus))
+  const [tipus, setTipus] = useState<TipusDocumentContracte>(document.tipus)
   const [data, setData] = useState<string | null>(document.data_document)
   const [comentaris, setComentaris] = useState(document.comentaris ?? '')
 
   async function desar(): Promise<void> {
-    if (idTipus === null) return
     const resposta = await window.api.documents.actualitzar(document.id, {
-      id_tipus: Number(idTipus),
+      tipus,
       comentaris: buitANull(comentaris),
       data_document: data
     })
@@ -41,11 +40,11 @@ function EditarDocument({ document, tipus, onDesat }: Props): React.JSX.Element 
       <Select
         allowDeselect={false}
         label={t('documents.camps.tipus')}
-        data={tipus.map((x) => ({ value: String(x.id), label: x.nom }))}
-        value={idTipus}
-        onChange={setIdTipus}
+        data={TIPUS_DOCUMENT_CONTRACTE.map((c) => ({ value: c, label: t(`documents.tipus.${c}`) }))}
+        value={tipus}
+        onChange={(v) => v && setTipus(v as TipusDocumentContracte)}
       />
-      <CampData clearable label={t('documents.camps.data')} value={data} onChange={setData} />{' '}
+      <CampData clearable label={t('documents.camps.data')} value={data} onChange={setData} />
       <Textarea
         autosize
         minRows={2}

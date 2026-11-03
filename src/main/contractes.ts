@@ -22,12 +22,12 @@ const COLUMNES_LLISTAT = `${COLUMNES.split(',')
   .join(', ')},
   q.nom AS inquili_nom, q.cognoms AS inquili_cognoms,
   q2.nom AS inquili2_nom, q2.cognoms AS inquili2_cognoms,
-  EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
-    WHERE d.id_contracte = c.id AND t.classe = 'fianca_model2') AS te_doc_model2,
-  EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
-    WHERE d.id_contracte = c.id AND t.classe = 'fianca_notificacio') AS te_doc_notificacio,
-  EXISTS (SELECT 1 FROM documents_contracte d JOIN tipus_document t ON t.id = d.id_tipus
-    WHERE d.id_contracte = c.id AND t.classe = 'fianca_model3') AS te_doc_model3`
+  EXISTS (SELECT 1 FROM documents_contracte d
+    WHERE d.id_contracte = c.id AND d.tipus = 'fianca_model2') AS te_doc_model2,
+  EXISTS (SELECT 1 FROM documents_contracte d
+    WHERE d.id_contracte = c.id AND d.tipus = 'fianca_notificacio') AS te_doc_notificacio,
+  EXISTS (SELECT 1 FROM documents_contracte d
+    WHERE d.id_contracte = c.id AND d.tipus = 'fianca_model3') AS te_doc_model3`
 
 // Fila tal com surt de SQLite: els dos indicadors són 0 o 1. El Main els converteix a boolean.
 type FilaLlistat = Omit<

@@ -4,34 +4,31 @@ import fs from 'fs'
 import path from 'path'
 import { db, docsDir } from './database'
 import { fitxerNoTrobat, nomSegur, rutaDins } from './fitxers'
-import type { DocumentContracte, DocumentDades, DocumentLlistat } from '../shared/tipus'
+import { TIPUS_DOCUMENT_CONTRACTE, TIPUS_UNICS_CONTRACTE } from '../shared/tipus'
+import type { DocumentContracte, DocumentDades } from '../shared/tipus'
 
-const COLUMNES = 'id, id_contracte, id_tipus, nom_original, comentaris, data_document'
+const COLUMNES = 'id, id_contracte, tipus, nom_original, comentaris, data_document'
 
 export function obtenirDocument(id: number): DocumentContracte | undefined {
   return db.prepare(`SELECT ${COLUMNES} FROM documents_contracte WHERE id = ?`).get(id) as
     DocumentContracte | undefined
 }
 
-// Documents d'un contracte, per ordre d'adjuntat, amb el nom i la classe del tipus (JOIN).
-// La ruta del fitxer no surt mai del Main.
-export function obtenirDocuments(idContracte: number): DocumentLlistat[] {
+// Documents d'un contracte, per ordre d'adjuntat. La ruta del fitxer no surt mai del Main.
+export function obtenirDocuments(idContracte: number): DocumentContracte[] {
   return db
-    .prepare(
-      `SELECT d.id, d.id_contracte, d.id_tipus, d.nom_original, d.comentaris, d.data_document,
-        t.nom AS tipus_nom, t.classe AS tipus_classe
-       FROM documents_contracte d
-       JOIN tipus_document t ON t.id = d.id_tipus
-       WHERE d.id_contracte = ?
-       ORDER BY d.id`
-    )
-    .all(idContracte) as DocumentLlistat[]
+    .prepare(`SELECT ${COLUMNES} FROM documents_contracte WHERE id_contracte = ? ORDER BY id`)
+    .all(idContracte) as DocumentContracte[]
 }
 
-// Obre el diàleg de selecció (múltiple) i adjunta els fitxers triats al contracte: una fila per fitxer, amb el
-// mateix tipus, data i comentari (opcional). Si n'hi ha més d'un, el comentari es numera ("1. Sala", "2. Sala"...;
-// sense comentari, només "1.", "2."...) en l'ordre dels noms dels fitxers. El Renderer no envia mai rutes.
-// Retorna els documents creats, o una llista buida si l'usuari cancel·la. Tot o res.
+const esTipus = (v: unknown): boolean =>
+  (TIPUS_DOCUMENT_CONTRACTE as readonly unknown[]).includes(v)
+
+// Obre el diàleg de selecció i adjunta els fitxers triats al contracte: una fila per fitxer, amb el mateix tipus,
+// data i comentari (opcional). Si n'hi ha més d'un, el comentari es numera ("1. Sala", "2. Sala"...; sense
+// comentari, només "1.", "2."...) en l'ordre dels noms dels fitxers. Els tipus únics només deixen triar un fitxer.
+// El Renderer no envia mai rutes. Retorna els documents creats, o una llista buida si l'usuari cancel·la.
+// Tot o res.
 export async function adjuntarDocuments(
   idContracte: number,
   dades: DocumentDades,
@@ -40,7 +37,7 @@ export async function adjuntarDocuments(
   // El Renderer no és de fiar: es valida tot ABANS d'obrir el diàleg. L'id del contracte forma part d'una
   // ruta del disc: ha de ser un enter.
   if (!Number.isInteger(idContracte)) throw new Error('Contracte invàlid')
-  if (!dades || !Number.isInteger(dades.id_tipus)) throw new Error('Tipus de document invàlid')
+  if (!dades || !esTipus(dades.tipus)) throw new Error('Tipus de document invàlid')
   if (
     dades.comentaris !== null &&
     dades.comentaris !== undefined &&
@@ -51,10 +48,11 @@ export async function adjuntarDocuments(
   const comentari = typeof dades.comentaris === 'string' ? dades.comentaris.trim() : ''
   const data = dades.data_document ?? null
   if (data !== null && typeof data !== 'string') throw new Error('Data invàlida')
+  const unic = (TIPUS_UNICS_CONTRACTE as readonly unknown[]).includes(dades.tipus)
 
   const opcions: OpenDialogOptions = {
     title: typeof titolDialeg === 'string' ? titolDialeg : undefined,
-    properties: ['openFile', 'multiSelections']
+    properties: unic ? ['openFile'] : ['openFile', 'multiSelections']
   }
   const finestra = BrowserWindow.getFocusedWindow()
   const triats = finestra
@@ -85,10 +83,10 @@ export async function adjuntarDocuments(
         // Primer la fila (amb la ruta buida), per saber l'id i prefixar el nom amb ell.
         const r = db
           .prepare(
-            `INSERT INTO documents_contracte (id_contracte, id_tipus, nom_original, ruta, comentaris, data_document)
+            `INSERT INTO documents_contracte (id_contracte, tipus, nom_original, ruta, comentaris, data_document)
              VALUES (?, ?, ?, '', ?, ?)`
           )
-          .run(idContracte, dades.id_tipus, path.basename(origen), comentariDe(i), data)
+          .run(idContracte, dades.tipus, path.basename(origen), comentariDe(i), data)
         const id = Number(r.lastInsertRowid)
         const fitxer = `${id}_${nomSegur(path.basename(origen))}`
         const desti = path.join(carpeta, fitxer)
@@ -114,11 +112,17 @@ export async function adjuntarDocuments(
   return ids.map((id) => obtenirDocument(id) as DocumentContracte)
 }
 
+// Canvia el tipus, la data i el comentari (opcional). El tipus ja no el valida la BD: el valida el Main.
 export function actualitzarDocument(id: number, d: DocumentDades): void {
+  if (!d || !esTipus(d.tipus)) throw new Error('Tipus de document invàlid')
+  if (d.comentaris !== null && d.comentaris !== undefined && typeof d.comentaris !== 'string') {
+    throw new Error('Comentari invàlid')
+  }
+  const comentaris = typeof d.comentaris === 'string' ? d.comentaris.trim() || null : null
   db.prepare(
-    `UPDATE documents_contracte SET id_tipus=@id_tipus, comentaris=@comentaris,
-      data_document=@data_document WHERE id=@id`
-  ).run({ ...d, id })
+    `UPDATE documents_contracte SET tipus=@tipus, comentaris=@comentaris, data_document=@data_document
+     WHERE id=@id`
+  ).run({ tipus: d.tipus, comentaris, data_document: d.data_document ?? null, id })
 }
 
 // Esborra la fila i el fitxer del disc. Si el fitxer ja no hi és, no és un error.

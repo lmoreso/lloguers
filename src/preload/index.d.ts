@@ -7,14 +7,11 @@ import type {
   ContracteLlistat,
   DocumentContracte,
   DocumentDades,
-  DocumentLlistat,
   Immoble,
   ImmobleDades,
   Inquili,
   InquiliDades,
-  NomsClasses,
   Resultat,
-  TipusDocument,
   DevolucioDades,
   ImmobleAmbContracte,
   DocumentImmoble,
@@ -43,10 +40,6 @@ declare global {
         obtenir: () => Promise<Resultat<ConfigObtinguda>>
         desar: (config: Config) => Promise<Resultat<void>>
       }
-      tipusDocument: {
-        obtenir: () => Promise<Resultat<TipusDocument[]>>
-        sembrar: (noms: NomsClasses) => Promise<Resultat<number>>
-      }
       contractes: {
         obtenir: (idInmoble: number) => Promise<Resultat<ContracteLlistat[]>>
         obtenirUn: (id: number) => Promise<Resultat<Contracte | null>>
@@ -63,7 +56,7 @@ declare global {
         ultims: () => Promise<Resultat<ImmobleAmbContracte[]>>
       }
       documents: {
-        obtenir: (idContracte: number) => Promise<Resultat<DocumentLlistat[]>>
+        obtenir: (idContracte: number) => Promise<Resultat<DocumentContracte[]>>
         adjuntar: (
           idContracte: number,
           dades: DocumentDades,

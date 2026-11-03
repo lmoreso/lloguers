@@ -15,8 +15,6 @@ import DatesAmbIdioma from './components/DatesAmbIdioma'
 import SeleccioIdioma from './components/SeleccioIdioma'
 import i18n from './i18n'
 import type { Idioma } from '../../shared/tipus'
-import { CLASSES_DOCUMENT } from '../../shared/tipus'
-import type { NomsClasses } from '../../shared/tipus'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 
@@ -40,20 +38,7 @@ async function arrencar(): Promise<void> {
 
   const arrel = createRoot(document.getElementById('root')!)
 
-  async function pintarApp(): Promise<void> {
-    // Sembrat dels tipus de document: amb l'idioma ja definitiu, el Renderer envia al Main el nom
-    // traduït de cada classe, i el Main n'insereix un per cada classe que no en tingui cap.
-    const noms = Object.fromEntries(
-      CLASSES_DOCUMENT.map((classe) => [classe, i18n.t(`documents.classes.${classe}`)])
-    ) as NomsClasses
-    const sembrat = await window.api.tipusDocument.sembrar(noms)
-    if (sembrat.ok) {
-      console.log(`[tipus] Sembrats ${sembrat.dades} tipus de document`)
-    } else {
-      // Les notificacions encara no estan muntades: només es registra i l'app arrenca igualment.
-      console.error("[tipus] No s'han pogut sembrar els tipus de document:", sembrat.error)
-    }
-
+  function pintarApp(): void {
     arrel.render(
       <StrictMode>
         <MantineProvider>
@@ -69,7 +54,7 @@ async function arrencar(): Promise<void> {
   }
 
   if (confirmat) {
-    await pintarApp()
+    pintarApp()
     return
   }
 

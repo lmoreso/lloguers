@@ -7,14 +7,11 @@ import type {
   InquiliDades,
   Resultat,
   ConfigObtinguda,
-  NomsClasses,
-  TipusDocument,
   Contracte,
   ContracteDades,
   ContracteLlistat,
   DocumentContracte,
   DocumentDades,
-  DocumentLlistat,
   DevolucioDades,
   ImmobleAmbContractes,
   DocumentImmoble,
@@ -48,11 +45,6 @@ const api = {
     obtenir: (): Promise<Resultat<ConfigObtinguda>> => ipcRenderer.invoke('config:obtenir'),
     desar: (config: Config): Promise<Resultat<void>> => ipcRenderer.invoke('config:desar', config)
   },
-  tipusDocument: {
-    obtenir: (): Promise<Resultat<TipusDocument[]>> => ipcRenderer.invoke('tipusDocument:obtenir'),
-    sembrar: (noms: NomsClasses): Promise<Resultat<number>> =>
-      ipcRenderer.invoke('tipusDocument:sembrar', noms)
-  },
   contractes: {
     obtenir: (idInmoble: number): Promise<Resultat<ContracteLlistat[]>> =>
       ipcRenderer.invoke('contractes:obtenir', idInmoble),
@@ -77,7 +69,7 @@ const api = {
     ultims: (): Promise<Resultat<ImmobleAmbContractes[]>> => ipcRenderer.invoke('contractes:ultims')
   },
   documents: {
-    obtenir: (idContracte: number): Promise<Resultat<DocumentLlistat[]>> =>
+    obtenir: (idContracte: number): Promise<Resultat<DocumentContracte[]>> =>
       ipcRenderer.invoke('documents:obtenir', idContracte),
     adjuntar: (
       idContracte: number,

@@ -212,14 +212,15 @@
       "titol": "Eliminar documento",
       "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Se borrará también el archivo del disco. Esta acción no se puede deshacer."
     },    
-    "classes": {
+    "tipus": {
       "contracte": "Contrato",
       "annex": "Anexo",
       "fianca_model2": "Fianza – Modelo 2",
       "fianca_notificacio": "Fianza – Notificación de pago del INCASOL",
       "fianca_model3": "Fianza – Modelo 3 (devolución)",
       "rebut": "Recibo",
-      "altres": "Otros"
+      "altres": "Otros",
+      "documents_inquili": "Documentos del inquilino"
     },
     "adjuntar": {
       "boto": "Adjuntar",

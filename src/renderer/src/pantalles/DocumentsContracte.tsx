@@ -28,7 +28,7 @@ import { formatData } from '../utils/dates'
 import { esOk } from '../utils/resultat'
 import AfegirDocument from './AfegirDocument'
 import EditarDocument from './EditarDocument'
-import type { Contracte, DocumentLlistat, Immoble, TipusDocument } from '../../../shared/tipus'
+import type { Contracte, DocumentContracte, Immoble } from '../../../shared/tipus'
 
 // Documents d'un contracte (/immobles/:id/contractes/:idContracte/documents). Les accions van a la capçalera,
 // no a sota.
@@ -38,8 +38,7 @@ function DocumentsContracte(): React.JSX.Element {
   const { id, idContracte } = useParams()
   const [immoble, setImmoble] = useState<Immoble | null>(null)
   const [contracte, setContracte] = useState<Contracte | null>(null)
-  const [documents, setDocuments] = useState<DocumentLlistat[]>([])
-  const [tipus, setTipus] = useState<TipusDocument[]>([])
+  const [documents, setDocuments] = useState<DocumentContracte[]>([])
   const [carregant, setCarregant] = useState(true)
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
@@ -49,14 +48,12 @@ function DocumentsContracte(): React.JSX.Element {
     Promise.all([
       window.api.inmobles.obtenirUn(Number(id)),
       window.api.contractes.obtenirUn(Number(idContracte)),
-      window.api.documents.obtenir(Number(idContracte)),
-      window.api.tipusDocument.obtenir()
-    ]).then(([rImmoble, rContracte, rDocuments, rTipus]) => {
+      window.api.documents.obtenir(Number(idContracte))
+    ]).then(([rImmoble, rContracte, rDocuments]) => {
       if (cancelat) return
       if (esOk(rImmoble)) setImmoble(rImmoble.dades)
       if (esOk(rContracte)) setContracte(rContracte.dades)
       if (esOk(rDocuments)) setDocuments(rDocuments.dades)
-      if (esOk(rTipus)) setTipus(rTipus.dades)
       setCarregant(false)
     })
     // Si el component es desmunta abans que arribin les respostes, no s'actualitza l'estat.
@@ -75,7 +72,7 @@ function DocumentsContracte(): React.JSX.Element {
   }
 
   // S'obre amb l'aplicació del sistema. Si el fitxer ja no és al disc, esOk mostra l'error traduït.
-  async function visualitzar(d: DocumentLlistat): Promise<void> {
+  async function visualitzar(d: DocumentContracte): Promise<void> {
     esOk(await window.api.documents.obrir(d.id))
   }
 
@@ -83,18 +80,18 @@ function DocumentsContracte(): React.JSX.Element {
     if (!contracte) return
     modals.open({
       title: t('documents.afegir.titol'),
-      children: <AfegirDocument idContracte={contracte.id} tipus={tipus} onAfegits={recarregar} />
+      children: <AfegirDocument idContracte={contracte.id} onAfegits={recarregar} />
     })
   }
 
-  function editar(d: DocumentLlistat): void {
+  function editar(d: DocumentContracte): void {
     modals.open({
       title: t('documents.editar.titol'),
-      children: <EditarDocument document={d} tipus={tipus} onDesat={recarregar} />
+      children: <EditarDocument document={d} onDesat={recarregar} />
     })
   }
 
-  function demanarEliminar(d: DocumentLlistat): void {
+  function demanarEliminar(d: DocumentContracte): void {
     modals.openConfirmModal({
       title: t('documents.eliminar.titol'),
       children: (
@@ -115,15 +112,15 @@ function DocumentsContracte(): React.JSX.Element {
   const faltaModel2 =
     contracte !== null &&
     contracte.fianca_data_model2 !== null &&
-    !documents.some((d) => d.tipus_classe === 'fianca_model2')
+    !documents.some((d) => d.tipus === 'fianca_model2')
   const faltaNotificacio =
     contracte !== null &&
     contracte.fianca_data_notificacio !== null &&
-    !documents.some((d) => d.tipus_classe === 'fianca_notificacio')
+    !documents.some((d) => d.tipus === 'fianca_notificacio')
   const faltaModel3 =
     contracte !== null &&
     contracte.devolucio_data_sollicitud !== null &&
-    !documents.some((d) => d.tipus_classe === 'fianca_model3')
+    !documents.some((d) => d.tipus === 'fianca_model3')
 
   return (
     <>
@@ -197,7 +194,7 @@ function DocumentsContracte(): React.JSX.Element {
                 {documents.map((d) => (
                   <Table.Tr key={d.id}>
                     {/* El nom del tipus és dada de l'usuari: no es tradueix. */}
-                    <Table.Td>{d.tipus_nom}</Table.Td>
+                    <Table.Td>{t(`documents.tipus.${d.tipus}`)}</Table.Td>
                     <Table.Td>{d.nom_original}</Table.Td>
                     <Table.Td>{formatData(d.data_document)}</Table.Td>
                     <Table.Td>{d.comentaris}</Table.Td>
