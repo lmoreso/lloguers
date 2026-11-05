@@ -27,6 +27,7 @@ import RevisarLloguer from './RevisarLloguer'
 import { MOTIUS_FI } from '../../../shared/tipus'
 import type { Contracte, ContracteDades, Immoble, Inquili, MotiuFi } from '../../../shared/tipus'
 import { hiHaCapaOberta } from '../utils/teclat'
+import { ingresPendent } from '../utils/avisosContracte'
 
 // Els selectors treballen amb text (id com a string); les dates són text ISO AAAA-MM-DD; els imports, número
 // (o text mentre s'escriu).
@@ -321,6 +322,10 @@ function FormulariContracte({
       color: avisDevolucio ? 'yellow' : 'green',
       message: avisDevolucio ? t('contractes.desatTancat') : t('contractes.desat')
     })
+    // Fiança INCASOL sense la data de l'ingrés: cal gestionar-ne l'ingrés.
+    if (ingresPendent(dades)) {
+      notifications.show({ color: 'yellow', message: t('contractes.avisIngres') })
+    }
     return desat
   }
 
@@ -540,7 +545,8 @@ function FormulariContracte({
                   tipus="import"
                   disabled
                   label={t('contractes.camps.fiancaImport')}
-                  {...form.getInputProps('fianca_import')}
+                  // {...form.getInputProps('fianca_import')}
+                  value={form.values.fianca_import}
                 />
                 <div />
                 <TextInput

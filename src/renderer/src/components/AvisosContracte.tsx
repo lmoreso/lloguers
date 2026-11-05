@@ -1,6 +1,6 @@
 import { Badge, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
-import { avisos, devolucioPendent, faltenDocuments } from '../utils/avisosContracte'
+import { avisos, devolucioPendent, faltenDocuments, ingresPendent } from '../utils/avisosContracte'
 import type { ContracteLlistat } from '../../../shared/tipus'
 
 // Etiquetes d'avís d'un contracte, apilades. Compartit per la llista de contractes d'un immoble
@@ -14,6 +14,7 @@ function AvisosContracte({ contracte: c }: { contracte: ContracteLlistat }): Rea
           {t(`contractes.avisos.${a.clau}.${a.estat}`)}
         </Badge>
       ))}
+      {ingresPendent(c) && <Badge color="orange">{t('contractes.avisos.ingresPendent')}</Badge>}
       {faltenDocuments(c) && <Badge color="orange">{t('contractes.avisos.documents')}</Badge>}
       {devolucioPendent(c) && (
         <Badge color="yellow">{t('contractes.avisos.devolucioPendent')}</Badge>

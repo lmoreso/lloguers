@@ -262,6 +262,7 @@
       "titol": "Últimos contratos",
       "senseContracte": "Sin contrato"
     }, 
+    "avisIngres": "Hay que gestionar el ingreso de la fianza en el INCASOL: todavía no consta la fecha del ingreso.",    
     "desatTancat": "Contrato guardado. Queda pendiente gestionar la devolución de la fianza.",
     "nota": {
       "senseFi": "Disponible cuando el contrato tiene fecha de fin."
@@ -375,7 +376,8 @@
         "caducat": "Revisión pendiente",
         "aviat": "Revisión próxima"
       },
-      "documents": "Faltan documentos"      
+      "documents": "Faltan documentos",
+      "ingresPendent": "Ingreso pendiente"            
     },        
     "tancar": {
       "titol": "Cerrar contrato",

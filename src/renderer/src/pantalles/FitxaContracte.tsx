@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Group, Stack, Text, Title } from '@mantine/core'
+import { Alert, Button, Group, Stack, Text, Title } from '@mantine/core'
 import { IconCheck, IconCornerUpLeft, IconFiles } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -7,12 +7,18 @@ import { adreca } from '../utils/adreca'
 import { esOk } from '../utils/resultat'
 import FormulariContracte from './FormulariContracte'
 import type { AccionsCapcalera } from './FormulariContracte'
-import type { Contracte, Immoble, Inquili } from '../../../shared/tipus'
+import type { Contracte, Immoble, Inquili, ContracteLlistat } from '../../../shared/tipus'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
 import { formatData } from '../utils/dates'
 import { nomInquili } from '../utils/inquilins'
+import {
+  avisos,
+  devolucioPendent,
+  documentsQueFalten,
+  ingresPendent
+} from '../utils/avisosContracte'
 
 // /immobles/:id/contractes/nou  i  /immobles/:id/contractes/:idContracte
 function FitxaContracte(): React.JSX.Element {
@@ -27,6 +33,11 @@ function FitxaContracte(): React.JSX.Element {
   const [versioForm, setVersioForm] = useState(0)
   // Pestanya activa del formulari. Viu aquí perquè es conservi quan el formulari es torna a muntar en desar.
   const [pestanya, setPestanya] = useState('dades')
+  // El mateix contracte tal com surt a la llista de l'immoble: porta els indicadors dels documents, que calen
+  // per als avisos de dalt.
+  const [llistat, setLlistat] = useState<ContracteLlistat | null>(null)
+  // Canvia després de desar: es tornen a llegir les dades i els avisos.
+  const [versioDades, setVersioDades] = useState(0)
 
   useEffect(() => {
     let cancelat = false
@@ -34,22 +45,28 @@ function FitxaContracte(): React.JSX.Element {
       idContracte === undefined
         ? Promise.resolve(null)
         : window.api.contractes.obtenirUn(Number(idContracte))
+    const pLlistat =
+      idContracte === undefined ? Promise.resolve(null) : window.api.contractes.obtenir(Number(id))
     Promise.all([
       window.api.inmobles.obtenirUn(Number(id)),
       window.api.inquilins.obtenir(),
-      pContracte
-    ]).then(([rImmoble, rInquilins, rContracte]) => {
+      pContracte,
+      pLlistat
+    ]).then(([rImmoble, rInquilins, rContracte, rLlistat]) => {
       if (cancelat) return
       if (esOk(rImmoble)) setImmoble(rImmoble.dades)
       if (esOk(rInquilins)) setInquilins(rInquilins.dades)
       if (rContracte !== null && esOk(rContracte)) setContracte(rContracte.dades)
+      if (rLlistat !== null && esOk(rLlistat)) {
+        setLlistat(rLlistat.dades.find((c) => c.id === Number(idContracte)) ?? null)
+      }
       setCarregant(false)
     })
     // Si el component es desmunta abans que arribin les respostes, no s'actualitza l'estat.
     return () => {
       cancelat = true
     }
-  }, [id, idContracte])
+  }, [id, idContracte, versioDades])
 
   // Un contracte que no existeix, o que és d'un altre immoble, es tracta com a no trobat.
   const contracteNoTrobat =
@@ -64,6 +81,7 @@ function FitxaContracte(): React.JSX.Element {
     }
     setContracte(desat)
     setVersioForm((v) => v + 1)
+    setVersioDades((v) => v + 1)
   }
 
   function demanarEliminar(c: Contracte): void {
@@ -108,6 +126,27 @@ function FitxaContracte(): React.JSX.Element {
           </Title>
           {immoble && <Text c="dimmed">{adreca(immoble)}</Text>}
         </div>
+
+        {llistat &&
+          (() => {
+            const linies: string[] = [
+              ...avisos(llistat).map((a) => t(`contractes.avisos.${a.clau}.${a.estat}`)),
+              ...(ingresPendent(llistat) ? [t('contractes.avisIngres')] : []),
+              ...documentsQueFalten(llistat).map((d) => t(`documents.avis.${d}`)),
+              ...(devolucioPendent(llistat) ? [t('contractes.avisos.devolucioPendent')] : [])
+            ]
+            return linies.length > 0 ? (
+              <Alert color="orange">
+                <Stack gap={2}>
+                  {linies.map((l) => (
+                    <Text key={l} size="sm">
+                      {l}
+                    </Text>
+                  ))}
+                </Stack>
+              </Alert>
+            ) : null
+          })()}
 
         <Group justify="space-between">
           <Group gap="xs">
