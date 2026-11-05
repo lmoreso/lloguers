@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Button,
   Fieldset,
@@ -25,9 +25,18 @@ import { aNumeroForm, buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
 import RevisarLloguer from './RevisarLloguer'
 import { MOTIUS_FI } from '../../../shared/tipus'
-import type { Contracte, ContracteDades, Immoble, Inquili, MotiuFi } from '../../../shared/tipus'
+import type {
+  Contracte,
+  ContracteDades,
+  DocumentContracte,
+  Immoble,
+  Inquili,
+  MotiuFi,
+  TipusDocumentContracte
+} from '../../../shared/tipus'
 import { hiHaCapaOberta } from '../utils/teclat'
 import { ingresPendent } from '../utils/avisosContracte'
+import DocumentUnicContracte from './DocumentUnicContracte'
 
 // Els selectors treballen amb text (id com a string); les dates són text ISO AAAA-MM-DD; els imports, número
 // (o text mentre s'escriu).
@@ -96,6 +105,8 @@ interface Props {
   // Pestanya activa: viu a la fitxa perquè es conservi quan el formulari es torna a muntar en desar.
   pestanya: string
   onPestanya: (pestanya: string) => void
+  // Es crida quan s'afegeix o s'elimina un document des d'un clip (la fitxa refresca la barra d'avisos).
+  onDocumentsCanvi: () => void
 }
 
 function FormulariContracte({
@@ -105,10 +116,50 @@ function FormulariContracte({
   onDesat,
   capcalera,
   pestanya,
-  onPestanya
+  onPestanya,
+  onDocumentsCanvi
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+
+  // Documents del contracte: els de tipus únic són els que mostren els clips. Es desen a l'instant i no formen part
+  // del formulari: no afecten el diàleg de canvis sense desar.
+  const [documents, setDocuments] = useState<DocumentContracte[]>([])
+  const [versioDocs, setVersioDocs] = useState(0)
+  const idContracte = contracte?.id ?? null
+
+  useEffect(() => {
+    if (idContracte === null) return
+    let cancelat = false
+    window.api.documents.obtenir(idContracte).then((resposta) => {
+      if (cancelat) return
+      if (esOk(resposta)) setDocuments(resposta.dades)
+    })
+    // Si el component es desmunta abans que arribi la resposta, no s'actualitza l'estat.
+    return () => {
+      cancelat = true
+    }
+  }, [idContracte, versioDocs])
+
+  function alCanviDocuments(): void {
+    setVersioDocs((v) => v + 1)
+    onDocumentsCanvi()
+  }
+
+  // Etiqueta d'un camp amb la icona del seu document al costat.
+  function etiqueta(text: string, tipus: TipusDocumentContracte): React.ReactNode {
+    return (
+      <Group gap={6} wrap="nowrap">
+        <span>{text}</span>
+        <DocumentUnicContracte
+          idContracte={idContracte}
+          tipus={tipus}
+          doc={documents.find((d) => d.tipus === tipus)}
+          onCanvi={alCanviDocuments}
+        />
+      </Group>
+    )
+  }
 
   // Nom de l'inquilí per al desplegable; el NIF ajuda a distingir-ne dos de semblants.
   const opcions = inquilins.map((i) => ({
@@ -428,7 +479,7 @@ function FormulariContracte({
                 />
                 <CampData
                   withAsterisk
-                  label={t('contractes.camps.dataInici')}
+                  label={etiqueta(t('contractes.camps.dataInici'), 'contracte')}
                   {...form.getInputProps('data_inici')}
                 />
                 <CampData
@@ -555,7 +606,7 @@ function FormulariContracte({
                 />
                 <CampData
                   clearable
-                  label={t('contractes.camps.fiancaDataModel2')}
+                  label={etiqueta(t('contractes.camps.fiancaDataModel2'), 'fianca_model2')}
                   {...form.getInputProps('fianca_data_model2')}
                 />
                 <CampData
@@ -570,7 +621,10 @@ function FormulariContracte({
                 />
                 <CampData
                   clearable
-                  label={t('contractes.camps.fiancaDataNotificacio')}
+                  label={etiqueta(
+                    t('contractes.camps.fiancaDataNotificacio'),
+                    'fianca_notificacio'
+                  )}
                   {...form.getInputProps('fianca_data_notificacio')}
                 />
               </SimpleGrid>
@@ -591,7 +645,7 @@ function FormulariContracte({
                 <CampData
                   clearable
                   disabled={!teFi}
-                  label={t('contractes.camps.devolucioDataSollicitud')}
+                  label={etiqueta(t('contractes.camps.devolucioDataSollicitud'), 'fianca_model3')}
                   {...form.getInputProps('devolucio_data_sollicitud')}
                 />
                 <CampData

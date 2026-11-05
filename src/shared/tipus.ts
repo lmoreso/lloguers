@@ -130,6 +130,15 @@ export const TIPUS_UNICS_CONTRACTE = [
   'fianca_model3'
 ] as const
 
+// Tipus que es poden afegir i editar des de la pantalla de documents del contracte (els únics es gestionen des del
+// formulari del contracte, amb els clips).
+export const TIPUS_LLIURES_CONTRACTE: readonly TipusDocumentContracte[] = [
+  'annex',
+  'rebut',
+  'altres',
+  'documents_inquili'
+]
+
 // Un document adjunt d'un contracte. La ruta del fitxer no s'exposa: només la fa servir el Main.
 export interface DocumentContracte {
   id: number

@@ -29,6 +29,7 @@ import { esOk } from '../utils/resultat'
 import AfegirDocument from './AfegirDocument'
 import EditarDocument from './EditarDocument'
 import type { Contracte, DocumentContracte, Immoble } from '../../../shared/tipus'
+import { TIPUS_UNICS_CONTRACTE } from '../../../shared/tipus'
 
 // Documents d'un contracte (/immobles/:id/contractes/:idContracte/documents). Les accions van a la capçalera,
 // no a sota.
@@ -63,6 +64,18 @@ function DocumentsContracte(): React.JSX.Element {
   }, [id, idContracte, versio])
 
   const recarregar = (): void => setVersio((v) => v + 1)
+  const esUnic = (d: DocumentContracte): boolean =>
+    (TIPUS_UNICS_CONTRACTE as readonly string[]).includes(d.tipus)
+
+  // La data d'un document únic és la de la seva secció del contracte (sempre va sincronitzada); la dels altres
+  // tipus, la del document.
+  function dataDe(d: DocumentContracte): string | null {
+    if (d.tipus === 'contracte') return contracte?.data_inici ?? null
+    if (d.tipus === 'fianca_model2') return contracte?.fianca_data_model2 ?? null
+    if (d.tipus === 'fianca_notificacio') return contracte?.fianca_data_notificacio ?? null
+    if (d.tipus === 'fianca_model3') return contracte?.devolucio_data_sollicitud ?? null
+    return d.data_document
+  }
 
   // Un contracte que no existeix, o que és d'un altre immoble, es tracta com a no trobat.
   const noTrobat =
@@ -196,7 +209,7 @@ function DocumentsContracte(): React.JSX.Element {
                     {/* El nom del tipus és dada de l'usuari: no es tradueix. */}
                     <Table.Td>{t(`documents.tipus.${d.tipus}`)}</Table.Td>
                     <Table.Td>{d.nom_original}</Table.Td>
-                    <Table.Td>{formatData(d.data_document)}</Table.Td>
+                    <Table.Td>{formatData(dataDe(d))}</Table.Td>
                     <Table.Td>{d.comentaris}</Table.Td>
                     <Table.Td style={{ width: 1 }}>
                       <Menu position="bottom-end" withinPortal>
@@ -214,12 +227,14 @@ function DocumentsContracte(): React.JSX.Element {
                           >
                             {t('documents.visualitzar')}
                           </Menu.Item>
-                          <Menu.Item
-                            leftSection={<IconPencil size={16} />}
-                            onClick={() => editar(d)}
-                          >
-                            {t('comu.editar')}
-                          </Menu.Item>
+                          {!esUnic(d) && (
+                            <Menu.Item
+                              leftSection={<IconPencil size={16} />}
+                              onClick={() => editar(d)}
+                            >
+                              {t('comu.editar')}
+                            </Menu.Item>
+                          )}
                           <Menu.Divider />
                           <Menu.Item
                             color="red"

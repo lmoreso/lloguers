@@ -209,6 +209,11 @@
     "editar": {
       "titol": "Editar document"
     },
+    "unic": {
+      "dialeg": "Tria el document a adjuntar",
+      "amb": "Document adjuntat",
+      "sense": "Sense document adjuntat"
+    },    
     "eliminar": {
       "titol": "Eliminar document",
       "confirmacio": "Segur que vols eliminar {{nom}}? S'esborrarà també el fitxer del disc. Aquesta acció no es pot desfer."

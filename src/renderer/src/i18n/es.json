@@ -209,6 +209,11 @@
     "editar": {
       "titol": "Editar documento"
     },
+    "unic": {
+      "dialeg": "Elige el documento a adjuntar",
+      "amb": "Documento adjuntado",
+      "sense": "Sin documento adjuntado"
+    },    
     "eliminar": {
       "titol": "Eliminar documento",
       "confirmacio": "¿Seguro que quieres eliminar {{nom}}? Se borrará también el archivo del disco. Esta acción no se puede deshacer."

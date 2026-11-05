@@ -228,6 +228,7 @@ function FitxaContracte(): React.JSX.Element {
           capcalera={capcalera}
           pestanya={pestanya}
           onPestanya={setPestanya}
+          onDocumentsCanvi={() => setVersioDades((v) => v + 1)}
         />
       )}
     </>
