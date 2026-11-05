@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Button,
   Fieldset,
@@ -5,47 +6,108 @@ import {
   Select,
   SimpleGrid,
   Stack,
+  Tabs,
+  Text,
   Textarea,
   TextInput
 } from '@mantine/core'
-import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
+import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
+import { IconCurrencyEuro } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { CampData } from '../components/CampData'
+import CampNumeric from '../components/CampNumeric'
+import CanvisSenseDesar from '../components/CanvisSenseDesar'
 import { adreca } from '../utils/adreca'
-import { formatData } from '../utils/dates'
-import { aNumero, buitANull } from '../utils/formulari'
+import { aNumeroForm, buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
-import type { Contracte, ContracteDades, Immoble, Inquili } from '../../../shared/tipus'
+import RevisarLloguer from './RevisarLloguer'
+import { MOTIUS_FI } from '../../../shared/tipus'
+import type { Contracte, ContracteDades, Immoble, Inquili, MotiuFi } from '../../../shared/tipus'
+import { hiHaCapaOberta } from '../utils/teclat'
+
+// Els selectors treballen amb text (id com a string); les dates són text ISO AAAA-MM-DD; els imports, número
+// (o text mentre s'escriu).
+interface Valors {
+  data_inici: string | null
+  d_fi_prevista: string | null
+  id_inquili: string | null
+  id_inquili_2: string | null
+  comentaris: string
+  lloguer_inicial: number | string
+  fianca_adicional: number | string
+  lloguer_actual: number | string
+  data_ultima_revisio: string | null
+  data_fi: string | null
+  motiu_fi: string | null
+  devolucio_import: number | string
+  devolucio_motiu: string
+  fianca_import: number | string
+  fianca_nc: string
+  fianca_data_model2: string | null
+  fianca_data_ingres: string | null
+  fianca_num_registre: string
+  fianca_data_notificacio: string | null
+  devolucio_nc: string
+  devolucio_data_sollicitud: string | null
+  devolucio_data_cobrament: string | null
+  fianca_comentari: string
+}
+
+// Camps de la pestanya "Fiança INCASOL". Els de l'altra pestanya (Dades) són la resta.
+const CAMPS_FIANCA = new Set([
+  'fianca_nc',
+  'fianca_data_model2',
+  'fianca_data_ingres',
+  'fianca_num_registre',
+  'fianca_data_notificacio',
+  'devolucio_nc',
+  'devolucio_data_sollicitud',
+  'devolucio_data_cobrament',
+  'fianca_comentari'
+])
+
+// Pestanya del primer error: si n'hi ha cap a Dades, aquesta; si no, Fiança INCASOL.
+function pestanyaDelPrimerError(errors: Record<string, unknown>): string {
+  return Object.keys(errors).some((k) => !CAMPS_FIANCA.has(k)) ? 'dades' : 'fianca'
+}
+
+// Què rep la capçalera (que dibuixa la fitxa) del formulari.
+export interface AccionsCapcalera {
+  // Executa una acció que canvia de pantalla; si hi ha canvis sense desar, pregunta abans.
+  anarAmbGuarda: (accio: () => void) => void
+  // Desa el formulari (el mateix que fa Ctrl+S).
+  desar: () => void
+  // Torna a la llista de contractes de l'immoble (amb la mateixa protecció).
+  tornar: () => void
+}
 
 interface Props {
   immoble: Immoble // fix: no es pot canviar ni en crear ni en editar
   contracte: Contracte | null // null = contracte nou
   inquilins: Inquili[]
+  // Es crida després de desar (alta o edició) amb el contracte tal com ha quedat a la BD.
+  onDesat: (contracte: Contracte) => void
+  // La fitxa dibuixa la capçalera (títol, subtítol i botons) a dalt del formulari.
+  capcalera: (accions: AccionsCapcalera) => React.ReactNode
+  // Pestanya activa: viu a la fitxa perquè es conservi quan el formulari es torna a muntar en desar.
+  pestanya: string
+  onPestanya: (pestanya: string) => void
 }
 
-// Els selectors treballen amb text (id com a string); les dates són text ISO AAAA-MM-DD.
-interface Valors {
-  data_inici: string | null
-  data_fi: string | null
-  d_fi_prevista: string | null
-  id_inquili: string | null
-  id_inquili_2: string | null
-  lloguer_inicial: string
-  comentaris: string
-  fianca_import: string
-  fianca_nc: string
-  fianca_data_model2: string | null
-  fianca_data_ingres: string | null
-  fianca_data_notificacio: string | null
-  fianca_num_registre: string
-}
-
-function FormulariContracte({ immoble, contracte, inquilins }: Props): React.JSX.Element {
-  const { t, i18n } = useTranslation()
+function FormulariContracte({
+  immoble,
+  contracte,
+  inquilins,
+  onDesat,
+  capcalera,
+  pestanya,
+  onPestanya
+}: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const navigate = useNavigate()
-  const tornar = `/immobles/${immoble.id}/contractes`
 
   // Nom de l'inquilí per al desplegable; el NIF ajuda a distingir-ne dos de semblants.
   const opcions = inquilins.map((i) => ({
@@ -55,27 +117,44 @@ function FormulariContracte({ immoble, contracte, inquilins }: Props): React.JSX
       (i.nif ? ` (${i.nif})` : '')
   }))
 
-  const numeroOpcional = (v: string): string | null => {
-    if (!v.trim()) return null
-    const n = aNumero(v)
+  // Un nombre >= 0 o buit.
+  const nombreOpcional = (v: number | string): string | null => {
+    if (v === '') return null
+    const n = aNumeroForm(v)
     return n === null || n < 0 ? t('immobles.validacio.numero') : null
   }
+
+  // Suma de la fiança i de la fiança addicional (arrodonida a cèntims, per evitar errors de decimals).
+  const sumaFiances = (v: Valors): number =>
+    Math.round(
+      ((aNumeroForm(v.fianca_import) ?? 0) + (aNumeroForm(v.fianca_adicional) ?? 0)) * 100
+    ) / 100
 
   const form = useForm<Valors>({
     initialValues: {
       data_inici: contracte?.data_inici ?? null,
-      data_fi: contracte?.data_fi ?? null,
       d_fi_prevista: contracte?.d_fi_prevista ?? null,
       id_inquili: contracte ? String(contracte.id_inquili) : null,
       id_inquili_2: contracte?.id_inquili_2 ? String(contracte.id_inquili_2) : null,
-      lloguer_inicial: String(contracte?.lloguer_inicial ?? ''),
       comentaris: contracte?.comentaris ?? '',
-      fianca_import: String(contracte?.fianca_import ?? ''),
+      lloguer_inicial: contracte?.lloguer_inicial ?? '',
+      fianca_adicional: contracte?.fianca_adicional ?? 0,
+      lloguer_actual: contracte?.lloguer_actual ?? '',
+      data_ultima_revisio: contracte?.data_ultima_revisio ?? null,
+      data_fi: contracte?.data_fi ?? null,
+      motiu_fi: contracte?.motiu_fi ?? null,
+      devolucio_import: contracte?.devolucio_import ?? '',
+      devolucio_motiu: contracte?.devolucio_motiu ?? '',
+      fianca_import: contracte?.fianca_import ?? '',
       fianca_nc: contracte?.fianca_nc ?? '',
       fianca_data_model2: contracte?.fianca_data_model2 ?? null,
       fianca_data_ingres: contracte?.fianca_data_ingres ?? null,
+      fianca_num_registre: contracte?.fianca_num_registre ?? '',
       fianca_data_notificacio: contracte?.fianca_data_notificacio ?? null,
-      fianca_num_registre: contracte?.fianca_num_registre ?? ''
+      devolucio_nc: contracte?.devolucio_nc ?? '',
+      devolucio_data_sollicitud: contracte?.devolucio_data_sollicitud ?? null,
+      devolucio_data_cobrament: contracte?.devolucio_data_cobrament ?? null,
+      fianca_comentari: contracte?.fianca_comentari ?? ''
     },
     validate: {
       data_inici: (v) => (v ? null : t('comu.obligatori')),
@@ -85,32 +164,25 @@ function FormulariContracte({ immoble, contracte, inquilins }: Props): React.JSX
           ? t('contractes.validacio.fiPrevistaAnterior')
           : null
       },
-      data_fi: (v, vals) => {
-        if (v && vals.data_inici && v < vals.data_inici) {
-          return t('contractes.validacio.dataFiAnterior')
-        }
-        // Un contracte amb devolució informada no es pot reobrir, i la fi no pot passar de la sol·licitud.
-        if (contracte) {
-          const sol = contracte.devolucio_data_sollicitud
-          const teDevolucio = [
-            sol,
-            contracte.devolucio_data_cobrament,
-            contracte.devolucio_import,
-            contracte.devolucio_motiu
-          ].some((x) => x !== null)
-          if (!v && teDevolucio) return t('contractes.validacio.reobrirAmbDevolucio')
-          if (v && sol && v > sol) return t('contractes.validacio.finPosteriorSollicitud')
-        }
-        return null
-      },
+      data_fi: (v, vals) =>
+        v && vals.data_inici && v < vals.data_inici
+          ? t('contractes.validacio.dataFiAnterior')
+          : null,
       id_inquili: (v) => (v ? null : t('comu.obligatori')),
       id_inquili_2: (v, vals) =>
         v && v === vals.id_inquili ? t('contractes.validacio.mateixInquili') : null,
-      lloguer_inicial: (v) => {
-        if (!v.trim()) return t('comu.obligatori')
-        return numeroOpcional(v)
+      lloguer_inicial: (v) => (v === '' ? t('comu.obligatori') : nombreOpcional(v)),
+      fianca_adicional: (v) => (v === '' ? t('comu.obligatori') : nombreOpcional(v)),
+      fianca_import: nombreOpcional,
+      devolucio_import: nombreOpcional,
+      // Si l'import a retornar és inferior a la suma de les dues fiances, cal justificar-ho.
+      devolucio_motiu: (v, vals) => {
+        if (!vals.data_fi || v.trim()) return null
+        const retornar = aNumeroForm(vals.devolucio_import)
+        return retornar !== null && Math.round(retornar * 100) < Math.round(sumaFiances(vals) * 100)
+          ? t('comu.obligatori')
+          : null
       },
-      fianca_import: numeroOpcional,
       // Les parelles de la fiança s'informen juntes: l'error surt al camp que falta.
       fianca_nc: (v, vals) =>
         !v.trim() && vals.fianca_data_model2 ? t('contractes.validacio.parellaModel2') : null,
@@ -123,179 +195,420 @@ function FormulariContracte({ immoble, contracte, inquilins }: Props): React.JSX
       fianca_data_notificacio: (v, vals) =>
         v === null && vals.fianca_num_registre.trim()
           ? t('contractes.validacio.parellaNotificacio')
+          : null,
+      // La devolució: el NC i la data de sol·licitud van junts; l'abonament no és anterior a la sol·licitud, ni la
+      // sol·licitud a la fi del contracte.
+      devolucio_nc: (v, vals) =>
+        !v.trim() && vals.devolucio_data_sollicitud
+          ? t('contractes.validacio.parellaDevolucio')
+          : null,
+      devolucio_data_sollicitud: (v, vals) => {
+        if (v === null && vals.devolucio_nc.trim()) {
+          return t('contractes.validacio.parellaDevolucio')
+        }
+        return v && vals.data_fi && v < vals.data_fi ? t('contractes.validacio.solAnterior') : null
+      },
+      devolucio_data_cobrament: (v, vals) =>
+        v && vals.devolucio_data_sollicitud && v < vals.devolucio_data_sollicitud
+          ? t('contractes.validacio.cobAnterior')
           : null
     }
   })
 
-  async function desar(v: Valors): Promise<void> {
+  const teFi = Boolean(form.values.data_fi)
+
+  const retornarForm = aNumeroForm(form.values.devolucio_import)
+  const justificacioObligatoria =
+    teFi &&
+    retornarForm !== null &&
+    Math.round(retornarForm * 100) < Math.round(sumaFiances(form.values) * 100)
+
+  // Esborrar la data de fi buida les dades que només tenen sentit amb el contracte tancat, i les desactiva. En posar
+  // la data de fi per primer cop, l'import a retornar surt amb la suma de les dues fiances (si encara és buit).
+  function canviarDataFi(v: string | null): void {
+    const teFiAbans = Boolean(form.values.data_fi)
+    form.setFieldValue('data_fi', v)
+    if (!v) {
+      form.setValues({
+        motiu_fi: null,
+        devolucio_import: '',
+        devolucio_motiu: '',
+        devolucio_nc: '',
+        devolucio_data_sollicitud: null,
+        devolucio_data_cobrament: null
+      })
+      return
+    }
+    if (!teFiAbans && form.values.devolucio_import === '') {
+      const suma = sumaFiances(form.values)
+      if (suma > 0) form.setFieldValue('devolucio_import', suma)
+    }
+  }
+
+  // Revisar lloguer: NO escriu a la BD; només posa el lloguer actual i la data de revisió als camps del formulari,
+  // que es desen amb Desar.
+  function revisar(): void {
+    const dataInici = form.values.data_inici
+    if (!dataInici) return
+    modals.open({
+      title: t('contractes.revisar.titol'),
+      children: (
+        <RevisarLloguer
+          lloguerActual={aNumeroForm(form.values.lloguer_actual) ?? 0}
+          dataUltimaRevisio={form.values.data_ultima_revisio ?? dataInici}
+          dataInici={dataInici}
+          onAcceptar={(lloguer, data) => {
+            form.setFieldValue('lloguer_actual', lloguer)
+            form.setFieldValue('data_ultima_revisio', data)
+          }}
+        />
+      )
+    })
+  }
+
+  // Desa el formulari (alta o edició). Retorna el contracte tal com ha quedat a la BD, o null si ha fallat
+  // (l'error ja s'ha notificat).
+  async function desarValors(v: Valors): Promise<Contracte | null> {
     // Els camps obligatoris ja estan validats: els `as` només ajusten el tipus.
+    const lloguerInicial = aNumeroForm(v.lloguer_inicial) as number
     const dades: ContracteDades = {
       id_inmoble: immoble.id,
       data_inici: v.data_inici as string,
       data_fi: v.data_fi,
+      motiu_fi: (v.motiu_fi as MotiuFi | null) ?? null,
       id_inquili: Number(v.id_inquili),
       id_inquili_2: v.id_inquili_2 ? Number(v.id_inquili_2) : null,
       d_fi_prevista: v.d_fi_prevista as string,
-      lloguer_inicial: aNumero(v.lloguer_inicial) as number,
-      fianca_import: aNumero(v.fianca_import),
+      lloguer_inicial: lloguerInicial,
+      // En crear, el Main fixa el lloguer actual i la data de revisió a partir de l'inicial i de la data d'inici.
+      lloguer_actual: contracte ? (aNumeroForm(v.lloguer_actual) as number) : lloguerInicial,
+      data_ultima_revisio: contracte ? (v.data_ultima_revisio as string) : (v.data_inici as string),
+      fianca_adicional: aNumeroForm(v.fianca_adicional) as number,
+      fianca_import: aNumeroForm(v.fianca_import),
       fianca_nc: buitANull(v.fianca_nc),
       fianca_data_model2: v.fianca_data_model2,
       fianca_data_ingres: v.fianca_data_ingres,
       fianca_data_notificacio: v.fianca_data_notificacio,
       fianca_num_registre: buitANull(v.fianca_num_registre),
-      comentaris: buitANull(v.comentaris),
-      // Provisional fins al pas 26-4 (formulari reorganitzat): es conserva el que ja hi ha desat.
-      motiu_fi: contracte?.motiu_fi ?? null,
-      lloguer_actual: contracte?.lloguer_actual ?? (aNumero(v.lloguer_inicial) as number),
-      data_ultima_revisio: contracte?.data_ultima_revisio ?? (v.data_inici as string),
-      fianca_adicional: contracte?.fianca_adicional ?? 0,
-      fianca_comentari: contracte?.fianca_comentari ?? null,
-      devolucio_nc: contracte?.devolucio_nc ?? null,
-      devolucio_data_sollicitud: contracte?.devolucio_data_sollicitud ?? null,
-      devolucio_data_cobrament: contracte?.devolucio_data_cobrament ?? null,
-      devolucio_import: contracte?.devolucio_import ?? null,
-      devolucio_motiu: contracte?.devolucio_motiu ?? null
+      fianca_comentari: buitANull(v.fianca_comentari),
+      devolucio_nc: buitANull(v.devolucio_nc),
+      devolucio_data_sollicitud: v.devolucio_data_sollicitud,
+      devolucio_data_cobrament: v.devolucio_data_cobrament,
+      devolucio_import: aNumeroForm(v.devolucio_import),
+      devolucio_motiu: buitANull(v.devolucio_motiu),
+      comentaris: buitANull(v.comentaris)
     }
-    const correcte = contracte
-      ? esOk(await window.api.contractes.actualitzar(contracte.id, dades))
-      : esOk(await window.api.contractes.crear(dades))
-    if (!correcte) return // p. ex. CONTRACTE_SOLAPAT: es queda al formulari
 
-    notifications.show({ color: 'green', message: t('contractes.desat') })
-    navigate(tornar)
+    let desat: Contracte | null = null
+    if (contracte) {
+      if (!esOk(await window.api.contractes.actualitzar(contracte.id, dades))) return null // p. ex. CONTRACTE_SOLAPAT
+      const r = await window.api.contractes.obtenirUn(contracte.id)
+      if (esOk(r)) desat = r.dades
+    } else {
+      const r = await window.api.contractes.crear(dades)
+      if (esOk(r)) desat = r.dades
+    }
+    if (desat === null) return null
+
+    // Un contracte obert que passa a tancat, amb fiança: queda pendent gestionar la devolució.
+    const acabaDeTancar = contracte !== null && contracte.data_fi === null && dades.data_fi !== null
+    const teFianca =
+      dades.fianca_import !== null ||
+      dades.fianca_data_model2 !== null ||
+      dades.fianca_data_notificacio !== null
+    const avisDevolucio = acabaDeTancar && teFianca
+    notifications.show({
+      color: avisDevolucio ? 'yellow' : 'green',
+      message: avisDevolucio ? t('contractes.desatTancat') : t('contractes.desat')
+    })
+    return desat
   }
 
-  const euros = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
+  async function desar(v: Valors): Promise<void> {
+    const desat = await desarValors(v)
+    if (desat !== null) onDesat(desat)
+  }
+
+  // Desa el formulari (botó Desar i Ctrl+S). Si la validació falla, es canvia a la pestanya del primer error.
+  function desarFormulari(): void {
+    form.onSubmit(desar, (errors) => onPestanya(pestanyaDelPrimerError(errors)))()
+  }
+
+  // Executa una acció que canvia de pantalla; si hi ha canvis sense desar, pregunta abans.
+  function anarAmbGuarda(accio: () => void): void {
+    if (!form.isDirty()) {
+      accio()
+      return
+    }
+    modals.open({
+      title: t('comu.canvisSenseDesar.titol'),
+      children: (
+        <CanvisSenseDesar
+          onDesar={async () => {
+            // Si hi ha errors de validació o el desat falla, ens quedem a la pantalla: es tanca el diàleg,
+            // es canvia a la pestanya del primer error i els errors es veuen al formulari.
+            const validacio = form.validate()
+            if (validacio.hasErrors) onPestanya(pestanyaDelPrimerError(validacio.errors))
+            const desat = validacio.hasErrors ? null : await desarValors(form.values)
+            modals.closeAll()
+            if (desat !== null) accio()
+          }}
+          onDescartar={() => {
+            modals.closeAll()
+            accio()
+          }}
+        />
+      )
+    })
+  }
+
+  const tornar = (): void => anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/contractes`))
+
+  // Ctrl+S desa; Escape = Tornar, amb la mateixa protecció. Cap dels dos actua si hi ha una finestra o un
+  // desplegable obert (calendari, diàleg de canvis sense desar, revisar lloguer...). Intro NO desa: el formulari no
+  // té cap botó d'enviament.
+  useEffect(() => {
+    function alTeclat(e: KeyboardEvent): void {
+      if (e.defaultPrevented) return
+      if (hiHaCapaOberta()) return
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        desarFormulari()
+      } else if (e.key === 'Escape') {
+        tornar()
+      }
+    }
+    window.addEventListener('keydown', alTeclat)
+    return () => window.removeEventListener('keydown', alTeclat)
+  })
 
   return (
-    <form onSubmit={form.onSubmit(desar)}>
-      <Stack>
-        <Fieldset legend={t('contractes.seccions.dades')}>
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            <TextInput
-              readOnly
-              label={t('contractes.camps.immoble')}
-              value={adreca(immoble)}
-              style={{ gridColumn: '1 / -1' }}
-            />
-            <Select
-              withAsterisk
-              searchable
-              data={opcions}
-              nothingFoundMessage={t('comu.capResultat')}
-              placeholder={t('contractes.cercarInquili')}
-              label={t('contractes.camps.inquili')}
-              {...form.getInputProps('id_inquili')}
-            />
-            <Select
-              searchable
-              clearable
-              data={opcions}
-              nothingFoundMessage={t('comu.capResultat')}
-              placeholder={t('contractes.cercarInquili')}
-              label={t('contractes.camps.inquili2')}
-              {...form.getInputProps('id_inquili_2')}
-            />
-            <DatePickerInput
-              withAsterisk
-              valueFormat="DD/MM/YYYY"
-              label={t('contractes.camps.dataInici')}
-              {...form.getInputProps('data_inici')}
-            />
-            <DatePickerInput
-              withAsterisk
-              valueFormat="DD/MM/YYYY"
-              label={t('contractes.camps.dFiPrevista')}
-              {...form.getInputProps('d_fi_prevista')}
-            />
-            <DatePickerInput
-              clearable
-              valueFormat="DD/MM/YYYY"
-              label={t('contractes.camps.dataFi')}
-              {...form.getInputProps('data_fi')}
-            />
-          </SimpleGrid>
-          <Textarea
-            mt="md"
-            autosize
-            minRows={2}
-            label={t('contractes.camps.comentaris')}
-            {...form.getInputProps('comentaris')}
-          />
-        </Fieldset>
+    <>
+      {capcalera({ anarAmbGuarda, desar: desarFormulari, tornar })}
 
-        <Fieldset legend={t('contractes.seccions.lloguer')}>
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            <TextInput
-              withAsterisk
-              inputMode="decimal"
-              label={t('contractes.camps.lloguerInicial')}
-              {...form.getInputProps('lloguer_inicial')}
-            />
-            {/* En editar, el lloguer actual i la data de revisió són de només lectura: només els canvia l'acció Revisar lloguer. */}
-            {contracte && (
-              <>
+      <Tabs value={pestanya} onChange={(v) => v && onPestanya(v)} keepMounted>
+        <Tabs.List>
+          <Tabs.Tab value="dades">{t('contractes.pestanyes.dades')}</Tabs.Tab>
+          <Tabs.Tab value="fianca">{t('contractes.pestanyes.fianca')}</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="dades" pt="md">
+          <Stack>
+            <Fieldset legend={t('contractes.seccions.dades')}>
+              <SimpleGrid cols={{ base: 1, sm: 2 }}>
                 <TextInput
                   readOnly
-                  label={t('contractes.camps.lloguerActual')}
-                  value={euros.format(contracte.lloguer_actual)}
+                  variant="filled"
+                  label={t('contractes.camps.immoble')}
+                  value={adreca(immoble)}
+                  style={{ gridColumn: '1 / -1' }}
                 />
+                <Select
+                  withAsterisk
+                  searchable
+                  data={opcions}
+                  nothingFoundMessage={t('comu.capResultat')}
+                  placeholder={t('contractes.cercarInquili')}
+                  label={t('contractes.camps.inquili')}
+                  {...form.getInputProps('id_inquili')}
+                />
+                <Select
+                  searchable
+                  clearable
+                  data={opcions}
+                  nothingFoundMessage={t('comu.capResultat')}
+                  placeholder={t('contractes.cercarInquili')}
+                  label={t('contractes.camps.inquili2')}
+                  {...form.getInputProps('id_inquili_2')}
+                />
+                <CampData
+                  withAsterisk
+                  label={t('contractes.camps.dataInici')}
+                  {...form.getInputProps('data_inici')}
+                />
+                <CampData
+                  withAsterisk
+                  label={t('contractes.camps.dFiPrevista')}
+                  {...form.getInputProps('d_fi_prevista')}
+                />
+              </SimpleGrid>
+              <Textarea
+                mt="md"
+                autosize
+                minRows={2}
+                label={t('contractes.camps.comentaris')}
+                {...form.getInputProps('comentaris')}
+              />
+            </Fieldset>
+
+            <Fieldset legend={t('contractes.seccions.lloguer')}>
+              <SimpleGrid cols={{ base: 1, sm: 3 }}>
+                <CampNumeric
+                  withAsterisk
+                  tipus="import"
+                  label={t('contractes.camps.lloguerInicial')}
+                  {...form.getInputProps('lloguer_inicial')}
+                />
+                <CampNumeric
+                  tipus="import"
+                  label={t('contractes.camps.fiancaImport')}
+                  {...form.getInputProps('fianca_import')}
+                />
+                <CampNumeric
+                  withAsterisk
+                  tipus="import"
+                  label={t('contractes.camps.fiancaAdicional')}
+                  {...form.getInputProps('fianca_adicional')}
+                />
+                {/* El lloguer actual i la data de revisió només existeixen en editar, i només els canvia Revisar lloguer. */}
+                {contracte && (
+                  <>
+                    <CampNumeric
+                      readOnly
+                      variant="filled"
+                      tipus="import"
+                      label={t('contractes.camps.lloguerActual')}
+                      value={form.values.lloguer_actual}
+                    />
+                    <CampData
+                      readOnly
+                      variant="filled"
+                      label={t('contractes.camps.dataUltimaRevisio')}
+                      value={form.values.data_ultima_revisio}
+                    />
+                    {/* A la mateixa línia que els dos camps, a la dreta, a l'altura dels camps. */}
+                    <Group justify="flex-end" align="flex-end">
+                      <Button
+                        variant="default"
+                        disabled={teFi}
+                        leftSection={<IconCurrencyEuro size={16} />}
+                        onClick={revisar}
+                      >
+                        {t('contractes.revisar.titol')}
+                      </Button>
+                    </Group>
+                  </>
+                )}
+              </SimpleGrid>
+            </Fieldset>
+
+            <Fieldset legend={t('contractes.seccions.tancament')}>
+              {!teFi && (
+                <Text size="sm" c="dimmed" mb="sm">
+                  {t('contractes.nota.senseFi')}
+                </Text>
+              )}
+              <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                <CampData
+                  clearable
+                  label={t('contractes.camps.dataFi')}
+                  {...form.getInputProps('data_fi')}
+                  onChange={canviarDataFi}
+                />
+                <Select
+                  clearable
+                  disabled={!teFi}
+                  data={MOTIUS_FI.map((m) => ({ value: m, label: t(`contractes.motiusFi.${m}`) }))}
+                  label={t('contractes.camps.motiuFi')}
+                  {...form.getInputProps('motiu_fi')}
+                />
+                <CampNumeric
+                  disabled={!teFi}
+                  tipus="import"
+                  label={t('contractes.camps.importARetornar')}
+                  {...form.getInputProps('devolucio_import')}
+                />
+              </SimpleGrid>
+              <Textarea
+                mt="md"
+                autosize
+                minRows={3}
+                disabled={!teFi}
+                withAsterisk={justificacioObligatoria}
+                label={t('contractes.camps.justificacioImport')}
+                {...form.getInputProps('devolucio_motiu')}
+              />
+            </Fieldset>
+          </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="fianca" pt="md">
+          <Stack>
+            <Fieldset legend={t('contractes.seccions.ingres')}>
+              <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                <CampNumeric
+                  tipus="import"
+                  disabled
+                  label={t('contractes.camps.fiancaImport')}
+                  {...form.getInputProps('fianca_import')}
+                />
+                <div />
                 <TextInput
-                  readOnly
-                  label={t('contractes.camps.dataUltimaRevisio')}
-                  value={formatData(contracte.data_ultima_revisio)}
+                  label={t('contractes.camps.fiancaNc')}
+                  {...form.getInputProps('fianca_nc')}
                 />
-              </>
-            )}
-          </SimpleGrid>
-        </Fieldset>
+                <CampData
+                  clearable
+                  label={t('contractes.camps.fiancaDataModel2')}
+                  {...form.getInputProps('fianca_data_model2')}
+                />
+                <CampData
+                  clearable
+                  label={t('contractes.camps.fiancaDataIngres')}
+                  {...form.getInputProps('fianca_data_ingres')}
+                />
+                <div />
+                <TextInput
+                  label={t('contractes.camps.fiancaNumRegistre')}
+                  {...form.getInputProps('fianca_num_registre')}
+                />
+                <CampData
+                  clearable
+                  label={t('contractes.camps.fiancaDataNotificacio')}
+                  {...form.getInputProps('fianca_data_notificacio')}
+                />
+              </SimpleGrid>
+            </Fieldset>
 
-        <Fieldset legend={t('contractes.seccions.fianca')}>
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            <TextInput
-              inputMode="decimal"
-              label={t('contractes.camps.fiancaImport')}
-              {...form.getInputProps('fianca_import')}
-            />
-            <div />
-            <TextInput
-              label={t('contractes.camps.fiancaNc')}
-              {...form.getInputProps('fianca_nc')}
-            />
-            <DatePickerInput
-              clearable
-              valueFormat="DD/MM/YYYY"
-              label={t('contractes.camps.fiancaDataModel2')}
-              {...form.getInputProps('fianca_data_model2')}
-            />
-            <DatePickerInput
-              clearable
-              valueFormat="DD/MM/YYYY"
-              label={t('contractes.camps.fiancaDataIngres')}
-              {...form.getInputProps('fianca_data_ingres')}
-            />
-            <div />
-            <TextInput
-              label={t('contractes.camps.fiancaNumRegistre')}
-              {...form.getInputProps('fianca_num_registre')}
-            />
-            <DatePickerInput
-              clearable
-              valueFormat="DD/MM/YYYY"
-              label={t('contractes.camps.fiancaDataNotificacio')}
-              {...form.getInputProps('fianca_data_notificacio')}
-            />
-          </SimpleGrid>
-        </Fieldset>
+            <Fieldset legend={t('contractes.seccions.devolucio')}>
+              {!teFi && (
+                <Text size="sm" c="dimmed" mb="sm">
+                  {t('contractes.nota.senseFi')}
+                </Text>
+              )}
+              <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                <TextInput
+                  disabled={!teFi}
+                  label={t('contractes.camps.devolucioNc')}
+                  {...form.getInputProps('devolucio_nc')}
+                />
+                <CampData
+                  clearable
+                  disabled={!teFi}
+                  label={t('contractes.camps.devolucioDataSollicitud')}
+                  {...form.getInputProps('devolucio_data_sollicitud')}
+                />
+                <CampData
+                  clearable
+                  disabled={!teFi}
+                  label={t('contractes.camps.devolucioDataCobrament')}
+                  {...form.getInputProps('devolucio_data_cobrament')}
+                />
+              </SimpleGrid>
+            </Fieldset>
 
-        <Group justify="flex-end">
-          <Button variant="default" onClick={() => navigate(tornar)}>
-            {t('comu.cancellar')}
-          </Button>
-          <Button type="submit">{t('comu.desar')}</Button>
-        </Group>
-      </Stack>
-    </form>
+            <Fieldset legend={t('contractes.seccions.comentari')}>
+              <Textarea
+                autosize
+                minRows={2}
+                label={t('contractes.camps.fiancaComentari')}
+                {...form.getInputProps('fianca_comentari')}
+              />
+            </Fieldset>
+          </Stack>
+        </Tabs.Panel>
+      </Tabs>
+    </>
   )
 }
 

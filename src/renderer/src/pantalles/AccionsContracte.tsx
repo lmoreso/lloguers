@@ -8,6 +8,7 @@ import { formatData } from '../utils/dates'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
 import type { ContracteLlistat } from '../../../shared/tipus'
+import { useEditarContracte } from '../utils/useEditarContracte'
 
 interface Props {
   contracte: ContracteLlistat
@@ -26,21 +27,7 @@ function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
   }
 
   // Un contracte tancat (amb data de fi) demana confirmació abans d'editar-lo.
-  function editar(): void {
-    const anar = (): void => {
-      navigate(`/immobles/${c.id_inmoble}/contractes/${c.id}`)
-    }
-    if (c.data_fi === null) {
-      anar()
-      return
-    }
-    modals.openConfirmModal({
-      title: t('contractes.editarTancat.titol'),
-      children: <Text size="sm">{t('contractes.editarTancat.text')}</Text>,
-      labels: { confirm: t('comu.editar'), cancel: t('comu.cancellar') },
-      onConfirm: anar
-    })
-  }
+  const editarContracte = useEditarContracte()
 
   function demanarEliminar(): void {
     const inquilins = [
@@ -78,7 +65,7 @@ function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
         <Menu.Item leftSection={<IconFiles size={16} />} onClick={documents}>
           {t('contractes.accions.documents')}
         </Menu.Item>
-        <Menu.Item leftSection={<IconPencil size={16} />} onClick={editar}>
+        <Menu.Item leftSection={<IconPencil size={16} />} onClick={() => editarContracte(c)}>
           {t('comu.editar')}
         </Menu.Item>
         <Menu.Divider />

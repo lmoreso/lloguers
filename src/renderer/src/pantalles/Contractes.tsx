@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Badge, Button, Group, Table, Text, Title } from '@mantine/core'
+import { Badge, Button, Group, Table, Text, Title, Stack, ActionIcon, Tooltip } from '@mantine/core'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -9,6 +9,8 @@ import { esOk } from '../utils/resultat'
 import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
 import AccionsContracte from './AccionsContracte'
 import AvisosContracte from '../components/AvisosContracte'
+import { IconCornerUpLeft, IconPencil, IconPlus } from '@tabler/icons-react'
+import { useEditarContracte } from '../utils/useEditarContracte'
 
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
 function Contractes(): React.JSX.Element {
@@ -20,6 +22,8 @@ function Contractes(): React.JSX.Element {
   const [carregant, setCarregant] = useState(true)
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
+
+  const editarContracte = useEditarContracte()
 
   useEffect(() => {
     let cancelat = false
@@ -43,16 +47,40 @@ function Contractes(): React.JSX.Element {
   return (
     <>
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
-      {!carregant && immoble === null && <Text c="dimmed">{t('immobles.noTrobat')}</Text>}
+      {!carregant && immoble === null && (
+        <>
+          <Text c="dimmed">{t('immobles.noTrobat')}</Text>
+          <Button
+            mt="md"
+            variant="default"
+            leftSection={<IconCornerUpLeft size={16} />}
+            onClick={() => navigate('/immobles')}
+          >
+            {t('comu.tornar')}
+          </Button>
+        </>
+      )}
 
       {immoble && (
         <>
-          <Group justify="space-between" mb="md">
+          <Stack gap="sm" mb="md">
             <Title order={2}>{t('contractes.titolImmoble', { adreca: adreca(immoble) })}</Title>
-            <Button onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}>
-              {t('comu.afegir')}
-            </Button>
-          </Group>
+            <Group justify="space-between">
+              <Button
+                leftSection={<IconPlus size={16} />}
+                onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
+              >
+                {t('comu.afegir')}
+              </Button>
+              <Button
+                variant="default"
+                leftSection={<IconCornerUpLeft size={16} />}
+                onClick={() => navigate('/immobles')}
+              >
+                {t('comu.tornar')}
+              </Button>
+            </Group>
+          </Stack>
 
           {contractes.length === 0 && <Text c="dimmed">{t('contractes.buit')}</Text>}
 
@@ -60,6 +88,7 @@ function Contractes(): React.JSX.Element {
             <Table striped highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
+                  <Table.Th />
                   <Table.Th>{t('contractes.camps.estat')}</Table.Th>
                   <Table.Th>{t('contractes.camps.dataInici')}</Table.Th>
                   <Table.Th>{t('contractes.camps.dataFi')}</Table.Th>
@@ -73,6 +102,17 @@ function Contractes(): React.JSX.Element {
               <Table.Tbody>
                 {contractes.map((c) => (
                   <Table.Tr key={c.id}>
+                    <Table.Td style={{ width: 1 }}>
+                      <Tooltip label={t('comu.editar')}>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={t('comu.editar')}
+                          onClick={() => editarContracte(c)}
+                        >
+                          <IconPencil size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Table.Td>
                     <Table.Td>
                       <Badge color={c.data_fi === null ? 'green' : 'gray'}>
                         {c.data_fi === null
@@ -105,10 +145,6 @@ function Contractes(): React.JSX.Element {
           )}
         </>
       )}
-
-      <Button mt="md" variant="default" onClick={() => navigate('/immobles')}>
-        {t('comu.tornar')}
-      </Button>
     </>
   )
 }

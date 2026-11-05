@@ -146,6 +146,10 @@ function nombreOpcional(nom: string, v: unknown): number | null {
   return v
 }
 
+// Una data amb forma ISO AAAA-MM-DD. El format l'imposa el CHECK de la BD; aquí només serveix per no comparar
+// com a text una data mal escrita (que la BD rebutjarà amb CHECK_VIOLAT).
+const esISO = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
+
 function nombreObligatori(nom: string, v: unknown): number {
   const n = nombreOpcional(nom, v)
   if (n === null) throw new Error(`${nom} és obligatori`)
@@ -189,12 +193,23 @@ function preparar(d: ContracteDades): ContracteDades {
   if (p.data_fi === null && (p.devolucio_nc !== null || p.motiu_fi !== null)) {
     throw new Error('Les dades de tancament només es poden informar amb el contracte tancat')
   }
+  // Si l'import a retornar és inferior a la suma de les dues fiances, cal justificar-ho (només amb el contracte
+  // tancat; amb el contracte obert, la BD ja rebutja qualsevol dada de devolució).
+  const suma = Math.round(((p.fianca_import ?? 0) + p.fianca_adicional) * 100)
+  if (
+    p.data_fi !== null &&
+    p.devolucio_import !== null &&
+    Math.round(p.devolucio_import * 100) < suma &&
+    p.devolucio_motiu === null
+  ) {
+    throw new Error('Cal justificar un import a retornar inferior a la fiança')
+  }
   const sol = p.devolucio_data_sollicitud
   const cob = p.devolucio_data_cobrament
-  if (sol !== null && cob !== null && cob < sol) {
+  if (esISO(sol) && esISO(cob) && cob < sol) {
     throw new Error("L'abonament no pot ser anterior a la sol·licitud")
   }
-  if (sol !== null && p.data_fi !== null && sol < p.data_fi) {
+  if (esISO(sol) && esISO(p.data_fi) && sol < p.data_fi) {
     throw new Error('La sol·licitud no pot ser anterior a la fi del contracte')
   }
   return p

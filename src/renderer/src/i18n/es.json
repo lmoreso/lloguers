@@ -261,7 +261,17 @@
     "ultims": {
       "titol": "Últimos contratos",
       "senseContracte": "Sin contrato"
-    },    
+    }, 
+    "desatTancat": "Contrato guardado. Queda pendiente gestionar la devolución de la fianza.",
+    "nota": {
+      "senseFi": "Disponible cuando el contrato tiene fecha de fin."
+    },
+    "motiusFi": {
+      "no_renovacio": "No renovación",
+      "voluntaria": "Voluntaria",
+      "nou_contracte": "Nuevo contrato",
+      "altres": "Otros"
+    },       
     "estat": {
       "vigent": "Vigente",
       "tancat": "Cerrado"
@@ -277,12 +287,17 @@
     },    
     "pestanyes": {
       "dades": "Datos",
-      "documents": "Documentos"
+      "documents": "Documentos",
+      "fianca": "Fianza INCASOL"      
     },    
     "seccions": {
       "dades": "Datos del contrato",
       "lloguer": "Alquiler",
-      "fianca": "Fianza"
+      "fianca": "Fianza",
+      "tancament": "Cierre",
+      "ingres": "Ingreso de la fianza",
+      "devolucio": "Devolución de la fianza",
+      "comentari": "Comentario"      
     },
     "camps": {
       "estat": "Estado",
@@ -297,13 +312,21 @@
       "lloguerActual": "Alquiler actual",
       "dataUltimaRevisio": "Última revisión",
       "comentaris": "Comentarios",
-      "fiancaImport": "Importe de la fianza",
+      "fiancaImport": "Fianza INCASOL",
       "fiancaNc": "NC (registro INCASOL)",
       "fiancaDataModel2": "Fecha del modelo 2",
       "fiancaDataIngres": "Fecha del ingreso",
       "fiancaDataNotificacio": "Fecha de la notificación",
       "avisos": "Avisos",      
-      "fiancaNumRegistre": "N.º de registro de la notificación"
+      "fiancaNumRegistre": "N.º de registro de la notificación",
+      "fiancaAdicional": "Fianza adicional",
+      "motiuFi": "Motivo de fin",
+      "importARetornar": "Importe a devolver",
+      "justificacioImport": "Justificación del importe a devolver",
+      "fiancaComentari": "Comentario (incidencias con el INCASOL)",
+      "devolucioNc": "NC de la devolución",
+      "devolucioDataSollicitud": "Fecha de solicitud",
+      "devolucioDataCobrament": "Fecha de abono"      
     },
     "cercarInquili": "Busca un inquilino…",
     "validacio": {
@@ -316,7 +339,8 @@
       "mateixInquili": "El segundo inquilino debe ser distinto del primero.",
       "parellaModel2": "El NC y la fecha del modelo 2 deben informarse juntos.",
       "parellaNotificacio": "El número de registro y la fecha de la notificación deben informarse juntos.",
-      "revisioAnterior": "La fecha de la revisión no puede ser anterior al inicio del contrato."      
+      "revisioAnterior": "La fecha de la revisión no puede ser anterior al inicio del contrato.",
+      "parellaDevolucio": "El NC y la fecha de solicitud de la devolución deben informarse juntos."            
     },
     "editarTancat": {
       "titol": "Contrato cerrado",
