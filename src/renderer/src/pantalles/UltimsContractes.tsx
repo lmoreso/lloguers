@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Anchor, Badge, Button, Table, Text, Title } from '@mantine/core'
+import { ActionIcon, Badge, Table, Text, Title, Tooltip } from '@mantine/core'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import AvisosContracte from '../components/AvisosContracte'
@@ -9,6 +9,8 @@ import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
 import AccionsContracte from './AccionsContracte'
 import type { ContracteLlistat, Immoble, ImmobleAmbContractes } from '../../../shared/tipus'
+import { IconPencil, IconPlus } from '@tabler/icons-react'
+import { useEditarContracte } from '@renderer/utils/useEditarContracte'
 
 // Una fila de la taula: un contracte, o un immoble sense cap contracte.
 interface Fila {
@@ -25,6 +27,7 @@ function UltimsContractes(): React.JSX.Element {
   const [carregant, setCarregant] = useState(true)
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
+  const editarContracte = useEditarContracte()
 
   useEffect(() => {
     let cancelat = false
@@ -61,6 +64,7 @@ function UltimsContractes(): React.JSX.Element {
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
+              <Table.Th />
               <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
               <Table.Th>{t('contractes.camps.estat')}</Table.Th>
               <Table.Th>{t('contractes.camps.dataInici')}</Table.Th>
@@ -75,15 +79,35 @@ function UltimsContractes(): React.JSX.Element {
           <Table.Tbody>
             {files.map(({ immoble, contracte: c }) => (
               <Table.Tr key={c ? `c${c.id}` : `i${immoble.id}`}>
-                <Table.Td>
-                  <Anchor
-                    component="button"
-                    type="button"
-                    onClick={() => navigate(`/immobles/${immoble.id}/contractes`)}
-                  >
-                    {adreca(immoble)}
-                  </Anchor>
+                <Table.Td style={{ width: 1 }}>
+                  {c === null ? (
+                    <>
+                      <Tooltip label={t('comu.afegir')}>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={t('comu.afegir')}
+                          onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
+                        >
+                          <IconPlus size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <Tooltip label={t('comu.editar')}>
+                      <ActionIcon
+                        variant="subtle"
+                        aria-label={t('comu.editar')}
+                        onClick={() =>
+                          editarContracte({ ...c, id_inmoble: immoble.id } as ContracteLlistat)
+                        }
+                      >
+                        <IconPencil size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
                 </Table.Td>
+
+                <Table.Td>{adreca(immoble)}</Table.Td>
                 {c === null ? (
                   <>
                     <Table.Td colSpan={7}>
@@ -92,13 +116,15 @@ function UltimsContractes(): React.JSX.Element {
                       </Badge>
                     </Table.Td>
                     <Table.Td style={{ width: 1 }}>
-                      <Button
-                        size="xs"
-                        variant="subtle"
-                        onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
-                      >
-                        {t('comu.afegir')}
-                      </Button>
+                      <Tooltip label={t('comu.afegir')}>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={t('comu.afegir')}
+                          onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
+                        >
+                          <IconPlus size={18} />
+                        </ActionIcon>
+                      </Tooltip>
                     </Table.Td>
                   </>
                 ) : (

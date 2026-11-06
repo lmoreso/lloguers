@@ -1,0 +1,9 @@
+Llicència MIT
+
+Copyright (c) 2026 Lluís Moreso Bosch
+
+Per la present, es concedeix gratuïtament a qualsevol persona que obtingui una còpia d'aquest programari i dels fitxers de documentació associats (el «Programari»), permís per utilitzar el Programari sense restriccions, incloent-hi, entre d'altres, els drets d'utilitzar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar i/o vendre còpies del Programari, així com permetre que les persones a qui es proporcioni el Programari puguin fer-ho, sempre que es compleixin les condicions següents:
+
+L'avís de copyright anterior i aquest avís de permís s'han d'incloure en totes les còpies o parts substancials del Programari.
+
+EL PROGRAMARI ES PROPORCIONA «TAL COM ÉS», SENSE CAP TIPUS DE GARANTIA, EXPRESSA O IMPLÍCITA, INCLOSES, ENTRE D'ALTRES, LES GARANTIES DE COMERCIABILITAT, IDONEÏTAT PER A UN PROPÒSIT PARTICULAR I NO INFRACCIÓ. EN CAP CAS ELS AUTORS O TITULARS DELS DRETS D'AUTOR SERAN RESPONSABLES DE CAP RECLAMACIÓ, DANY O ALTRA RESPONSABILITAT, JA SIGUI PER ACCIÓ CONTRACTUAL, EXTRACONTRACTUAL O D'ALTRE TIPUS, QUE DERIVI DE, O ESTIGUI RELACIONADA AMB, EL PROGRAMARI O EL SEU ÚS O ALTRES OPERACIONS AMB EL PROGRAMARI.

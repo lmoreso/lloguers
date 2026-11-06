@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Anchor, Badge, Fieldset, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core'
+import { Anchor, Badge, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import icona from '../assets/icon.png'
 import { esOk } from '../utils/resultat'
 import { IconBrandGithub } from '@tabler/icons-react'
+import license from '../assets/LICENSE.txt?raw'
+import license_es from '../assets/LICENSE_es.txt?raw'
+import license_ca from '../assets/LICENSE_ca.txt?raw'
+import { Accordion } from '@mantine/core'
 
 // Noms propis i adreces: no es tradueixen.
 const AUTOR = 'Lluís Moreso Bosch'
@@ -55,8 +59,10 @@ const TECNOLOGIES = [
 ]
 
 function QuantA(): React.JSX.Element {
-  const { t } = useTranslation()
   const [versio, setVersio] = useState<string | null>(null)
+  const { t, i18n } = useTranslation()
+  const Llicencia =
+    i18n.language === 'es' ? license_es : i18n.language === 'ca' ? license_ca : license
 
   useEffect(() => {
     let cancelat = false
@@ -79,151 +85,124 @@ function QuantA(): React.JSX.Element {
   return (
     <Stack gap="md" maw={640}>
       <Group gap="sm">
-        <Image src={icona} w={40} h={40} alt="" />
         <Title order={2}>{t('quantA.titol')}</Title>
       </Group>
 
-      <div>
-        <Text fw={700} size="lg">
-          Lloguers
-        </Text>
-        {versio && (
-          <Text c="dimmed">
-            {t('quantA.versio')} {versio}
+      <Group gap="md" align="center">
+        <Image src={icona} w={40} h={40} fit="contain" />
+
+        <Stack gap={2}>
+          <Text fw={700} size="xl">
+            Lloguers
           </Text>
-        )}
-      </div>
+          {versio && (
+            <Text c="dimmed">
+              {t('quantA.versio')} {versio}
+            </Text>
+          )}
+        </Stack>
+      </Group>
 
       <Text>{t('quantA.descripcio')}</Text>
+      <Text>
+        {'© 2026 - '}
+        <Tooltip label={URL_AUTOR}>
+          <Anchor component="button" type="button" onClick={() => obrir(URL_AUTOR)}>
+            {AUTOR}
+          </Anchor>
+        </Tooltip>
+      </Text>
 
-      <Fieldset
-        legend={t('quantA.caracteristiques')}
-        fw={700}
-        styles={{
-          legend: {
-            fontSize: '14px',
-            fontWeight: 700
-          }
-        }}
-      >
-        <Text fz="sm">{t('quantA.descripcio2')}</Text>
-        <Text fz="sm">{t('quantA.descripcio3')}</Text>
-        <Text fz="sm">{t('quantA.descripcio4')}</Text>
-        <Text fz="sm">{t('quantA.descripcio5')}</Text>
-        <Text fz="sm">{t('quantA.descripcio6')}</Text>
-      </Fieldset>
-
-      <div>
-        <Text fw={700}>{t('quantA.autor')}</Text>
-        <Text>
-          {'© 2026 - '}
-          <Tooltip label={URL_AUTOR}>
-            <Anchor component="button" type="button" onClick={() => obrir(URL_AUTOR)}>
-              {AUTOR}
-            </Anchor>
-          </Tooltip>
-        </Text>
-      </div>
-
-      <Fieldset
-        legend={t('quantA.tecnologies')}
-        fw={700}
-        styles={{
-          legend: {
-            fontSize: '14px',
-            fontWeight: 700
-          }
-        }}
-      >
-        <div>
-          <Group gap="xs">
-            {TECNOLOGIES.map((x) => (
-              <Tooltip key={x.nom} label={x.label + ' (' + x.url + ')'} w={300} multiline>
-                <Badge
-                  key={x.nom}
-                  component="button"
-                  type="button"
-                  variant="light"
-                  color="gray"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => obrir(x.url)}
-                >
-                  {x.nom}
-                </Badge>
-              </Tooltip>
-            ))}
-          </Group>
-        </div>
-
-        <Text mt={20} fz="sm">
-          {t('quantA.claudeAbans')}{' '}
-          <Tooltip label={URL_CLAUDE}>
-            <Anchor component="button" type="button" onClick={() => obrir(URL_CLAUDE)}>
-              <Text span fz="sm">
-                Claude
-              </Text>
-            </Anchor>
-          </Tooltip>
-          {t('quantA.claudeDespres')}
-        </Text>
-
-        <div>
-          <Text fw={700} mt={15} fz="sm">
-            {t('quantA.llicenciaTitol')}
-          </Text>
-          <Text mt={4}>
-            <Text span fz="sm">
-              {t('quantA.llicenciaAbans')}
+      <Accordion variant="separated">
+        <Accordion.Item value="llicencia">
+          <Accordion.Control>{t('quantA.llicenciaAbans')}</Accordion.Control>
+          <Accordion.Panel>
+            <Text fz="sm" style={{ whiteSpace: 'pre-wrap' }}>
+              {Llicencia}
             </Text>
-            <Tooltip label="https://choosealicense.com/es/licenses/mit/">
-              <Anchor
-                component="button"
-                type="button"
-                onClick={() => obrir('https://choosealicense.com/es/licenses/mit/')}
-              >
-                <Text fz="sm">{t('quantA.llicencia')}</Text>
-              </Anchor>
-            </Tooltip>
-            {'.'}
-          </Text>
-        </div>
+          </Accordion.Panel>
+        </Accordion.Item>
 
-        <div>
-          <Text fw={700} mt={15} fz="sm">
-            {t('quantA.gitHubTitol')}
-          </Text>
-          <Text mt={4} fz="sm">
-            {t('quantA.gitHubAbans')}{' '}
-            <Tooltip label="https://github.com/lmoreso/lloguers">
-              <Anchor
-                component="button"
-                type="button"
-                onClick={() => obrir('https://github.com/lmoreso/lloguers')}
-              >
-                <IconBrandGithub size={14} />
-                <Text span fz="sm">
-                  {' GitHub'}
+        <Accordion.Item value="caracteristiques">
+          <Accordion.Control>{t('quantA.caracteristiques')}</Accordion.Control>
+          <Accordion.Panel>
+            <Text fz="sm">{t('quantA.descripcio2')}</Text>
+            <Text fz="sm">{t('quantA.descripcio3')}</Text>
+            <Text fz="sm">{t('quantA.descripcio4')}</Text>
+            <Text fz="sm">{t('quantA.descripcio5')}</Text>
+            <Text fz="sm">{t('quantA.descripcio6')}</Text>
+          </Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value="tecnologies">
+          <Accordion.Control>{t('quantA.tecnologies')}</Accordion.Control>
+          <Accordion.Panel>
+            <>
+              <div>
+                <Group gap="xs">
+                  {TECNOLOGIES.map((x) => (
+                    <Tooltip key={x.nom} label={x.label + ' (' + x.url + ')'} w={300} multiline>
+                      <Badge
+                        key={x.nom}
+                        component="button"
+                        type="button"
+                        variant="light"
+                        color="gray"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => obrir(x.url)}
+                      >
+                        {x.nom}
+                      </Badge>
+                    </Tooltip>
+                  ))}
+                </Group>
+              </div>
+
+              <Text mt={20} fz="sm">
+                {t('quantA.claudeAbans')}{' '}
+                <Tooltip label={URL_CLAUDE}>
+                  <Anchor component="button" type="button" onClick={() => obrir(URL_CLAUDE)}>
+                    <Text span fz="sm">
+                      Claude
+                    </Text>
+                  </Anchor>
+                </Tooltip>
+                {t('quantA.claudeDespres')}
+              </Text>
+
+              <div>
+                <Text fw={700} mt={15} fz="sm">
+                  {t('quantA.gitHubTitol')}
                 </Text>
-              </Anchor>
-            </Tooltip>
-            {'.'}
-          </Text>
-        </div>
-      </Fieldset>
+                <Text mt={4} fz="sm">
+                  {t('quantA.gitHubAbans')}{' '}
+                  <Tooltip label="https://github.com/lmoreso/lloguers">
+                    <Anchor
+                      component="button"
+                      type="button"
+                      onClick={() => obrir('https://github.com/lmoreso/lloguers')}
+                    >
+                      <IconBrandGithub size={14} />
+                      <Text span fz="sm">
+                        {' GitHub'}
+                      </Text>
+                    </Anchor>
+                  </Tooltip>
+                  {'.'}
+                </Text>
+              </div>
+            </>
+          </Accordion.Panel>
+        </Accordion.Item>
 
-      <Fieldset
-        legend={t('quantA.disclaimerTitol')}
-        fw={700}
-        styles={{
-          legend: {
-            fontSize: '14px',
-            fontWeight: 700
-          }
-        }}
-      >
-        <Text fz="sm">{t('quantA.disclaimer')}</Text>
-        <Text fz="sm">{t('quantA.disclaimer2')}</Text>
-      </Fieldset>
+        <Accordion.Item value="avis">
+          <Accordion.Control>{t('quantA.disclaimerTitol')}</Accordion.Control>
+          <Accordion.Panel>
+            <Text fz="sm">{t('quantA.disclaimer')}</Text>
+            <Text fz="sm">{t('quantA.disclaimer2')}</Text>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
     </Stack>
   )
 }

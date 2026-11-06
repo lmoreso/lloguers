@@ -147,10 +147,15 @@ function FormulariContracte({
   }
 
   // Etiqueta d'un camp amb la icona del seu document al costat.
-  function etiqueta(text: string, tipus: TipusDocumentContracte): React.ReactNode {
+  function etiqueta(
+    text: string,
+    tipus: TipusDocumentContracte,
+    obligatori?: boolean
+  ): React.ReactNode {
     return (
       <Group gap={6} wrap="nowrap">
         <span>{text}</span>
+        {obligatori && <span style={{ color: 'var(--mantine-color-red-6)' }}>*</span>}
         <DocumentUnicContracte
           idContracte={idContracte}
           tipus={tipus}
@@ -478,8 +483,8 @@ function FormulariContracte({
                   {...form.getInputProps('id_inquili_2')}
                 />
                 <CampData
-                  withAsterisk
-                  label={etiqueta(t('contractes.camps.dataInici'), 'contracte')}
+                  // withAsterisk
+                  label={etiqueta(t('contractes.camps.dataInici'), 'contracte', true)}
                   {...form.getInputProps('data_inici')}
                 />
                 <CampData
