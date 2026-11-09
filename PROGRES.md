@@ -27,6 +27,8 @@
 - L'usuari treballa per defecte a la **VM**; el portàtil i l'ordinador anfitrió (Ubuntu 24.04, dades reals) es fan servir per a proves
   d'empaquetat. Abans d'instal·lar una versió nova a l'anfitrió, còpia de seguretat de `~/Lloguers/lloguers.sqlite` (les migracions
   s'apliquen soles en la primera arrencada).
+- **Fitxers que l'usuari retoca a mà** (p. ex. `CampData`, `formats.ts`, els formularis): demanar-ne el contingut abans de reescriure'ls sencers,
+  perquè no es desfacin els seus canvis.
 
 ## Entorn (verificat)
 
@@ -80,7 +82,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 24.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, accions Tancar i Revisar lloguer, avisos i documents amb la taula de tipus) i fase 2 (devolució de la fiança). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23) i els camps nous i els documents únics d'immoble (24). **La BD és a `user_version = 4`.** L'empaquetat s'ha provat fins al pas 21 (`.deb` v1.0.2 a l'anfitrió, amb dades reals); **els passos 22 a 24 no s'han empaquetat encara**.
+**Fases A, B i C fetes; Fase D feta fins al pas 26.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, avisos i documents), fase 2 (devolució de la fiança) i **formulari reorganitzat** (26: pestanyes Dades i Fiança INCASOL, devolució i tancament dins del formulari, documents únics amb clips, tipus de document fixos al codi). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23), els camps nous i els documents únics d'immoble (24) i els documents de contracte com a pantalla pròpia (25). **La BD és a `user_version = 5`.** L'empaquetat s'ha provat fins al pas 21 (`.deb` v1.0.2 a l'anfitrió, amb dades reals); **els passos 22 a 26 no s'han empaquetat encara**.
 
 ### Fase A: base (feta)
 
@@ -119,6 +121,10 @@ tornar a provar la migració 002 des de la BD real. cSpell desactivat al project
   No s'ha de tornar a posar `user-select: none` (cal poder copiar NIF, telèfons...).
 
 ### Fase D: pantalles i contractes
+
+> Nota: els passos 16 i 18 i la Fase 2 descriuen el que es va fer en el seu moment. **El pas 26 els substitueix en part**: ja no hi ha pestanya
+> Documents (és una pantalla pròpia, pas 25), ni accions Tancar / Revisar lloguer / Devolució (tot és al formulari), ni taula `tipus_document`
+> (ni `CLASSES_DOCUMENT`, `ClasseDocument`, `NomsClasses` ni sembrat: els tipus són fixos al codi). Per a l'estat vigent, mana `NOTES.md`.
 
 - **Inquilins** (`src/renderer/src/pantalles/{Inquilins,FormulariInquili}.tsx`): taula, alta i edició en modal,
   validació (cal nom o cognoms), eliminació amb confirmació (`modals.openConfirmModal`) i notificacions.
@@ -302,6 +308,39 @@ a **tots**, Editar i (després d'una línia) Eliminar en vermell. Les confirmaci
 - Provat des de les DevTools: validacions de cada regla (límits inclosos), objecte sense camps nous, numeració, tipus únic amb un sol fitxer,
   `actualitzar` amb tipus invàlid, comentari en blanc i data mal escrita.
 
+**Pas 25: documents del contracte com a pantalla pròpia, fet.**
+
+- **Backend** (`documents.ts`): `adjuntarDocuments(idContracte, dades, titol)` valida tipus, data i comentari **abans** d'obrir el diàleg; una fila per fitxer, amb
+  tipus, data i comentari (opcional) comuns; si n'hi ha més d'un, el comentari es numera (`1. Sala`; sense comentari, `1.`; amb zero davant a partir de 10), ordenats
+  pel nom (ordre numèric); tot o res (en fallar s'esborren els fitxers i la carpeta si ha quedat buida). El llistat va per ordre d'adjuntat.
+- **UI**: `DocumentsContracte.tsx` a `/immobles/:id/contractes/:idContracte/documents` (ja no és una pestanya): títol, subtítol (adreça i data d'inici), barra
+  d'avisos de documents que falten i una fila *Afegir* (esquerra) / *Tornar* (dreta, porta al formulari); cap botó a sota. `AfegirDocument.tsx` i
+  `EditarDocument.tsx` (tipus, data amb `CampData` i comentari opcional). Entrada **Documents** al menú d'accions dels contractes.
+- **Format dels números**: `CampNumeric` (`NumberInput` amb punt de milers, coma decimal i sufix `€` o `m²` segons l'idioma actiu) i `aNumeroForm`; a la llista d'immobles,
+  la superfície es mostra amb `formatM2`. `CampData` (de l'usuari) fa servir l'idioma actiu per al calendari.
+
+**Pas 26: formulari de contracte reorganitzat, tipus de document fixos i fiança, fet.**
+
+- **26-1, migració `005_fianca_i_tipus_fixos.sql`**: quatre columnes noves a `contractes` amb `ADD COLUMN` (`fianca_adicional` `NOT NULL DEFAULT 0`, `fianca_comentari`,
+  `devolucio_nc`, `motiu_fi`; **no es reconstrueix `contractes`**, perquè esborraria els documents en cascada); `documents_contracte` es reconstrueix (`id_tipus` → `tipus` de text, amb
+  la `classe` de l'antic tipus; mateixos `id`; comptador d'`AUTOINCREMENT` conservat; **guarda** que atura la migració si es perd cap fila) i s'elimina `tipus_document`.
+  Provada sobre còpies (mateixos recomptes, `id` i documents), des de zero, i aplicada a la BD de la VM (`user_version = 5`).
+- **26-2, tipus fixos**: `TIPUS_DOCUMENT_CONTRACTE` (vuit, amb `documents_inquili`), `TIPUS_UNICS_CONTRACTE` i `TIPUS_LLIURES_CONTRACTE` a `tipus.ts`. Eliminats `tipusDocument.ts`, el seu IPC,
+  el bloc del preload, el sembrat de `main.tsx` i les claus `documents.classes` (ara `documents.tipus.*`). Els indicadors `te_doc_*` es calculen amb `d.tipus`.
+- **26-3, Main de contractes**: camps nous; la devolució i el tancament passen a `crear` i `actualitzar`; **desapareixen** `registrarDevolucio`, `tancarContracte`, `revisarLloguer` i els seus
+  IPC. `preparar` valida: NC i sol·licitud junts, dades de tancament només amb el contracte tancat, ordre de dates (només si són ISO, `esISO`), imports >= 0, `motiu_fi` de la llista i
+  **justificació obligatòria** si l'import a retornar < fiança INCASOL + fiança addicional. `actualitzar` accepta `lloguer_actual` i `data_ultima_revisio` (arrossegament mentre no s'ha revisat mai).
+  Provat des de les DevTools (una cinquantena de casos).
+- **26-4, formulari** (`FitxaContracte.tsx` + `FormulariContracte.tsx`): pestanyes **Dades** (dades del contracte; lloguer amb *Lloguer inicial*, *Fiança INCASOL* i *Fiança addicional*, i *Lloguer actual* i *Última revisió* amb el
+  botó *Revisar lloguer*, que no escriu a la BD; tancament amb *Data de fi*, *Motiu de fi*, *Import a retornar* i *Justificació*, desactivats sense data de fi) i **Fiança INCASOL** (ingrés, devolució i comentari). Una sola fila de
+  botons a dalt: *Desar*, *Documents*, *Afegir* i *Eliminar* a l'esquerra, *Tornar* a la dreta. **Ctrl+S** desa, **Intro no desa**, **Escape** = Tornar (amb protecció de canvis); `hiHaCapaOberta` (`utils/teclat.ts`).
+  L'import a retornar surt amb la suma de les dues fiances en posar la data de fi; esborrar-la buida i desactiva els camps. Desar es queda a la pantalla; un contracte nou passa a l'edició.
+- **26-5, documents únics**: clips (`DocumentUnicContracte.tsx`) al costat de *Inici* (contracte), *Data del model 2*, *Data de la notificació* i *Data de sol·licitud* (model 3); *Afegir* obre directament el diàleg
+  del sistema, sense comentari; *Visualitzar* i *Eliminar*. Es desen a l'instant. A la pantalla de documents, els quatre tipus només es poden visualitzar i eliminar, i la data és la de la secció del contracte.
+- **Avisos**: barra taronja a dalt de l'edició (una línia per avís); **Ingrés pendent** (obert, fiança INCASOL > 0 i sense data d'ingrés) amb notificació groga en desar; "Devolució pendent" també amb només la data
+  de sol·licitud. Tot a `utils/avisosContracte.ts` (`documentsQueFalten`, `ingresPendent`...), compartit amb les llistes i amb l'etiqueta d'Immobles.
+- **Llista de contractes**: títol i, a sota, *Afegir* (esquerra) i *Tornar* (dreta) amb icona; icona d'editar a la primera columna (`useEditarContracte`); menú d'accions amb **Documents, Editar i Eliminar**.
+
 ### Fase E: empaquetat (feta al portàtil)
 
 Prova d'empaquetat anticipada a la VM (`npm run build:unpack`): migracions incrustades; `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`
@@ -327,40 +366,32 @@ Al portàtil (14-10-2026):
 
 ### Pendent de confirmar
 
-- **Commit** del pas 24-5 i d'aquest `PROGRES.md`; `git push`.
-- **`NOTES.md`**: afegir a "Modificar Gestió de Immobles" els blocs "Decisions (tancades)", "Documents únics i camps nous d'immoble
-  (decisions tancades)" i "Disseny de la UI (pendent de revisar)", l'estat de l'edició d'immoble (pestanyes, botons a la capçalera, Escape i
-  Intro) i actualitzar el punt dels documents (comentari opcional; una fila per fitxer amb numeració). Marcar els passos 20 a 24.
-- **Anfitrió (dades reals)**: quan s'hi instal·li una versió nova, fer abans una còpia de seguretat de `~/Lloguers/lloguers.sqlite`; les
-  migracions 003 i 004 s'hi aplicaran soles en la primera arrencada (la 004 reconstrueix `documents_immoble`, que allà serà buida).
-- **Portàtil**: `git pull`, `npm install`, `npm install-scripts ls`, i **esborrar la seva BD de proves** (té la 002 antiga i contractes de
-  prova): `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`, esborrar `-wal`/`-shm` i arrencar perquè l'app la creï amb la
-  001 + 002 + 003 + 004. Comprovar `user_version = 4`, 7 tipus i que `'2025-1-1'` es rebutja.
-- **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes i documents; en aquest ordre invers per les claus
-  foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/`
-  (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/provaDocs`, `/tmp/provaImm` i `/tmp/provaImm2` són temporals.
+- **Commit** del pas 26 (si queda alguna cosa) i d'aquest `PROGRES.md`; `git push`.
+- **`NOTES.md`**: reescrit sencer (nova versió); substituir l'antic. Ja inclou el disseny final dels passos 24 a 26.
+- **Pas 26-6 (neteja)**: `npm run lint` (imports i variables sense ús), el script de claus de text sense ús (`/tmp/claus_sense_us.js`; cal esborrar les claus també de `es.json`) i la matriu
+  de coherència dels avisos (llistes, barra de dalt, pantalla de documents i etiqueta d'Immobles). No en consten els resultats.
+- **Anfitrió (dades reals)**: quan s'hi instal·li una versió nova, fer abans una còpia de seguretat de `~/Lloguers/lloguers.sqlite`; les migracions 003, 004 i 005 s'hi aplicaran soles en la primera
+  arrencada (la 004 i la 005 reconstrueixen `documents_immoble` i `documents_contracte`, que tenen guarda i conserven els `id`; la 005 també elimina `tipus_document`).
+- **Portàtil**: `git pull`, `npm install`, `npm install-scripts ls`, i **esborrar la seva BD de proves**: `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`, esborrar `-wal`/`-shm` i arrencar perquè l'app
+  la creï amb la 001 a la 005. Comprovar `user_version = 5` i que `'2025-1-1'` es rebutja.
+- **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes i documents; en aquest ordre invers per les claus foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també
+  `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/` (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/prova*` són temporals.
 - Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
 
 ## Pròxim pas
 
 Cap pas en curs. Opcions, per decidir amb l'usuari:
 
-**1. Aplicar als contractes el mateix criteri que a Immobles**: el formulari de contracte (`FormulariContracte.tsx` + `FitxaContracte.tsx`)
-encara té Cancel·lar i Desar a sota. La capçalera la dibuixa `FitxaContracte` i el formulari té pestanyes (Dades i Documents), així que el
-disseny és una mica diferent (cal decidir què fa Desar a la pestanya Documents).
+**1. Nova publicació** (recomanat abans de seguir amb funcionalitat nova: els passos 22 a 26 no s'han empaquetat): pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el
+`.deb` (les migracions 003, 004 i 005 s'hi aplicaran). Provar-hi els clips dels documents, adjuntar i obrir, el formulari de contracte (Ctrl+S, Escape) i les validacions.
 
-**2. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): la navegació entre pantalles i el botó "Descartar" del diàleg de
-canvis sense desar.
+**2. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar, i aplicar a Immobles el mateix criteri que a Contractes
+(Ctrl+S i `hiHaCapaOberta`, en lloc d'Intro i del `querySelector`).
 
-**3. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar, com es va fer amb els
-contractes): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable; els documents no es mouen perquè van
-per `id_contracte`; el trigger de solapament ja valida el nou immoble), historial de revisions de lloguer, canvi de signants (annex).
+**3. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable;
+els documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble), historial de revisions de lloguer, canvi de signants (annex).
 
-**4. Nova publicació**: pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el `.deb`
-(les migracions 003 i 004 s'hi aplicaran).
-
-**5. Altres de `NOTES.md`** (la secció de notes disperses, que l'usuari marca "a ignorar per Claude": només si ell les demana): propietaris
-dels immobles, documents d'inquilins, configuració de la ruta de la BD...
+**4. Menors**: el `dateParser` de `CampData` (dates inexistents), la columna `Id` a les llistes, Configuració i la resta de notes de `NOTES.md` ("Idees per a més endavant", només si l'usuari les demana).
 
 ## Versions reals vs. la guia
 
@@ -503,35 +534,43 @@ dels `id` copiats: si n'havies esborrat els últims, els números es tornarien a
 fitxer al disc en porta l'`id`) això podria barrejar fitxers. Solució (migració 004): guardar el valor d'abans en una taula temporal i
 restaurar-lo amb un `UPDATE sqlite_sequence`. Es comprova comparant `SELECT seq FROM sqlite_sequence` abans i després.
 
+### 19. Escape i Ctrl+S no funcionaven (o només a vegades) amb desplegables al formulari
+
+El gestor de tecles no actuava si el DOM tenia `[role="dialog"]` o `.mantine-Popover-dropdown`, però els desplegables de Mantine (`Select`, `CampData`) poden quedar **muntats i amagats**
+després d'obrir-los, i es confonien amb una capa oberta. Solució: `hiHaCapaOberta()` (`utils/teclat.ts`) només compta els elements **visibles** (`display`, `visibility` i `getClientRects`).
+Immobles encara fa servir el `querySelector` antic.
+
+### 20. Reconstruir `contractes` esborraria els documents
+
+Un `DROP TABLE contractes` amb les claus foranes actives fa un `DELETE` implícit i el `ON DELETE CASCADE` s'emporta `documents_contracte`. Per això les columnes noves de la 005 s'afegeixen amb
+`ADD COLUMN` i les regles noves es validen a l'app i al Main, no a la BD.
+
+### 21. Comparar dates com a text amb una data mal escrita
+
+`'2026-02-20' < '2026-1-10'` és cert com a text, i el Main rebutjava la regla de l'abonament amb un error genèric abans que el `CHECK` de la BD parlés (`DESCONEGUT` en lloc de `CHECK_VIOLAT`). Solució:
+les comparacions d'ordre només s'apliquen si les dues dates tenen forma ISO (`esISO`); el format l'imposa la BD.
+
 ## Altres pendents
 
-- `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD
-  (p. ex. l'idioma invàlid o les validacions de `tancarContracte`/`revisarLloguer`/`registrarDevolucio`/`adjuntarDocuments`/`adjuntarDocumentsImmoble`).
-  Només cosmètic.
+- `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD (p. ex. l'idioma invàlid o les validacions de `contractes`, `immobles` i `documents`). Només cosmètic.
 - Configuració només té el selector d'idioma.
-- El formulari de contracte encara té Cancel·lar i Desar a sota (vegeu "Pròxim pas").
-- Les validacions dels camps nous d'immoble (superfície útil, valors cadastrals, any i data de compra) són a l'app i al Main, no a la BD (decisió de l'usuari).
-- Si una BD de proves té dos documents del mateix tipus únic en un immoble, el menú de l'edició en mostra el primer; no hi ha cap validació.
-- Pantalla per crear i editar tipus de document (a Configuració): fora de la fase 1. Quan es faci, caldrà decidir si es pot
-  esborrar l'últim tipus d'una classe amb lògica (el sembrat el recrea a l'arrencada).
-- Els noms dels tipus de document sembrats queden en l'idioma del primer arrencat (són dada de l'usuari).
-- Un contracte nou **no** porta a la pestanya Documents en desar-lo: cal tornar a entrar-hi amb el llapis.
-- `aNumero` només converteix la coma decimal: un import amb punt de milers (`1.400,50`) no s'accepta. Escriure `1400,50` o `1400.50`.
-- L'avís "Devolució pendent" pot persistir en contractes antics amb la fiança ja retornada però no anotada, fins que s'hi posa el cobrament.
-- Casos límit assumits: una revisió de lloguer feta el mateix dia que `data_inici` no es distingeix de "mai revisat"; una
-  correcció d'una data de revisió ha de poder retrocedir (ara es pot revisar amb una data anterior, mentre sigui `>= data_inici`).
-- Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans),
-  correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els documents), historial de revisions de lloguer.
+- Els noms dels tipus de document ja no són dada de l'usuari: surten de la traducció (`documents.tipus.*`).
+- `CampData`: el `dateParser` construeix la data amb `new Date(any, mes - 1, dia)` i JavaScript desplaça les dates inexistents (`30/02/2025` passa a ser el 2 de març); cal comprovar que dia i mes coincideixen.
+- Immobles: l'Escape fa servir un `querySelector` directe i Intro per desar; unificar amb `hiHaCapaOberta` i Ctrl+S.
+- Si una BD de proves té dos documents del mateix tipus únic en un immoble o en un contracte, el clip en mostra el primer; no hi ha cap validació.
+- L'avís "Devolució pendent" pot persistir en contractes antics amb la fiança ja retornada però no anotada, fins que s'hi posa l'abonament.
+- Casos límit assumits: una revisió de lloguer feta el mateix dia que `data_inici` no es distingeix de "mai revisat"; una correcció d'una data de revisió ha de poder retrocedir.
+- Un contracte nou sense `data_fi` solapa amb qualsevol d'un altre posterior del mateix immoble: els contractes antics s'han d'entrar amb la data de fi des del primer moment.
+- Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans), correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els
+  documents), historial de revisions de lloguer.
 - Editar un contracte des d'"Últims contractes" torna a la llista de contractes de l'immoble (no a la vista d'origen).
 - La icona dels menús d'accions (`IconDots` o `IconMenu2`) és una decisió estètica pendent d'uniformar.
 - `Immobles.tsx` i `FitxaImmoble.tsx` fan cadascun una crida a `contractes.ultims()` només per saber si hi ha avisos.
 - `inmobles` té dates sense cap `CHECK` (conté dades reals; el selector de dates ja protegeix l'app).
-- `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren (`App.tsx.bak` es va fer fora de Git:
-  comprovar-ho amb `git status` abans de `git add -A`).
-- Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida; icones de macOS/Windows i suport
-  per a Windows (a `NOTES.md`).
+- `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren (`App.tsx.bak` es va fer fora de Git: comprovar-ho amb `git status` abans de `git add -A`).
+- Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida; icones de macOS/Windows i suport per a Windows.
 
 ## Git
 
-- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últims commits confirmats: la migració 004 i les parts del pas 24 fins al
-  24-4; queda per confirmar el del pas 24-5 i el d'aquest `PROGRES.md` (vegeu "Pendent de confirmar").
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit confirmat: el dels documents únics de contracte i la pantalla de documents restringida (26-5). Queda per confirmar el
+  d'aquest `PROGRES.md` i el del nou `NOTES.md` (vegeu "Pendent de confirmar").

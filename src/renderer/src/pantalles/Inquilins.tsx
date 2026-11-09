@@ -67,6 +67,7 @@ function Inquilins(): React.JSX.Element {
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
+              <Table.Th />
               <Table.Th>{t('inquilins.camps.nom')}</Table.Th>
               <Table.Th>{t('inquilins.camps.cognoms')}</Table.Th>
               <Table.Th>{t('inquilins.camps.nif')}</Table.Th>
@@ -79,6 +80,17 @@ function Inquilins(): React.JSX.Element {
           <Table.Tbody>
             {inquilins.map((i) => (
               <Table.Tr key={i.id}>
+                <Table.Td>
+                  <Tooltip label={t('comu.editar')}>
+                    <ActionIcon
+                      variant="subtle"
+                      aria-label={t('comu.editar')}
+                      onClick={() => setModal({ inquili: i })}
+                    >
+                      <IconPencil size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Table.Td>
                 <Table.Td>{i.nom ?? t('inquilins.senseNom')}</Table.Td>
                 <Table.Td>{i.cognoms}</Table.Td>
                 <Table.Td>{i.nif}</Table.Td>
@@ -87,15 +99,6 @@ function Inquilins(): React.JSX.Element {
                 <Table.Td>{siNo(i.ck_tel1_bizum)}</Table.Td>
                 <Table.Td>
                   <Group gap="xs" wrap="nowrap">
-                    <Tooltip label={t('comu.editar')}>
-                      <ActionIcon
-                        variant="subtle"
-                        aria-label={t('comu.editar')}
-                        onClick={() => setModal({ inquili: i })}
-                      >
-                        <IconPencil size={18} />
-                      </ActionIcon>
-                    </Tooltip>
                     <Tooltip label={t('comu.eliminar')}>
                       <ActionIcon
                         variant="subtle"
