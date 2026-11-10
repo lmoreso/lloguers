@@ -2,7 +2,8 @@ import { ActionIcon, Menu, Text, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import {
-  IconExternalLink,
+  // IconExternalLink,
+  IconEye,
   IconPaperclip,
   IconPencil,
   IconPlus,
@@ -92,10 +93,7 @@ function DocumentUnicImmoble({ idInmoble, tipus, doc, onCanvi }: Props): React.J
         {doc ? (
           <>
             <Menu.Label>{doc.nom_original}</Menu.Label>
-            <Menu.Item
-              leftSection={<IconExternalLink size={16} />}
-              onClick={() => visualitzar(doc)}
-            >
+            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => visualitzar(doc)}>
               {t('documentsImmoble.visualitzar')}
             </Menu.Item>
             <Menu.Item leftSection={<IconPencil size={16} />} onClick={() => editar(doc)}>

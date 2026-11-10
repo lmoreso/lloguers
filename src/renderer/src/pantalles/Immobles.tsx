@@ -18,7 +18,14 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import type { Immoble } from '../../../shared/tipus'
-import { IconDots, IconFileText, IconPencil, IconTrash, IconFiles, IconPlus } from '@tabler/icons-react'
+import {
+  IconDots,
+  IconFileText,
+  IconPencil,
+  IconTrash,
+  IconFiles,
+  IconPlus
+} from '@tabler/icons-react'
 import { adreca } from '../utils/adreca'
 import { teAvisos } from '../utils/avisosContracte'
 import { alertes } from '../utils/avisosImmoble'

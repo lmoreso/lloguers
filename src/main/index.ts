@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, Menu, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -22,6 +22,62 @@ function createWindow(): void {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
+    }
+  })
+
+  mainWindow.webContents.on('context-menu', (event, params) => {
+    const menuItems: Electron.MenuItemConstructorOptions[] = []
+
+    // Corrector ortogràfic
+    if (params.misspelledWord) {
+      if (params.dictionarySuggestions.length > 0) {
+        for (const suggestion of params.dictionarySuggestions) {
+          menuItems.push({
+            label: suggestion,
+            click: () => {
+              mainWindow.webContents.replaceMisspelling(suggestion)
+            }
+          })
+        }
+      } else {
+        menuItems.push({
+          label: 'No hi ha suggeriments',
+          enabled: false
+        })
+      }
+
+      menuItems.push({
+        label: 'Afegeix al diccionari',
+        click: () => {
+          session.defaultSession.addWordToSpellCheckerDictionary(params.misspelledWord)
+        }
+      })
+
+      menuItems.push({ type: 'separator' })
+    }
+
+    // Edició
+    const flags = params.editFlags
+
+    if (flags.canUndo || flags.canRedo) {
+      if (flags.canUndo) menuItems.push({ role: 'undo', label: 'Desfés' })
+      if (flags.canRedo) menuItems.push({ role: 'redo', label: 'Refés' })
+      menuItems.push({ type: 'separator' })
+    }
+
+    if (flags.canCut) menuItems.push({ role: 'cut', label: 'Retalla' })
+    if (flags.canCopy) menuItems.push({ role: 'copy', label: 'Copia' })
+    if (flags.canPaste) menuItems.push({ role: 'paste', label: 'Enganxa' })
+    if (flags.canDelete) menuItems.push({ role: 'delete', label: 'Elimina' })
+
+    if (flags.canSelectAll) {
+      if (menuItems.length > 0) menuItems.push({ type: 'separator' })
+      menuItems.push({ role: 'selectAll', label: 'Selecciona-ho tot' })
+    }
+
+    if (menuItems.length > 0) {
+      event.preventDefault()
+      Menu.buildFromTemplate(menuItems).popup({ window: mainWindow })
     }
   })
 

@@ -127,14 +127,14 @@ export const TIPUS_UNICS_CONTRACTE = [
   'contracte',
   'fianca_model2',
   'fianca_notificacio',
-  'fianca_model3'
+  'fianca_model3',
+  'rebut'
 ] as const
 
 // Tipus que es poden afegir i editar des de la pantalla de documents del contracte (els únics es gestionen des del
 // formulari del contracte, amb els clips).
 export const TIPUS_LLIURES_CONTRACTE: readonly TipusDocumentContracte[] = [
   'annex',
-  'rebut',
   'altres',
   'documents_inquili'
 ]

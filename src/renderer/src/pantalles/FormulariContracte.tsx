@@ -616,7 +616,8 @@ function FormulariContracte({
                 />
                 <CampData
                   clearable
-                  label={t('contractes.camps.fiancaDataIngres')}
+                  label={etiqueta(t('contractes.camps.fiancaDataIngres'), 'rebut')}
+                  // label={t('contractes.camps.fiancaDataIngres')}
                   {...form.getInputProps('fianca_data_ingres')}
                 />
                 <div />

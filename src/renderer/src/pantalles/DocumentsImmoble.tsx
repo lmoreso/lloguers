@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ActionIcon, Button, Group, Menu, Stack, Table, Text, Title, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconDots, IconExternalLink, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
+import { IconDots, IconEye, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -129,6 +129,7 @@ function DocumentsImmoble(): React.JSX.Element {
             <Table striped highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
+                  <Table.Th />
                   <Table.Th>{t('documentsImmoble.camps.tipus')}</Table.Th>
                   <Table.Th>{t('documentsImmoble.camps.fitxer')}</Table.Th>
                   <Table.Th>{t('documentsImmoble.camps.data')}</Table.Th>
@@ -139,6 +140,17 @@ function DocumentsImmoble(): React.JSX.Element {
               <Table.Tbody>
                 {documents.map((d) => (
                   <Table.Tr key={d.id}>
+                    <Table.Td>
+                      <Tooltip label={t('documentsImmoble.visualitzar')}>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={t('documentsImmoble.visualitzar')}
+                          onClick={() => visualitzar(d)}
+                        >
+                          <IconEye size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Table.Td>
                     <Table.Td>{t(`documentsImmoble.tipus.${d.tipus}`)}</Table.Td>
                     <Table.Td>{d.nom_original}</Table.Td>
                     <Table.Td>{formatData(dataDe(d))}</Table.Td>
@@ -154,7 +166,7 @@ function DocumentsImmoble(): React.JSX.Element {
                         </Menu.Target>
                         <Menu.Dropdown>
                           <Menu.Item
-                            leftSection={<IconExternalLink size={16} />}
+                            leftSection={<IconEye size={16} />}
                             onClick={() => visualitzar(d)}
                           >
                             {t('documentsImmoble.visualitzar')}

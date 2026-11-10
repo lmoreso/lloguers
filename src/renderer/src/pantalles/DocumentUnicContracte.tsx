@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { ActionIcon, Menu, Text, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconExternalLink, IconPaperclip, IconPlus, IconTrash } from '@tabler/icons-react'
+import {
+  // IconExternalLink,
+  IconEye,
+  IconPaperclip,
+  IconPlus,
+  IconTrash
+} from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import type { DocumentContracte, TipusDocumentContracte } from '../../../shared/tipus'
@@ -79,10 +85,7 @@ function DocumentUnicContracte({ idContracte, tipus, doc, onCanvi }: Props): Rea
         {doc ? (
           <>
             <Menu.Label>{doc.nom_original}</Menu.Label>
-            <Menu.Item
-              leftSection={<IconExternalLink size={16} />}
-              onClick={() => visualitzar(doc)}
-            >
+            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => visualitzar(doc)}>
               {t('documents.visualitzar')}
             </Menu.Item>
             <Menu.Divider />

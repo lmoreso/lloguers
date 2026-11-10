@@ -16,7 +16,8 @@ import { notifications } from '@mantine/notifications'
 import {
   IconCornerUpLeft,
   IconDots,
-  IconExternalLink,
+  // IconExternalLink,
+  IconEye,
   IconPencil,
   IconPlus,
   IconTrash
@@ -196,6 +197,7 @@ function DocumentsContracte(): React.JSX.Element {
             <Table striped highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
+                  <Table.Th />
                   <Table.Th>{t('documents.camps.tipus')}</Table.Th>
                   <Table.Th>{t('documents.camps.fitxer')}</Table.Th>
                   <Table.Th>{t('documents.camps.data')}</Table.Th>
@@ -206,7 +208,17 @@ function DocumentsContracte(): React.JSX.Element {
               <Table.Tbody>
                 {documents.map((d) => (
                   <Table.Tr key={d.id}>
-                    {/* El nom del tipus és dada de l'usuari: no es tradueix. */}
+                    <Table.Td>
+                      <Tooltip label={t('documents.visualitzar')}>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={t('documents.visualitzar')}
+                          onClick={() => visualitzar(d)}
+                        >
+                          <IconEye size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Table.Td>
                     <Table.Td>{t(`documents.tipus.${d.tipus}`)}</Table.Td>
                     <Table.Td>{d.nom_original}</Table.Td>
                     <Table.Td>{formatData(dataDe(d))}</Table.Td>
@@ -222,7 +234,7 @@ function DocumentsContracte(): React.JSX.Element {
                         </Menu.Target>
                         <Menu.Dropdown>
                           <Menu.Item
-                            leftSection={<IconExternalLink size={16} />}
+                            leftSection={<IconEye size={16} />}
                             onClick={() => visualitzar(d)}
                           >
                             {t('documents.visualitzar')}
