@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Anchor, Badge, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core'
+import {
+  Anchor,
+  Badge,
+  Group,
+  Image,
+  Paper,
+  ScrollArea,
+  Stack,
+  Text,
+  Title,
+  Tooltip
+} from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import icona from '../assets/icon.png'
 import { esOk } from '../utils/resultat'
@@ -8,6 +19,9 @@ import license from '../assets/LICENSE.txt?raw'
 import license_es from '../assets/LICENSE_es.txt?raw'
 import license_ca from '../assets/LICENSE_ca.txt?raw'
 import { Accordion } from '@mantine/core'
+import caracteristiques_es from '../assets/CARACTERISTIQUES_es.md?raw'
+import caracteristiques_ca from '../assets/CARACTERISTIQUES_ca.md?raw'
+import ReactMarkdown from 'react-markdown'
 
 // Noms propis i adreces: no es tradueixen.
 const AUTOR = 'Lluís Moreso Bosch'
@@ -63,6 +77,7 @@ function QuantA(): React.JSX.Element {
   const { t, i18n } = useTranslation()
   const Llicencia =
     i18n.language === 'es' ? license_es : i18n.language === 'ca' ? license_ca : license
+  const caracteristiques = i18n.language === 'es' ? caracteristiques_es : caracteristiques_ca
 
   useEffect(() => {
     let cancelat = false
@@ -83,7 +98,7 @@ function QuantA(): React.JSX.Element {
   }
 
   return (
-    <Stack gap="md" maw={640}>
+    <Stack gap="md" maw={640} h="100%" style={{ minHeight: 0 }}>
       <Group gap="sm">
         <Title order={2}>{t('quantA.titol')}</Title>
       </Group>
@@ -113,7 +128,7 @@ function QuantA(): React.JSX.Element {
         </Tooltip>
       </Text>
 
-      <Accordion variant="separated">
+      <Accordion variant="separated" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
         <Accordion.Item value="llicencia">
           <Accordion.Control>{t('quantA.llicenciaAbans')}</Accordion.Control>
           <Accordion.Panel>
@@ -126,11 +141,16 @@ function QuantA(): React.JSX.Element {
         <Accordion.Item value="caracteristiques">
           <Accordion.Control>{t('quantA.caracteristiques')}</Accordion.Control>
           <Accordion.Panel>
-            <Text fz="sm">{t('quantA.descripcio2')}</Text>
+            {/* <Text fz="sm">{t('quantA.descripcio2')}</Text>
             <Text fz="sm">{t('quantA.descripcio3')}</Text>
             <Text fz="sm">{t('quantA.descripcio4')}</Text>
             <Text fz="sm">{t('quantA.descripcio5')}</Text>
-            <Text fz="sm">{t('quantA.descripcio6')}</Text>
+            <Text fz="sm">{t('quantA.descripcio6')}</Text> */}
+            <ScrollArea type="auto" offsetScrollbars h="500px">
+              <Paper p="md" fz="sm">
+                <ReactMarkdown>{caracteristiques}</ReactMarkdown>
+              </Paper>
+            </ScrollArea>
           </Accordion.Panel>
         </Accordion.Item>
 
