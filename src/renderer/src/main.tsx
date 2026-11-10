@@ -7,6 +7,8 @@ import '@mantine/core/styles.css'
 // Els estils de dates i notificacions van després dels de core.
 import '@mantine/dates/styles.css'
 import '@mantine/notifications/styles.css'
+// Els estils propis, que poden sobreescriure alguns de Mantine, van al final.
+import './assets/main.css'
 // Locales de dayjs per als components de dates.
 import 'dayjs/locale/ca'
 import 'dayjs/locale/es'

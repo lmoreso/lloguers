@@ -27,6 +27,7 @@ import ReactMarkdown from 'react-markdown'
 const AUTOR = 'Lluís Moreso Bosch'
 const URL_AUTOR = 'https://www.linkedin.com/in/consultornominameta4bcn/'
 const URL_CLAUDE = 'https://claude.ai'
+const URL_GITHUB = 'https://github.com/lmoreso/lloguers'
 const TECNOLOGIES = [
   {
     nom: 'Node.js',
@@ -141,13 +142,8 @@ function QuantA(): React.JSX.Element {
         <Accordion.Item value="caracteristiques">
           <Accordion.Control>{t('quantA.caracteristiques')}</Accordion.Control>
           <Accordion.Panel>
-            {/* <Text fz="sm">{t('quantA.descripcio2')}</Text>
-            <Text fz="sm">{t('quantA.descripcio3')}</Text>
-            <Text fz="sm">{t('quantA.descripcio4')}</Text>
-            <Text fz="sm">{t('quantA.descripcio5')}</Text>
-            <Text fz="sm">{t('quantA.descripcio6')}</Text> */}
             <ScrollArea type="auto" offsetScrollbars h="500px">
-              <Paper p="md" fz="sm">
+              <Paper p="md" className="markdown">
                 <ReactMarkdown>{caracteristiques}</ReactMarkdown>
               </Paper>
             </ScrollArea>
@@ -196,12 +192,8 @@ function QuantA(): React.JSX.Element {
                 </Text>
                 <Text mt={4} fz="sm">
                   {t('quantA.gitHubAbans')}{' '}
-                  <Tooltip label="https://github.com/lmoreso/lloguers">
-                    <Anchor
-                      component="button"
-                      type="button"
-                      onClick={() => obrir('https://github.com/lmoreso/lloguers')}
-                    >
+                  <Tooltip label={URL_GITHUB}>
+                    <Anchor component="button" type="button" onClick={() => obrir(URL_GITHUB)}>
                       <IconBrandGithub size={14} />
                       <Text span fz="sm">
                         {' GitHub'}
