@@ -16,9 +16,14 @@ export function avisos(
 
 // Documents de la fiança que falten: hi ha una data informada però no el document adjunt que la justifica.
 // El model 3 justifica la sol·licitud de devolució.
-export function documentsQueFalten(c: ContracteLlistat): ('model2' | 'notificacio' | 'model3')[] {
-  const llista: ('model2' | 'notificacio' | 'model3')[] = []
+export function documentsQueFalten(
+  c: ContracteLlistat
+): ('model2' | 'notificacio' | 'model3' | 'rebut')[] {
+  const llista: ('model2' | 'notificacio' | 'model3' | 'rebut')[] = []
   if (c.fianca_data_model2 !== null && !c.te_doc_model2) llista.push('model2')
+  // Si no te document de notificació però ja s'ha informat la data d'ingrés, cal que el gestor adjunti el rebut.
+  if (c.fianca_data_ingres !== null && c.fianca_data_notificacio === null && !c.te_doc_rebut)
+    llista.push('rebut')
   if (c.fianca_data_notificacio !== null && !c.te_doc_notificacio) llista.push('notificacio')
   if (c.devolucio_data_sollicitud !== null && !c.te_doc_model3) llista.push('model3')
   return llista

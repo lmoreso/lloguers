@@ -82,7 +82,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 26.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, avisos i documents), fase 2 (devolució de la fiança) i **formulari reorganitzat** (26: pestanyes Dades i Fiança INCASOL, devolució i tancament dins del formulari, documents únics amb clips, tipus de document fixos al codi). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23), els camps nous i els documents únics d'immoble (24) i els documents de contracte com a pantalla pròpia (25). **La BD és a `user_version = 5`.** L'empaquetat s'ha provat fins al pas 21 (`.deb` v1.0.2 a l'anfitrió, amb dades reals); **els passos 22 a 26 no s'han empaquetat encara**.
+**Fases A, B i C fetes; Fase D feta fins al pas 26.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, avisos i documents), fase 2 (devolució de la fiança) i **formulari reorganitzat** (26: pestanyes Dades i Fiança INCASOL, devolució i tancament dins del formulari, documents únics amb clips, tipus de document fixos al codi). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23), els camps nous i els documents únics d'immoble (24) i els documents de contracte com a pantalla pròpia (25). **La BD és a `user_version = 5`.** **Tot fins al pas 26 està empaquetat i provat** (`.deb` instal·lat a l'anfitrió, amb la BD real, i al portàtil, amb una BD nova).
 
 ### Fase A: base (feta)
 
@@ -362,7 +362,9 @@ Al portàtil (14-10-2026):
   igualment a Mint 22.3. No s'ha investigat el motiu. A la VM sí que va caldre el SUID. Si falla en un altre equip,
   aplicar l'arreglat de la incidència 2 sobre `/opt/lloguers/chrome-sandbox`, o valorar un script `afterInstall`.
 - **Prova a l'anfitrió (Ubuntu 24.04, dades reals), després del pas 21**: `.deb` v1.0.2 instal·lat; pantalla d'idioma, contractes,
-  adjuntar i obrir documents (diàleg del sistema i `shell.openPath`) i la resta funcionen. Els passos 22 i 23 no s'han empaquetat encara.
+  adjuntar i obrir documents (diàleg del sistema i `shell.openPath`) i la resta funcionen. Els passos 22 en endavant es van provar a la publicació següent (vegeu més avall).
+- **Publicació dels passos 22 a 26**: `.deb` instal·lat i provat a l'anfitrió (BD real, amb còpia de seguretat prèvia) i al portàtil (BD nova). Les migracions 003, 004
+  i 005 es van aplicar soles en la primera arrencada, sense errors; clips dels documents, adjuntar, obrir i eliminar, Ctrl+S i Escape funcionen empaquetats.
 
 ### Pendent de confirmar
 
@@ -370,10 +372,6 @@ Al portàtil (14-10-2026):
 - **`NOTES.md`**: reescrit sencer (nova versió); substituir l'antic. Ja inclou el disseny final dels passos 24 a 26.
 - **Pas 26-6 (neteja)**: `npm run lint` (imports i variables sense ús), el script de claus de text sense ús (`/tmp/claus_sense_us.js`; cal esborrar les claus també de `es.json`) i la matriu
   de coherència dels avisos (llistes, barra de dalt, pantalla de documents i etiqueta d'Immobles). No en consten els resultats.
-- **Anfitrió (dades reals)**: quan s'hi instal·li una versió nova, fer abans una còpia de seguretat de `~/Lloguers/lloguers.sqlite`; les migracions 003, 004 i 005 s'hi aplicaran soles en la primera
-  arrencada (la 004 i la 005 reconstrueixen `documents_immoble` i `documents_contracte`, que tenen guarda i conserven els `id`; la 005 també elimina `tipus_document`).
-- **Portàtil**: `git pull`, `npm install`, `npm install-scripts ls`, i **esborrar la seva BD de proves**: `mv ~/Lloguers/lloguers.sqlite ~/Lloguers/lloguers.sqlite.vella`, esborrar `-wal`/`-shm` i arrencar perquè l'app
-  la creï amb la 001 a la 005. Comprovar `user_version = 5` i que `'2025-1-1'` es rebutja.
 - **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes i documents; en aquest ordre invers per les claus foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també
   `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/` (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/prova*` són temporals.
 - Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
@@ -382,8 +380,7 @@ Al portàtil (14-10-2026):
 
 Cap pas en curs. Opcions, per decidir amb l'usuari:
 
-**1. Nova publicació** (recomanat abans de seguir amb funcionalitat nova: els passos 22 a 26 no s'han empaquetat): pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el
-`.deb` (les migracions 003, 004 i 005 s'hi aplicaran). Provar-hi els clips dels documents, adjuntar i obrir, el formulari de contracte (Ctrl+S, Escape) i les validacions.
+**1. Nova publicació: feta.** Els passos 22 a 26 s'han empaquetat i instal·lat a l'anfitrió i al portàtil (vegeu Fase E). La propera publicació només caldrà quan hi hagi funcionalitat nova.
 
 **2. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar, i aplicar a Immobles el mateix criteri que a Contractes
 (Ctrl+S i `hiHaCapaOberta`, en lloc d'Intro i del `querySelector`).

@@ -25,7 +25,7 @@ function parametres(d: ImmobleDades): ImmobleDades {
 
 export function obtenirInmobles(): Immoble[] {
   return db
-    .prepare(`SELECT ${COLUMNES} FROM inmobles ORDER BY via, num_via, pis, porta`)
+    .prepare(`SELECT ${COLUMNES} FROM inmobles ORDER BY localitat, via, num_via, pis, porta`)
     .all() as Immoble[]
 }
 

@@ -368,8 +368,8 @@ fiança INCASOL i devolució, documents amb clips i pantalla pròpia, avisos, "�
   els documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble), historial de revisions de lloguer i canvi de signants (annex; ara només s'edita
   `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans).
 - **Configuració i Quant a**: Configuració només té el selector d'idioma. Pantalla de tipus de documents: ja no cal (són fixos al codi).
-- **Empaquetat**: el `.deb` s'ha provat a l'amfitrió amb dades reals, però els passos posteriors (migracions 003 a 005, edició d'immoble, documents únics i fiança) encara no s'han
-  empaquetat; la 005 reconstrueix `documents_contracte`, així que cal una còpia de seguretat abans d'instal·lar-hi.
+- **Empaquetat**: publicada una versió amb tot el que hi ha fins ara, provada a l'amfitrió (BD real) i al portàtil (BD nova). Abans d'instal·lar una versió amb
+  migracions noves, còpia de seguretat de la BD (les migracions que reconstrueixen taules tenen guarda, però la còpia és la xarxa de seguretat).
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD (validacions del Main). Només cosmètic.
 
 **Idees per a més endavant** (no decidides; l'usuari les demana si les vol):

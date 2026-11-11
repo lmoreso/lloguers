@@ -246,7 +246,8 @@
     "avis": {
       "model3": "Hay fecha de solicitud de la devolución, pero falta adjuntar su documento (modelo 3).",      
       "model2": "Hay fecha del modelo 2, pero falta adjuntar su documento.",
-      "notificacio": "Hay fecha de la notificación, pero falta adjuntar su documento."
+      "notificacio": "Hay fecha de la notificación, pero falta adjuntar su documento.",
+      "rebut": "Hay fecha de ingreso de la fianza, pero falta adjuntar su recibo."
     }        
   },
   "contractes": {

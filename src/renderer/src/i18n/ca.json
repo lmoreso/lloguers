@@ -246,7 +246,8 @@
     "avis": {
       "model3": "Hi ha la data de sol·licitud de la devolució, però falta adjuntar-ne el document (model 3).",
       "model2": "Hi ha la data del model 2, però falta adjuntar-ne el document.",
-      "notificacio": "Hi ha la data de la notificació, però falta adjuntar-ne el document."
+      "notificacio": "Hi ha la data de la notificació, però falta adjuntar-ne el document.",
+      "rebut": "Hi ha la data d'ingrés de la fiança, però falta adjuntar-ne el rebut."
     }
   },
   "contractes": {

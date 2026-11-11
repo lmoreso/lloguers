@@ -92,6 +92,7 @@ export interface ContracteLlistat extends Contracte {
   // Si el contracte té algun document adjunt de la classe corresponent (calculat al Main).
   te_doc_model2: boolean
   te_doc_notificacio: boolean
+  te_doc_rebut: boolean
   te_doc_model3: boolean
 }
 

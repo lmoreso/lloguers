@@ -49,16 +49,19 @@ const COLUMNES_LLISTAT = `${['id', ...CAMPS].map((c) => `c.${c}`).join(', ')},
   EXISTS (SELECT 1 FROM documents_contracte d
     WHERE d.id_contracte = c.id AND d.tipus = 'fianca_notificacio') AS te_doc_notificacio,
   EXISTS (SELECT 1 FROM documents_contracte d
+    WHERE d.id_contracte = c.id AND d.tipus = 'rebut') AS te_doc_rebut,
+  EXISTS (SELECT 1 FROM documents_contracte d
     WHERE d.id_contracte = c.id AND d.tipus = 'fianca_model3') AS te_doc_model3`
 
 // Fila tal com surt de SQLite: els tres indicadors són 0 o 1. El Main els converteix a boolean.
 type FilaLlistat = Omit<
   ContracteLlistat,
-  'te_doc_model2' | 'te_doc_notificacio' | 'te_doc_model3'
+  'te_doc_model2' | 'te_doc_notificacio' | 'te_doc_model3' | 'te_doc_rebut'
 > & {
   te_doc_model2: number
   te_doc_notificacio: number
   te_doc_model3: number
+  te_doc_rebut: number
 }
 
 function aLlistat(f: FilaLlistat): ContracteLlistat {
@@ -66,6 +69,7 @@ function aLlistat(f: FilaLlistat): ContracteLlistat {
     ...f,
     te_doc_model2: f.te_doc_model2 === 1,
     te_doc_notificacio: f.te_doc_notificacio === 1,
+    te_doc_rebut: f.te_doc_rebut === 1,
     te_doc_model3: f.te_doc_model3 === 1
   }
 }
