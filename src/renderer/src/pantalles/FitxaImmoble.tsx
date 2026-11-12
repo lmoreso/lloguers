@@ -85,7 +85,7 @@ function FitxaImmoble(): React.JSX.Element {
   // Capçalera: títol, subtítol, barra d'avisos i una sola fila de botons (accions a l'esquerra; Tornar i Desar
   // a la dreta). Es veu a totes les pestanyes. La dibuixa el formulari a dalt de tot, i ens dona
   // `anarAmbGuarda` per preguntar abans de sortir si hi ha canvis sense desar.
-  function capcalera({ anarAmbGuarda, idFormulari, tornar }: AccionsCapcalera): React.ReactNode {
+  function capcalera({ anarAmbGuarda, desar, tornar }: AccionsCapcalera): React.ReactNode {
     const alertesImmoble = immoble ? alertes(immoble) : []
     return (
       <Stack gap="sm" mb="md">
@@ -115,7 +115,7 @@ function FitxaImmoble(): React.JSX.Element {
 
         <Group justify="space-between">
           <Group gap="xs">
-            <Button type="submit" form={idFormulari} leftSection={<IconCheck size={16} />}>
+            <Button onClick={desar} leftSection={<IconCheck size={16} />}>
               {t('comu.desar')}
             </Button>
             {immoble && (

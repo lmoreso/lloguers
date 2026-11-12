@@ -17,6 +17,7 @@ import { aNumeroForm, buitANull } from '../utils/formulari'
 import DocumentUnicImmoble from './DocumentUnicImmoble'
 import { CampData } from '@renderer/components/CampData'
 import CampNumeric from '@renderer/components/CampNumeric'
+import { hiHaCapaOberta } from '../utils/teclat'
 
 // Els camps de text són sempre string al formulari; a la BD els buits són NULL.
 // Les dates són text ISO AAAA-MM-DD (o null), tal com les desa la BD. Els números (superfícies, imports i
@@ -75,8 +76,8 @@ function pestanyaDelPrimerError(errors: Record<string, unknown>): string {
 export interface AccionsCapcalera {
   // Executa una acció que canvia de pantalla; si hi ha canvis sense desar, pregunta abans.
   anarAmbGuarda: (accio: () => void) => void
-  // `id` del formulari: el botó Desar de la capçalera hi queda enllaçat amb l'atribut `form`.
-  idFormulari: string
+  // Desa el formulari (el mateix que fa Ctrl+S).
+  desar: () => void
   // Torna a la llista d'Immobles (amb la mateixa protecció).
   tornar: () => void
 }
@@ -91,8 +92,6 @@ interface Props {
   pestanya: string
   onPestanya: (pestanya: string) => void
 }
-
-const ID_FORMULARI = 'formulari-immoble'
 
 function FormulariImmoble({
   immoble,
@@ -304,13 +303,24 @@ function FormulariImmoble({
 
   const tornar = (): void => anarAmbGuarda(() => navigate('/immobles'))
 
-  // Escape = Tornar, amb la mateixa protecció. No actua si hi ha una finestra o un desplegable obert
-  // (calendari, diàleg de canvis sense desar...): llavors Escape només tanca això.
+  // Desa el formulari (botó Desar i Ctrl+S). Si la validació falla, es canvia a la pestanya del primer error.
+  function desarFormulari(): void {
+    form.onSubmit(desar, (errors) => onPestanya(pestanyaDelPrimerError(errors)))()
+  }
+
+  // Ctrl+S desa; Escape = Tornar, amb la mateixa protecció. Cap dels dos actua si hi ha una finestra o un
+  // desplegable visible (calendari, menú d'un clip, diàleg de canvis sense desar...): llavors Escape només tanca això.
+  // Intro NO desa: el formulari no té cap botó d'enviament.
   useEffect(() => {
     function alTeclat(e: KeyboardEvent): void {
-      if (e.key !== 'Escape' || e.defaultPrevented) return
-      if (document.querySelector('[role="dialog"], .mantine-Popover-dropdown')) return
-      tornar()
+      if (e.defaultPrevented) return
+      if (hiHaCapaOberta()) return
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        desarFormulari()
+      } else if (e.key === 'Escape') {
+        tornar()
+      }
     }
     window.addEventListener('keydown', alTeclat)
     return () => window.removeEventListener('keydown', alTeclat)
@@ -318,13 +328,10 @@ function FormulariImmoble({
 
   return (
     <>
-      {capcalera({ anarAmbGuarda, idFormulari: ID_FORMULARI, tornar })}
+      {capcalera({ anarAmbGuarda, desar: desarFormulari, tornar })}
 
-      {/* Si la validació falla, es canvia a la pestanya del primer camp amb error. */}
-      <form
-        id={ID_FORMULARI}
-        onSubmit={form.onSubmit(desar, (errors) => onPestanya(pestanyaDelPrimerError(errors)))}
-      >
+      {/* Sense <form>: així Intro no desa. Si la validació falla, es canvia a la pestanya del primer error. */}
+      <div>
         <Tabs value={pestanya} onChange={(v) => v && onPestanya(v)} keepMounted>
           <Tabs.List>
             <Tabs.Tab value="adreca">{t('immobles.pestanyes.adreca')}</Tabs.Tab>
@@ -464,7 +471,7 @@ function FormulariImmoble({
             </Stack>
           </Tabs.Panel>
         </Tabs>
-      </form>
+      </div>
     </>
   )
 }
