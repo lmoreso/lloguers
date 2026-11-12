@@ -14,7 +14,9 @@ import type {
   Resultat,
   ImmobleAmbContractes,
   DocumentImmoble,
-  DocumentImmobleDades
+  DocumentImmobleDades,
+  DadesExportacio,
+  ResultatExportacio
 } from '../shared/tipus'
 
 declare global {
@@ -72,6 +74,11 @@ declare global {
         actualitzar: (id: number, dades: DocumentImmobleDades) => Promise<Resultat<void>>
         eliminar: (id: number) => Promise<Resultat<void>>
         obrir: (id: number) => Promise<Resultat<void>>
+      }
+      exportacio: {
+        csv: (dades: DadesExportacio) => Promise<Resultat<ResultatExportacio>>
+        ods: (dades: DadesExportacio) => Promise<Resultat<ResultatExportacio>>
+        xlsx: (dades: DadesExportacio) => Promise<Resultat<ResultatExportacio>>
       }
     }
   }

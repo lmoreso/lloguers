@@ -14,7 +14,9 @@ import type {
   DocumentDades,
   ImmobleAmbContractes,
   DocumentImmoble,
-  DocumentImmobleDades
+  DocumentImmobleDades,
+  DadesExportacio,
+  ResultatExportacio
 } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -90,6 +92,16 @@ const api = {
     eliminar: (id: number): Promise<Resultat<void>> =>
       ipcRenderer.invoke('documentsImmoble:eliminar', id),
     obrir: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('documentsImmoble:obrir', id)
+  },
+  exportacio: {
+    csv: (dades: DadesExportacio): Promise<Resultat<ResultatExportacio>> =>
+      ipcRenderer.invoke('exportacio:csv', dades),
+
+    ods: (dades: DadesExportacio): Promise<Resultat<ResultatExportacio>> =>
+      ipcRenderer.invoke('exportacio:ods', dades),
+
+    xlsx: (dades: DadesExportacio): Promise<Resultat<ResultatExportacio>> =>
+      ipcRenderer.invoke('exportacio:xlsx', dades)
   }
 }
 

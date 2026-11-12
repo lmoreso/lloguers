@@ -385,6 +385,16 @@
       "fet": "Contracte tancat."
     }
   },
+  "exportacio": {
+    "titol": "Exportar",
+    "csvTitol": "Exportar a CSV",
+    "odsTitol": "Exportar a ODS",
+    "xlsxTitol": "Exportar a XLSX",
+    "ultimsContractes": {
+      "nomFitxer": "ultims_contractes",
+      "titolDialog": "Exportació dels últims contractes"
+    }
+  },
   "proves": {
     "titol": "Proves de Mantine",
     "dataPicker": "Sel·lecciona una data",

@@ -1,5 +1,7 @@
+/* eslint-disable prettier/prettier */
 import { useEffect, useState } from 'react'
-import { ActionIcon, Badge, Table, Text, Title, Tooltip } from '@mantine/core'
+import { ActionIcon, Badge, Button, Group, Menu, Table, Text, Title, Tooltip } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import AvisosContracte from '../components/AvisosContracte'
@@ -8,9 +10,21 @@ import { formatData } from '../utils/dates'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
 import AccionsContracte from './AccionsContracte'
-import type { ContracteLlistat, Immoble, ImmobleAmbContractes } from '../../../shared/tipus'
-import { IconPencil, IconPlus } from '@tabler/icons-react'
+import type {
+  ContracteLlistat,
+  Immoble,
+  ImmobleAmbContractes,
+  DadesExportacio
+} from '../../../shared/tipus'
+import {
+  IconFileExport,
+  IconFileTypeCsv,
+  IconFileTypeXls,
+  IconPencil,
+  IconPlus
+} from '@tabler/icons-react'
 import { useEditarContracte } from '@renderer/utils/useEditarContracte'
+import { ingresPendent, faltenDocuments, devolucioPendent, avisos } from '@renderer/utils/avisosContracte'
 
 // Una fila de la taula: un contracte, o un immoble sense cap contracte.
 interface Fila {
@@ -51,12 +65,103 @@ function UltimsContractes(): React.JSX.Element {
       : [{ immoble: d.immoble, contracte: null }]
   )
 
+  const AvisosContracteTxt = (c: ContracteLlistat): string | null => {
+    const avisosText = new Set<string>()
+    if (ingresPendent(c)) avisosText.add(t('contractes.avisos.ingresPendent'))
+    if (faltenDocuments(c)) avisosText.add(t('contractes.avisos.documents'))
+    if (devolucioPendent(c)) avisosText.add(t('contractes.avisos.devolucioPendent'))
+    avisos(c).map((a) => avisosText.add(t(`contractes.avisos.${a.clau}.${a.estat}`)))
+    // console.log('AvisosContracteSet', c, avisosText)
+    return avisosText.size > 0 ? Array.from(avisosText).join(' | ') : null
+  }
+
+  async function exportar(format: 'csv' | 'ods'  | 'xlsx'): Promise<void> {
+    const dadesExportacio: DadesExportacio = {
+      nomFitxer: t('exportacio.ultimsContractes.nomFitxer'),
+      titolDialog: t('exportacio.ultimsContractes.titolDialog'),
+      format,
+      columnes: [
+        { titol: t('immobles.seccions.adreca'), tipus: 'text' },
+        { titol: t('contractes.camps.dataInici'), tipus: 'data' },
+        { titol: t('contractes.camps.dataFi'), tipus: 'data' },
+        { titol: t('contractes.camps.dFiPrevista'), tipus: 'data' },
+        { titol: t('contractes.camps.inquili') + ' 1', tipus: 'text' },
+        { titol: t('contractes.camps.inquili') + ' 2', tipus: 'text' },
+        { titol: t('contractes.camps.lloguerActual'), tipus: 'moneda' },
+        { titol: t('contractes.camps.dataUltimaRevisio'), tipus: 'data' },
+        { titol: t('contractes.camps.avisos'), tipus: 'text' },
+      ],
+      files: files.map(({ immoble, contracte: c }) => [
+        adreca(immoble),
+        c?.data_inici ?? null,
+        c?.data_fi ?? null,
+        c?.d_fi_prevista ?? null,
+        c === null
+          ? t('contractes.ultims.senseContracte') 
+          : nomInquili(c.inquili_nom, c.inquili_cognoms),
+        c === null || c.id_inquili_2 === null
+          ? null
+          : nomInquili(c.inquili2_nom, c.inquili2_cognoms),
+        c?.lloguer_actual ?? null,
+        c?.data_ultima_revisio ?? null,
+        c === null ? null : AvisosContracteTxt(c) 
+      ])
+    }
+
+    const resposta =
+      format === 'csv'
+        ? await window.api.exportacio.csv(dadesExportacio)
+        : format === 'ods'
+          ? await window.api.exportacio.ods(dadesExportacio)
+          : await window.api.exportacio.xlsx(dadesExportacio)
+
+    if (!esOk(resposta)) {
+      console.error('Error en exportar els contractes:', resposta.error)
+    } else {
+      notifications.show({
+        title: 'exportació correcte',
+        message: resposta.dades.filePath,
+        color: 'green'
+      })
+    }
+  }
+
   return (
     <>
-      <Title order={2} mb="md">
-        {t('contractes.ultims.titol')}
-      </Title>
+      <Group justify="space-between" mb="md">
+        <Title order={2}>{t('contractes.ultims.titol')}</Title>
 
+        {files.length > 0 && (
+          <Menu position="bottom-start" withinPortal>
+            <Menu.Target>
+              <Button leftSection={<IconFileExport size={16} />}>{t('exportacio.titol')}</Button>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconFileTypeCsv size={16} />}
+                onClick={() => exportar('csv')}
+              >
+                {t('exportacio.csvTitol')}
+              </Menu.Item>
+
+              <Menu.Item
+                leftSection={<IconFileExport size={16} />}
+                onClick={() => exportar('ods')}
+              >
+                {t('exportacio.odsTitol')}
+              </Menu.Item>
+
+              <Menu.Item
+                leftSection={<IconFileTypeXls size={16} />}
+                onClick={() => exportar('xlsx')}
+              >
+                {t('exportacio.xlsxTitol')}
+              </Menu.Item>              
+            </Menu.Dropdown>
+          </Menu>
+        )}
+      </Group>
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
       {!carregant && files.length === 0 && <Text c="dimmed">{t('immobles.buit')}</Text>}
 
@@ -66,12 +171,12 @@ function UltimsContractes(): React.JSX.Element {
             <Table.Tr>
               <Table.Th />
               <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
-              <Table.Th>{t('contractes.camps.estat')}</Table.Th>
               <Table.Th>{t('contractes.camps.dataInici')}</Table.Th>
               <Table.Th>{t('contractes.camps.dataFi')}</Table.Th>
               <Table.Th>{t('contractes.camps.dFiPrevista')}</Table.Th>
               <Table.Th>{t('contractes.camps.inquilins')}</Table.Th>
               <Table.Th>{t('contractes.camps.lloguerActual')}</Table.Th>
+              <Table.Th>{t('contractes.camps.dataUltimaRevisio')}</Table.Th>
               <Table.Th>{t('contractes.camps.avisos')}</Table.Th>
               <Table.Th>{t('contractes.accions.titol')}</Table.Th>
             </Table.Tr>
@@ -129,13 +234,6 @@ function UltimsContractes(): React.JSX.Element {
                   </>
                 ) : (
                   <>
-                    <Table.Td>
-                      <Badge color={c.data_fi === null ? 'green' : 'gray'}>
-                        {c.data_fi === null
-                          ? t('contractes.estat.vigent')
-                          : t('contractes.estat.tancat')}
-                      </Badge>
-                    </Table.Td>
                     <Table.Td>{formatData(c.data_inici)}</Table.Td>
                     <Table.Td>{formatData(c.data_fi)}</Table.Td>
                     <Table.Td>{formatData(c.d_fi_prevista)}</Table.Td>
@@ -148,6 +246,7 @@ function UltimsContractes(): React.JSX.Element {
                       )}
                     </Table.Td>
                     <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
+                    <Table.Td>{formatData(c.data_ultima_revisio)}</Table.Td>
                     <Table.Td>
                       <AvisosContracte contracte={c} />
                     </Table.Td>

@@ -207,3 +207,30 @@ export type CodiError =
 
 // Resposta uniforme de tots els handlers IPC.
 export type Resultat<T> = { ok: true; dades: T } | { ok: false; error: CodiError }
+
+// Tipus per a l'exportació genèrica de dades.
+export type TipusColumnaExportacio = 'text' | 'numero' | 'decimal' | 'moneda' | 'data' | 'boolean'
+
+export interface ColumnaExportacio {
+  titol: string
+  tipus: TipusColumnaExportacio
+}
+
+export type FormatExportacio = 'ods' | 'csv' | 'xlsx'
+
+export type ValorExportacio = string | number | boolean | null
+
+export interface DadesExportacio {
+  nomFitxer: string
+  titolDialog: string
+  format: FormatExportacio
+  columnes: ColumnaExportacio[]
+  files: ValorExportacio[][]
+}
+
+export interface ResultatExportacio {
+  canceled: boolean
+  format?: FormatExportacio
+  filePath?: string
+  error?: string
+}
