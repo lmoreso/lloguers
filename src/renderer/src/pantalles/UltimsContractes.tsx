@@ -1,6 +1,5 @@
-/* eslint-disable prettier/prettier */
 import { useEffect, useState } from 'react'
-import { ActionIcon, Badge, Button, Group, Menu, Table, Text, Title, Tooltip } from '@mantine/core'
+import { ActionIcon, Badge, Button, Group, Table, Text, Title, Tooltip } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -14,17 +13,18 @@ import type {
   ContracteLlistat,
   Immoble,
   ImmobleAmbContractes,
-  DadesExportacio
+  DadesExportacio,
+  ExtensioExportacio
 } from '../../../shared/tipus'
-import {
-  IconFileExport,
-  IconFileTypeCsv,
-  IconFileTypeXls,
-  IconPencil,
-  IconPlus
-} from '@tabler/icons-react'
+import { IconFileExport, IconPencil, IconPlus } from '@tabler/icons-react'
 import { useEditarContracte } from '@renderer/utils/useEditarContracte'
-import { ingresPendent, faltenDocuments, devolucioPendent, avisos } from '@renderer/utils/avisosContracte'
+import {
+  ingresPendent,
+  faltenDocuments,
+  devolucioPendent,
+  avisos
+} from '@renderer/utils/avisosContracte'
+import ModalExportacio from '../components/ModalExportacio'
 
 // Una fila de la taula: un contracte, o un immoble sense cap contracte.
 interface Fila {
@@ -42,6 +42,7 @@ function UltimsContractes(): React.JSX.Element {
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
   const editarContracte = useEditarContracte()
+  const [modalExportacioObert, setModalExportacioObert] = useState(false)
 
   useEffect(() => {
     let cancelat = false
@@ -75,7 +76,7 @@ function UltimsContractes(): React.JSX.Element {
     return avisosText.size > 0 ? Array.from(avisosText).join(' | ') : null
   }
 
-  async function exportar(format: 'csv' | 'ods'  | 'xlsx'): Promise<void> {
+  async function exportar(format: ExtensioExportacio): Promise<void> {
     const dadesExportacio: DadesExportacio = {
       nomFitxer: t('exportacio.ultimsContractes.nomFitxer'),
       titolDialog: t('exportacio.ultimsContractes.titolDialog'),
@@ -89,7 +90,7 @@ function UltimsContractes(): React.JSX.Element {
         { titol: t('contractes.camps.inquili') + ' 2', tipus: 'text' },
         { titol: t('contractes.camps.lloguerActual'), tipus: 'moneda' },
         { titol: t('contractes.camps.dataUltimaRevisio'), tipus: 'data' },
-        { titol: t('contractes.camps.avisos'), tipus: 'text' },
+        { titol: t('contractes.camps.avisos'), tipus: 'text' }
       ],
       files: files.map(({ immoble, contracte: c }) => [
         adreca(immoble),
@@ -97,14 +98,14 @@ function UltimsContractes(): React.JSX.Element {
         c?.data_fi ?? null,
         c?.d_fi_prevista ?? null,
         c === null
-          ? t('contractes.ultims.senseContracte') 
+          ? t('contractes.ultims.senseContracte')
           : nomInquili(c.inquili_nom, c.inquili_cognoms),
         c === null || c.id_inquili_2 === null
           ? null
           : nomInquili(c.inquili2_nom, c.inquili2_cognoms),
         c?.lloguer_actual ?? null,
         c?.data_ultima_revisio ?? null,
-        c === null ? null : AvisosContracteTxt(c) 
+        c === null ? null : AvisosContracteTxt(c)
       ])
     }
 
@@ -132,34 +133,12 @@ function UltimsContractes(): React.JSX.Element {
         <Title order={2}>{t('contractes.ultims.titol')}</Title>
 
         {files.length > 0 && (
-          <Menu position="bottom-start" withinPortal>
-            <Menu.Target>
-              <Button leftSection={<IconFileExport size={16} />}>{t('exportacio.titol')}</Button>
-            </Menu.Target>
-
-            <Menu.Dropdown>
-              <Menu.Item
-                leftSection={<IconFileTypeCsv size={16} />}
-                onClick={() => exportar('csv')}
-              >
-                {t('exportacio.csvTitol')}
-              </Menu.Item>
-
-              <Menu.Item
-                leftSection={<IconFileExport size={16} />}
-                onClick={() => exportar('ods')}
-              >
-                {t('exportacio.odsTitol')}
-              </Menu.Item>
-
-              <Menu.Item
-                leftSection={<IconFileTypeXls size={16} />}
-                onClick={() => exportar('xlsx')}
-              >
-                {t('exportacio.xlsxTitol')}
-              </Menu.Item>              
-            </Menu.Dropdown>
-          </Menu>
+          <Button
+            leftSection={<IconFileExport size={16} />}
+            onClick={() => setModalExportacioObert(true)}
+          >
+            {t('exportacio.titol')}
+          </Button>
         )}
       </Group>
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
@@ -260,6 +239,15 @@ function UltimsContractes(): React.JSX.Element {
           </Table.Tbody>
         </Table>
       )}
+      <ModalExportacio
+        obert={modalExportacioObert}
+        titol={t('exportacio.ultimsContractes.titolDialog')}
+        onAcceptar={(format) => {
+          setModalExportacioObert(false)
+          void exportar(format)
+        }}
+        onCancel·lar={() => setModalExportacioObert(false)}
+      />
     </>
   )
 }

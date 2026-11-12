@@ -385,14 +385,19 @@
       "fet": "Contracte tancat."
     }
   },
+
   "exportacio": {
     "titol": "Exportar",
     "csvTitol": "Exportar a CSV",
     "odsTitol": "Exportar a ODS",
     "xlsxTitol": "Exportar a XLSX",
+    "format": "Selecciona el format en què vols desar les dades",
+    "csvDescripcio": "Document de text CSV",
+    "odsDescripcio": "Document OpenDocument",
+    "xlsxDescripcio": "Llibre de Microsoft Excel",
     "ultimsContractes": {
       "nomFitxer": "ultims_contractes",
-      "titolDialog": "Exportació dels últims contractes"
+      "titolDialog": "Exportació dels contractes més recents"
     }
   },
   "proves": {

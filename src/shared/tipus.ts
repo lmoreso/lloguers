@@ -218,6 +218,8 @@ export interface ColumnaExportacio {
 
 export type FormatExportacio = 'ods' | 'csv' | 'xlsx'
 
+export type ExtensioExportacio = 'csv' | 'ods' | 'xlsx'
+
 export type ValorExportacio = string | number | boolean | null
 
 export interface DadesExportacio {
