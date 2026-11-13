@@ -1,7 +1,30 @@
-import { dialog } from 'electron'
+import { app, dialog } from 'electron'
+import path from 'path'
+import { obtenirConfig, desarConfig } from './config'
 import { writeFile } from 'fs/promises'
 import * as XLSX from 'xlsx'
 import type { DadesExportacio, ValorExportacio, ResultatExportacio } from '../shared/tipus'
+
+async function mostrarDialogDesament(
+  titol: string,
+  nomFitxer: string,
+  filtre: { name: string; extensions: string[] }
+): Promise<string | null> {
+  const config = obtenirConfig()
+  const carpeta = config.pathExportFiles ?? app.getPath('downloads')
+
+  const resultat = await dialog.showSaveDialog({
+    title: titol,
+    defaultPath: path.join(carpeta, nomFitxer),
+    filters: [filtre]
+  })
+
+  if (resultat.canceled || !resultat.filePath) return null
+
+  desarConfig({ pathExportFiles: path.dirname(resultat.filePath) })
+
+  return resultat.filePath
+}
 
 function convertirValor(valor: ValorExportacio, tipus: string): string {
   if (valor === null) return ''
@@ -36,13 +59,12 @@ export async function exportarCsv(dades: DadesExportacio): Promise<ResultatExpor
     ? dades.nomFitxer
     : `${dades.nomFitxer}.csv`
 
-  const resultat = await dialog.showSaveDialog({
-    title: dades.titolDialog,
-    defaultPath: nomFitxer,
-    filters: [{ name: 'CSV', extensions: ['csv'] }]
+  const filePath = await mostrarDialogDesament(dades.titolDialog, nomFitxer, {
+    name: 'CSV',
+    extensions: ['csv']
   })
 
-  if (resultat.canceled || !resultat.filePath) return { canceled: true }
+  if (!filePath) return { canceled: true }
 
   const capcalera = dades.columnes.map((c) => escaparValor(c.titol)).join(';')
 
@@ -54,9 +76,9 @@ export async function exportarCsv(dades: DadesExportacio): Promise<ResultatExpor
 
   const contingut = [capcalera, ...files].join('\r\n')
 
-  await writeFile(resultat.filePath, '\uFEFF' + contingut, 'utf8')
+  await writeFile(filePath, '\uFEFF' + contingut, 'utf8')
 
-  return { canceled: false, format: 'csv', filePath: resultat.filePath }
+  return { canceled: false, format: 'csv', filePath: filePath }
 }
 
 export async function exportarOds(dades: DadesExportacio): Promise<ResultatExportacio> {
@@ -68,13 +90,12 @@ export async function exportarOds(dades: DadesExportacio): Promise<ResultatExpor
     ? dades.nomFitxer
     : `${dades.nomFitxer}.ods`
 
-  const resultat = await dialog.showSaveDialog({
-    title: dades.titolDialog,
-    defaultPath: nomFitxer,
-    filters: [{ name: 'ODS', extensions: ['ods'] }]
+  const filePath = await mostrarDialogDesament(dades.titolDialog, nomFitxer, {
+    name: 'ODS',
+    extensions: ['ods']
   })
 
-  if (resultat.canceled || !resultat.filePath) return { canceled: true }
+  if (!filePath) return { canceled: true }
 
   const files = dades.files.map((fila) =>
     dades.columnes.map((columna, index) => {
@@ -121,9 +142,9 @@ export async function exportarOds(dades: DadesExportacio): Promise<ResultatExpor
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Dades')
 
-  XLSX.writeFile(wb, resultat.filePath, { bookType: 'ods' })
+  XLSX.writeFile(wb, filePath, { bookType: 'ods' })
 
-  return { canceled: false, format: 'ods', filePath: resultat.filePath }
+  return { canceled: false, format: 'ods', filePath: filePath }
 }
 
 export async function exportarExcel(dades: DadesExportacio): Promise<ResultatExportacio> {
@@ -135,13 +156,12 @@ export async function exportarExcel(dades: DadesExportacio): Promise<ResultatExp
     ? dades.nomFitxer
     : `${dades.nomFitxer}.xlsx`
 
-  const resultat = await dialog.showSaveDialog({
-    title: dades.titolDialog,
-    defaultPath: nomFitxer,
-    filters: [{ name: 'Excel', extensions: ['xlsx'] }]
+  const filePath = await mostrarDialogDesament(dades.titolDialog, nomFitxer, {
+    name: 'Excel',
+    extensions: ['xlsx']
   })
 
-  if (resultat.canceled || !resultat.filePath) return { canceled: true }
+  if (!filePath) return { canceled: true }
 
   const files = dades.files.map((fila) =>
     dades.columnes.map((columna, index) => {
@@ -187,7 +207,7 @@ export async function exportarExcel(dades: DadesExportacio): Promise<ResultatExp
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Dades')
 
-  XLSX.writeFile(wb, resultat.filePath, { bookType: 'xlsx' })
+  XLSX.writeFile(wb, filePath, { bookType: 'xlsx' })
 
-  return { canceled: false, format: dades.format, filePath: resultat.filePath }
+  return { canceled: false, format: dades.format, filePath: filePath }
 }

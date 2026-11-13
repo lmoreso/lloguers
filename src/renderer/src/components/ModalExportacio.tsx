@@ -7,15 +7,15 @@ interface Props {
   obert: boolean
   titol: string
   onAcceptar: (extensio: ExtensioExportacio) => void
-  onCancel·lar: () => void
+  onCancellar: () => void
 }
 
-function ModalExportacio({ obert, titol, onAcceptar, onCancel·lar }: Props): React.JSX.Element {
+function ModalExportacio({ obert, titol, onAcceptar, onCancellar }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const [format, setFormat] = useState<ExtensioExportacio>('csv')
 
   return (
-    <Modal opened={obert} onClose={onCancel·lar} title={titol} centered>
+    <Modal opened={obert} onClose={onCancellar} title={titol} centered>
       <Fieldset legend={t('exportacio.format')}>
         <Radio.Group value={format} onChange={(valor) => setFormat(valor as ExtensioExportacio)}>
           <Stack gap="sm">
@@ -27,7 +27,7 @@ function ModalExportacio({ obert, titol, onAcceptar, onCancel·lar }: Props): Re
       </Fieldset>
 
       <Group justify="flex-end" mt="lg">
-        <Button variant="default" onClick={onCancel·lar}>
+        <Button variant="default" onClick={onCancellar}>
           {t('comu.cancellar')}
         </Button>
 

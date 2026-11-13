@@ -246,7 +246,7 @@ function UltimsContractes(): React.JSX.Element {
           setModalExportacioObert(false)
           void exportar(format)
         }}
-        onCancel·lar={() => setModalExportacioObert(false)}
+        onCancellar={() => setModalExportacioObert(false)}
       />
     </>
   )
