@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, shell } from 'electron'
+import { app, BrowserWindow, dialog, shell } from 'electron'
 import type { OpenDialogOptions } from 'electron'
 import fs from 'fs'
 import path from 'path'
@@ -6,6 +6,7 @@ import { db, docsDir } from './database'
 import { fitxerNoTrobat, nomSegur, rutaDins } from './fitxers'
 import { TIPUS_DOCUMENT_IMMOBLE, TIPUS_UNICS_IMMOBLE } from '../shared/tipus'
 import type { DocumentImmoble, DocumentImmobleDades } from '../shared/tipus'
+import { obtenirConfig, desarConfig } from './config'
 
 const COLUMNES = 'id, id_inmoble, tipus, nom_original, comentaris, data_document'
 
@@ -47,15 +48,22 @@ export async function adjuntarDocumentsImmoble(
   const data = dades.data_document ?? null
   if (data !== null && typeof data !== 'string') throw new Error('Data invàlida')
 
+  const config = obtenirConfig()
+  const dirOpen = config.pathImportDocs ?? app.getPath('documents')
+
   const opcions: OpenDialogOptions = {
     title: typeof titolDialeg === 'string' ? titolDialeg : undefined,
-    properties: unic ? ['openFile'] : ['openFile', 'multiSelections']
+    properties: unic ? ['openFile'] : ['openFile', 'multiSelections'],
+    defaultPath: dirOpen
   }
   const finestra = BrowserWindow.getFocusedWindow()
   const triats = finestra
     ? await dialog.showOpenDialog(finestra, opcions)
     : await dialog.showOpenDialog(opcions)
   if (triats.canceled || triats.filePaths.length === 0) return []
+
+  // Si s'ha canviat la carpeta, la guardem per defecte. Només es guarda si l'usuari ha triat un fitxer: si cancel·la, no es toca.
+  desarConfig({ pathImportDocs: path.dirname(triats.filePaths[0]) })
 
   // Ordre pel nom, amb ordre numèric (foto2 abans de foto10).
   const origens = [...triats.filePaths].sort((a, b) =>

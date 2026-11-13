@@ -49,8 +49,6 @@ function escaparValor(valor: string): string {
 }
 
 export async function exportarCsv(dades: DadesExportacio): Promise<ResultatExportacio> {
-  // await exportarFitxer(dades)
-
   if (dades.format !== 'csv') {
     throw new Error('Format d’exportació no vàlid')
   }

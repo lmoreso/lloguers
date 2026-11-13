@@ -398,7 +398,9 @@
     "ultimsContractes": {
       "nomFitxer": "ultimos_contratos",
       "titolDialog": "Exportación de los contratos más recientes"
-    }
+    },
+    "exportOk": "Exportación correcta",
+    "exportOkDesc": "Se ha creado el archivo: "
   },
   "proves": {
     "titol": "Pruebas de Mantine",

@@ -118,10 +118,10 @@ function UltimsContractes(): React.JSX.Element {
 
     if (!esOk(resposta)) {
       console.error('Error en exportar els contractes:', resposta.error)
-    } else {
+    } else if (!resposta.dades.canceled && resposta.dades.filePath) {
       notifications.show({
-        title: 'exportació correcte',
-        message: resposta.dades.filePath,
+        title: t('exportacio.exportOk'),
+        message: t('exportacio.exportOkDesc') + resposta.dades.filePath,
         color: 'green'
       })
     }
