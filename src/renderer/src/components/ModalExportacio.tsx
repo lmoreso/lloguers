@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Fieldset, Group, Modal, Radio, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import type { ExtensioExportacio } from '../../../shared/tipus'
+import { esFormatExportacio } from '../../../shared/validacions'
 
 interface Props {
   obert: boolean
@@ -13,6 +14,28 @@ interface Props {
 function ModalExportacio({ obert, titol, onAcceptar, onCancellar }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const [format, setFormat] = useState<ExtensioExportacio>('csv')
+
+  useEffect(() => {
+    if (!obert) return
+
+    const carregarConfig = async (): Promise<void> => {
+      const resultat = await window.api.config.obtenir()
+
+      if (resultat.ok && esFormatExportacio(resultat.dades.formatExportacio)) {
+        setFormat(resultat.dades.formatExportacio)
+      }
+    }
+
+    void carregarConfig()
+  }, [obert])
+
+  const acceptar = async (): Promise<void> => {
+    const resultat = await window.api.config.desar({ formatExportacio: format })
+
+    if (resultat.ok) {
+      onAcceptar(format)
+    }
+  }
 
   return (
     <Modal opened={obert} onClose={onCancellar} title={titol} centered>
@@ -30,8 +53,7 @@ function ModalExportacio({ obert, titol, onAcceptar, onCancellar }: Props): Reac
         <Button variant="default" onClick={onCancellar}>
           {t('comu.cancellar')}
         </Button>
-
-        <Button onClick={() => onAcceptar(format)}>{t('comu.acceptar')}</Button>
+        <Button onClick={() => void acceptar()}>{t('comu.acceptar')}</Button>{' '}
       </Group>
     </Modal>
   )

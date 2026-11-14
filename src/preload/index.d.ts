@@ -39,7 +39,7 @@ declare global {
       }
       config: {
         obtenir: () => Promise<Resultat<ConfigObtinguda>>
-        desar: (config: Config) => Promise<Resultat<void>>
+        desar: (config: Partial<Config>) => Promise<Resultat<void>>
       }
       contractes: {
         obtenir: (idInmoble: number) => Promise<Resultat<ContracteLlistat[]>>

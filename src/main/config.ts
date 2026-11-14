@@ -2,29 +2,12 @@ import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import { DADES } from './database'
-import { IDIOMES } from '../shared/tipus'
-import type { Config, ConfigObtinguda, Idioma } from '../shared/tipus'
+import type { Config, ConfigObtinguda, FormatExportacio, Idioma } from '../shared/tipus'
+import { esFormatExportacio, esIdioma, esPathDirectory } from '../shared/validacions'
 
 const configPath = path.join(DADES, 'config.json')
 
 let configEnMemoria: ConfigObtinguda | null = null
-
-export function esIdioma(valor: unknown): valor is Idioma {
-  return (IDIOMES as readonly unknown[]).includes(valor)
-}
-
-// Comprova que la ruta existeix i correspon a una carpeta.
-export function esPathDirectory(valor: unknown): valor is string {
-  if (typeof valor !== 'string' || valor.trim() === '' || !path.isAbsolute(valor)) {
-    return false
-  }
-
-  try {
-    return fs.statSync(valor).isDirectory()
-  } catch {
-    return false
-  }
-}
 
 // Idioma del sistema (p. ex. 'es-ES' -> 'es'). Si l'app no el té, usem 'ca'.
 function idiomaDelSistema(): Idioma {
@@ -32,11 +15,12 @@ function idiomaDelSistema(): Idioma {
   const base = locale.split('-')[0]
 
   if (esIdioma(base)) {
-    console.log(`[idioma] Sistema: "${locale}" -> "${base}" (suportat)`)
     return base
   }
 
-  console.log(`[idioma] Sistema: "${locale}" -> "${base}" no suportat; s'usa "ca"`)
+  console.log(
+    `[main.idiomaDelSistema.idioma] Sistema: "${locale}" -> "${base}" no suportat; s'usa "ca"`
+  )
   return 'ca'
 }
 
@@ -45,7 +29,8 @@ function obtenirConfigPerDefecte(): Config {
   return {
     idioma: idiomaDelSistema(),
     pathExportFiles: app.getPath('downloads'),
-    pathImportDocs: app.getPath('documents')
+    pathImportDocs: app.getPath('documents'),
+    formatExportacio: 'xlsx'
   }
 }
 
@@ -70,7 +55,10 @@ function normalitzarConfig(brut: unknown): {
       : perDefecte.pathExportFiles,
     pathImportDocs: esPathDirectory(dades.pathImportDocs)
       ? dades.pathImportDocs
-      : perDefecte.pathImportDocs
+      : perDefecte.pathImportDocs,
+    formatExportacio: esFormatExportacio(dades.formatExportacio)
+      ? (dades.formatExportacio as FormatExportacio)
+      : perDefecte.formatExportacio
   }
 
   return { config, idiomaConfirmat }
@@ -81,7 +69,7 @@ export function obtenirConfig(): ConfigObtinguda {
   if (configEnMemoria !== null) return configEnMemoria
 
   if (!fs.existsSync(configPath)) {
-    console.log("[config] config.json no existeix; s'utilitzen els valors per defecte")
+    console.log("[main.config.obtenir] config.json no existeix; s'utilitzen els valors per defecte")
     configEnMemoria = { ...obtenirConfigPerDefecte(), confirmat: false }
     return configEnMemoria
   }
@@ -91,21 +79,25 @@ export function obtenirConfig(): ConfigObtinguda {
     const { config, idiomaConfirmat } = normalitzarConfig(brut)
 
     if (!idiomaConfirmat) {
-      console.log("[config] Idioma invàlid o absent; s'utilitza el valor per defecte")
+      console.log("[main.config.obtenir] Idioma invàlid o absent; s'utilitza el valor per defecte")
     }
 
     if (
       brut === null ||
       typeof brut !== 'object' ||
-      !esPathDirectory((brut as Record<string, unknown>).pathExportFiles)
+      !esPathDirectory((brut as Record<string, unknown>).pathExportFiles) ||
+      !esPathDirectory((brut as Record<string, unknown>).pathImportDocs) ||
+      !esFormatExportacio((brut as Record<string, unknown>).formatExportacio)
     ) {
-      console.log("[config] Ruta d'exportació invàlida o absent; s'utilitza Baixades")
+      console.log("[main.config.obtenir] Ruta d'exportació invàlida o absent; s'utilitza Baixades")
     }
 
     configEnMemoria = { ...config, confirmat: idiomaConfirmat }
     return configEnMemoria
   } catch {
-    console.log("[config] config.json no és JSON vàlid; s'utilitzen els valors per defecte")
+    console.log(
+      "[main.config.obtenir] config.json no és JSON vàlid; s'utilitzen els valors per defecte"
+    )
     configEnMemoria = { ...obtenirConfigPerDefecte(), confirmat: false }
     return configEnMemoria
   }

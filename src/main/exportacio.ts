@@ -1,4 +1,4 @@
-import { app, dialog } from 'electron'
+import { dialog } from 'electron'
 import path from 'path'
 import { obtenirConfig, desarConfig } from './config'
 import { writeFile } from 'fs/promises'
@@ -11,7 +11,7 @@ async function mostrarDialogDesament(
   filtre: { name: string; extensions: string[] }
 ): Promise<string | null> {
   const config = obtenirConfig()
-  const carpeta = config.pathExportFiles ?? app.getPath('downloads')
+  const carpeta = config.pathExportFiles
 
   const resultat = await dialog.showSaveDialog({
     title: titol,

@@ -192,8 +192,9 @@ export type DocumentImmobleDades = Pick<DocumentImmoble, 'tipus' | 'comentaris' 
 // Contingut de ~/Lloguers/config.json
 export interface Config {
   idioma: Idioma
-  pathExportFiles?: string
-  pathImportDocs?: string
+  pathExportFiles: string
+  formatExportacio: FormatExportacio
+  pathImportDocs: string
 }
 
 // Resposta de config:obtenir: la configuració, més si ve del fitxer (confirmat)

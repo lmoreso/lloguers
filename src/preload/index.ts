@@ -44,7 +44,8 @@ const api = {
   },
   config: {
     obtenir: (): Promise<Resultat<ConfigObtinguda>> => ipcRenderer.invoke('config:obtenir'),
-    desar: (config: Config): Promise<Resultat<void>> => ipcRenderer.invoke('config:desar', config)
+    desar: (config: Partial<Config>): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('config:desar', config)
   },
   contractes: {
     obtenir: (idInmoble: number): Promise<Resultat<ContracteLlistat[]>> =>
