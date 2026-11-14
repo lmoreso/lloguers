@@ -16,7 +16,10 @@ import type {
   DocumentImmoble,
   DocumentImmobleDades,
   DadesExportacio,
-  ResultatExportacio
+  ResultatExportacio,
+  RevisioDades,
+  RevisioLlistat,
+  RevisioLloguer
 } from '../shared/tipus'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -103,6 +106,17 @@ const api = {
 
     xlsx: (dades: DadesExportacio): Promise<Resultat<ResultatExportacio>> =>
       ipcRenderer.invoke('exportacio:xlsx', dades)
+  },
+  revisions: {
+    obtenir: (idContracte: number): Promise<Resultat<RevisioLloguer[]>> =>
+      ipcRenderer.invoke('revisions:obtenir', idContracte),
+    llistat: (nomesPendents: boolean): Promise<Resultat<RevisioLlistat[]>> =>
+      ipcRenderer.invoke('revisions:llistat', nomesPendents),
+    crear: (idContracte: number, dades: RevisioDades): Promise<Resultat<RevisioLloguer>> =>
+      ipcRenderer.invoke('revisions:crear', idContracte, dades),
+    actualitzar: (id: number, dades: RevisioDades): Promise<Resultat<void>> =>
+      ipcRenderer.invoke('revisions:actualitzar', id, dades),
+    eliminar: (id: number): Promise<Resultat<void>> => ipcRenderer.invoke('revisions:eliminar', id)
   }
 }
 

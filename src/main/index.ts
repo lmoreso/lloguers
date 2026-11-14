@@ -11,6 +11,7 @@ import { registrarIpcDocuments } from './ipc/documents'
 import { registrarIpcApp } from './ipc/app'
 import { registrarIpcDocumentsImmoble } from './ipc/documentsImmoble'
 import { registrarIpcExportacio } from './ipc/exportacio'
+import { registrarIpcRevisions } from './ipc/revisions'
 
 function createWindow(): void {
   // Create the browser window.
@@ -129,6 +130,8 @@ app.whenReady().then(() => {
   registrarIpcDocumentsImmoble()
 
   registrarIpcExportacio()
+
+  registrarIpcRevisions()
 
   createWindow()
 

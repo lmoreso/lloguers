@@ -51,17 +51,20 @@ const COLUMNES_LLISTAT = `${['id', ...CAMPS].map((c) => `c.${c}`).join(', ')},
   EXISTS (SELECT 1 FROM documents_contracte d
     WHERE d.id_contracte = c.id AND d.tipus = 'rebut') AS te_doc_rebut,
   EXISTS (SELECT 1 FROM documents_contracte d
-    WHERE d.id_contracte = c.id AND d.tipus = 'fianca_model3') AS te_doc_model3`
+    WHERE d.id_contracte = c.id AND d.tipus = 'fianca_model3') AS te_doc_model3,
+  EXISTS (SELECT 1 FROM revisions_lloguer r
+    WHERE r.id_contracte = c.id AND r.data_enviament IS NULL
+      AND round(r.increment_aplicat, 2) <> 0) AS carta_pendent`
 
-// Fila tal com surt de SQLite: els tres indicadors són 0 o 1. El Main els converteix a boolean.
+// Fila tal com surt de SQLite: els indicadors són 0 o 1. El Main els converteix a boolean.
 type FilaLlistat = Omit<
   ContracteLlistat,
-  'te_doc_model2' | 'te_doc_notificacio' | 'te_doc_model3' | 'te_doc_rebut'
+  'te_doc_model2' | 'te_doc_notificacio' | 'te_doc_model3' | 'carta_pendent'
 > & {
   te_doc_model2: number
   te_doc_notificacio: number
   te_doc_model3: number
-  te_doc_rebut: number
+  carta_pendent: number
 }
 
 function aLlistat(f: FilaLlistat): ContracteLlistat {
@@ -69,8 +72,8 @@ function aLlistat(f: FilaLlistat): ContracteLlistat {
     ...f,
     te_doc_model2: f.te_doc_model2 === 1,
     te_doc_notificacio: f.te_doc_notificacio === 1,
-    te_doc_rebut: f.te_doc_rebut === 1,
-    te_doc_model3: f.te_doc_model3 === 1
+    te_doc_model3: f.te_doc_model3 === 1,
+    carta_pendent: f.carta_pendent === 1
   }
 }
 

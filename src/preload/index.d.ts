@@ -80,6 +80,13 @@ declare global {
         ods: (dades: DadesExportacio) => Promise<Resultat<ResultatExportacio>>
         xlsx: (dades: DadesExportacio) => Promise<Resultat<ResultatExportacio>>
       }
+      revisions: {
+        obtenir: (idContracte: number) => Promise<Resultat<RevisioLloguer[]>>
+        llistat: (nomesPendents: boolean) => Promise<Resultat<RevisioLlistat[]>>
+        crear: (idContracte: number, dades: RevisioDades) => Promise<Resultat<RevisioLloguer>>
+        actualitzar: (id: number, dades: RevisioDades) => Promise<Resultat<void>>
+        eliminar: (id: number) => Promise<Resultat<void>>
+      }
     }
   }
 }

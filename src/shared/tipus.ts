@@ -94,6 +94,8 @@ export interface ContracteLlistat extends Contracte {
   te_doc_notificacio: boolean
   te_doc_rebut: boolean
   te_doc_model3: boolean
+  // Si el contracte té una revisió de lloguer amb la carta pendent d'enviar (calculat al Main).
+  carta_pendent: boolean
 }
 
 // Una entrada de la vista "Últims contractes": un immoble amb els seus contractes en curs o l'últim.
@@ -101,6 +103,53 @@ export interface ContracteLlistat extends Contracte {
 export interface ImmobleAmbContractes {
   immoble: Immoble
   contractes: ContracteLlistat[]
+}
+
+// Una revisió del lloguer d'un contracte. `lloguer_anterior` i `data_revisio_anterior` són els valors que tenia el
+// contracte abans de la revisió (es desen perquè, en eliminar-la, es pugui restaurar exactament el que hi havia).
+// `data_enviament` buida = la carta encara és pendent (un increment de 0 € no porta carta).
+export interface RevisioLloguer {
+  id: number
+  id_contracte: number
+  data_efecte: string // ISO AAAA-MM-DD
+  lloguer_anterior: number
+  data_revisio_anterior: string // ISO
+  percentatge: number | null // el que ha introduït l'usuari
+  increment_aplicat: number // pot ser diferent del calculat a partir del %
+  lloguer_nou: number // lloguer_anterior + increment_aplicat
+  data_enviament: string | null // ISO
+  comentari: string | null
+}
+
+// El que envia el Renderer en crear o modificar una revisió. El Main calcula la resta.
+export type RevisioDades = Pick<
+  RevisioLloguer,
+  'data_efecte' | 'percentatge' | 'increment_aplicat' | 'data_enviament' | 'comentari'
+>
+
+// Una fila de la pantalla "Revisions de lloguer" (de la vista v_revisions_lloguer): la revisió amb els dos
+// inquilins i les dades bàsiques de l'immoble.
+export interface RevisioLlistat {
+  id_revisio: number
+  id_contracte: number
+  data_efecte: string
+  lloguer_anterior: number
+  increment_aplicat: number
+  lloguer_nou: number
+  percentatge: number | null
+  percentatge_efectiu: number | null // increment / lloguer anterior, calculat per la vista
+  data_enviament: string | null
+  comentari: string | null
+  contracte_data_inici: string
+  inquili_nom: string | null
+  inquili_cognoms: string | null
+  inquili2_nom: string | null
+  inquili2_cognoms: string | null
+  immoble_id: number
+  immoble_via: string
+  immoble_num_via: string
+  immoble_pis: string
+  immoble_porta: string | null
 }
 
 // Idiomes de la interfície. Afegir-ne un de nou: afegir-lo aquí, crear el JSON
