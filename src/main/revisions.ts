@@ -42,20 +42,29 @@ function ultima(idContracte: number): RevisioLloguer | undefined {
 
 // Totes les revisions (o només les pendents d'enviar: sense data d'enviament i sense increments de 0 €), amb els
 // inquilins i l'immoble, per a la pantalla "Revisions de lloguer". Ordenades pel dia d'efecte, els cognoms i el nom
-// del primer inquilí.
+// del primer inquilí. L'ordre dels noms es fa aquí (col·lació catalana, sense distingir accents ni majúscules) i
+// no a SQLite, que ordena en binari ("Àlvarez" quedaria després de "Zamora").
 export function obtenirRevisionsLlistat(nomesPendents: boolean): RevisioLlistat[] {
   const filtre = nomesPendents
     ? 'WHERE data_enviament IS NULL AND round(increment_aplicat, 2) <> 0'
     : ''
-  return db
+  const files = db
     .prepare(
       `SELECT id_revisio, id_contracte, data_efecte, lloguer_anterior, increment_aplicat, lloguer_nou, percentatge,
         percentatge_efectiu, data_enviament, comentari, contracte_data_inici, inquili_nom, inquili_cognoms,
         inquili2_nom, inquili2_cognoms, immoble_id, immoble_via, immoble_num_via, immoble_pis, immoble_porta
-       FROM v_revisions_lloguer ${filtre}
-       ORDER BY data_efecte, inquili_cognoms, inquili_nom, id_revisio`
+       FROM v_revisions_lloguer ${filtre}`
     )
     .all() as RevisioLlistat[]
+  const nom = (a: string | null, b: string | null): number =>
+    (a ?? '').localeCompare(b ?? '', 'ca', { sensitivity: 'base' })
+  return files.sort(
+    (a, b) =>
+      (a.data_efecte < b.data_efecte ? 1 : a.data_efecte > b.data_efecte ? -1 : 0) ||
+      nom(a.inquili_cognoms, b.inquili_cognoms) ||
+      nom(a.inquili_nom, b.inquili_nom) ||
+      a.id_revisio - b.id_revisio
+  )
 }
 
 // Valida i normalitza el que envia el Renderer (que no és de fiar). Els imports, a cèntims.

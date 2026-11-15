@@ -55,6 +55,7 @@
     "inquilins": "Inquilinos",
     "contractes": "Contratos",
     "configuracio": "Configuración",
+    "revisions": "Revisiones de alquiler",    
     "quantA": "Acerca de"
   },
   "comu": {
@@ -403,6 +404,16 @@
     "exportOkDesc": "Se ha creado el archivo: "
   },
   "revisions": {
+    "global": {
+      "nomesPendents": "Solo pendientes",
+      "pendents_one": "{{count}} carta pendiente de enviar",
+      "pendents_other": "{{count}} cartas pendientes de enviar",
+      "capPendent": "No hay ninguna carta pendiente de enviar.",
+      "cap": "No hay ninguna revisión de alquiler.",
+      "inquilins": "Inquilinos",
+      "immoble": "Inmueble",
+      "obrir": "Abrir las revisiones del contrato"
+    },    
     "titol": "Revisiones de alquiler",
     "subtitol": "{{adreca}} · Contrato del {{inici}}",
     "actual": "Alquiler actual: {{lloguer}}, vigente desde el {{data}}.",

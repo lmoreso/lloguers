@@ -55,6 +55,7 @@
     "inquilins": "Inquilins",
     "contractes": "Contractes",
     "configuracio": "Configuració",
+    "revisions": "Revisions de lloguer",    
     "quantA": "Quant a"
   },
   "comu": {
@@ -403,6 +404,16 @@
     "exportOkDesc": "S'ha creat el fitxer: "
   },
   "revisions": {
+    "global": {
+      "nomesPendents": "Només pendents",
+      "pendents_one": "{{count}} carta pendent d'enviar",
+      "pendents_other": "{{count}} cartes pendents d'enviar",
+      "capPendent": "No hi ha cap carta pendent d'enviar.",
+      "cap": "No hi ha cap revisió de lloguer.",
+      "inquilins": "Inquilins",
+      "immoble": "Immoble",
+      "obrir": "Obrir les revisions del contracte"
+    },    
     "titol": "Revisions de lloguer",
     "subtitol": "{{adreca}} · Contracte del {{inici}}",
     "actual": "Lloguer actual: {{lloguer}}, vigent des del {{data}}.",

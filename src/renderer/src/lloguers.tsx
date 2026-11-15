@@ -12,10 +12,12 @@ import QuantA from './pantalles/QuantA'
 import DocumentsImmoble from './pantalles/DocumentsImmoble'
 import DocumentsContracte from './pantalles/DocumentsContracte'
 import RevisionsContracte from './pantalles/RevisionsContracte'
+import Revisions from './pantalles/Revisions'
 
 const SECCIONS = [
   { ruta: '/immobles', clau: 'menu.immobles' },
   { ruta: '/ultims-contractes', clau: 'menu.ultimsContractes' },
+  { ruta: '/revisions', clau: 'menu.revisions' },
   { ruta: '/inquilins', clau: 'menu.inquilins' },
   { ruta: '/configuracio', clau: 'menu.configuracio' },
   { ruta: '/quant-a', clau: 'menu.quantA' }
@@ -52,6 +54,7 @@ function Estructura(): React.JSX.Element {
           <Route path="/immobles/:id/contractes/nou" element={<FitxaContracte key="nou" />} />
           <Route path="/immobles/:id/documents" element={<DocumentsImmoble />} />
           <Route path="/ultims-contractes" element={<UltimsContractes />} />
+          <Route path="/revisions" element={<Revisions />} />
           <Route
             path="/immobles/:id/contractes/:idContracte"
             element={<FitxaContracte key="edicio" />}
