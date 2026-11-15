@@ -263,7 +263,8 @@
       "titol": "Últims contractes",
       "senseContracte": "Sense contracte"
     },   
-    "avisIngres": "Cal gestionar l'ingrés de la fiança a l'INCASOL: encara no consta la data de l'ingrés.",    
+    "avisIngres": "Cal gestionar l'ingrés de la fiança a l'INCASOL: encara no consta la data de l'ingrés.",   
+    "avisCarta": "Hi ha una carta de revisió del lloguer pendent d'enviar.",     
     "desatTancat": "Contracte desat. Queda pendent gestionar la devolució de la fiança.",
     "nota": {
       "senseFi": "Disponible quan el contracte té data de fi."
@@ -378,7 +379,8 @@
         "aviat": "Revisió pròxima"
       },
       "documents": "Falten documents",
-      "ingresPendent": "Ingrés pendent"      
+      "ingresPendent": "Ingrés pendent",
+      "cartaPendent": "Carta pendent"      
     },
     "tancar": {
       "titol": "Tancar contracte",

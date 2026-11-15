@@ -41,6 +41,13 @@ export function ingresPendent(
   return c.data_fi === null && (c.fianca_import ?? 0) > 0 && c.fianca_data_ingres === null
 }
 
+// Contracte amb una carta de revisió del lloguer pendent d'enviar: una revisió sense data d'enviament i amb un
+// increment diferent de 0 (un lloguer congelat no porta carta). L'indicador el calcula el Main; compta també als
+// contractes tancats.
+export function cartaPendent(c: ContracteLlistat): boolean {
+  return c.carta_pendent
+}
+
 // Contracte tancat amb la fiança ja gestionada (model 2, notificació o sol·licitud de devolució) però sense
 // l'abonament de la devolució: la fiança està per cobrar.
 export function devolucioPendent(c: ContracteLlistat): boolean {
@@ -55,5 +62,11 @@ export function devolucioPendent(c: ContracteLlistat): boolean {
 
 // Cert si el contracte té algun avís de qualsevol tipus.
 export function teAvisos(c: ContracteLlistat): boolean {
-  return avisos(c).length > 0 || faltenDocuments(c) || ingresPendent(c) || devolucioPendent(c)
+  return (
+    avisos(c).length > 0 ||
+    cartaPendent(c) ||
+    faltenDocuments(c) ||
+    ingresPendent(c) ||
+    devolucioPendent(c)
+  )
 }

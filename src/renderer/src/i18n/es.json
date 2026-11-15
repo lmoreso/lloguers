@@ -264,6 +264,7 @@
       "senseContracte": "Sin contrato"
     }, 
     "avisIngres": "Hay que gestionar el ingreso de la fianza en el INCASOL: todavía no consta la fecha del ingreso.",    
+    "avisCarta": "Hay una carta de revisión del alquiler pendiente de enviar.",    
     "desatTancat": "Contrato guardado. Queda pendiente gestionar la devolución de la fianza.",
     "nota": {
       "senseFi": "Disponible cuando el contrato tiene fecha de fin."
@@ -378,7 +379,8 @@
         "aviat": "Revisión próxima"
       },
       "documents": "Faltan documentos",
-      "ingresPendent": "Ingreso pendiente"            
+      "ingresPendent": "Ingreso pendiente",
+      "cartaPendent": "Carta pendiente"         
     },        
     "tancar": {
       "titol": "Cerrar contrato",

@@ -15,6 +15,7 @@ import { formatData } from '../utils/dates'
 import { nomInquili } from '../utils/inquilins'
 import {
   avisos,
+  cartaPendent,
   devolucioPendent,
   documentsQueFalten,
   ingresPendent
@@ -131,6 +132,7 @@ function FitxaContracte(): React.JSX.Element {
           (() => {
             const linies: string[] = [
               ...avisos(llistat).map((a) => t(`contractes.avisos.${a.clau}.${a.estat}`)),
+              ...(cartaPendent(llistat) ? [t('contractes.avisCarta')] : []),
               ...(ingresPendent(llistat) ? [t('contractes.avisIngres')] : []),
               ...documentsQueFalten(llistat).map((d) => t(`documents.avis.${d}`)),
               ...(devolucioPendent(llistat) ? [t('contractes.avisos.devolucioPendent')] : [])
