@@ -11,6 +11,7 @@ import UltimsContractes from './pantalles/UltimsContractes'
 import QuantA from './pantalles/QuantA'
 import DocumentsImmoble from './pantalles/DocumentsImmoble'
 import DocumentsContracte from './pantalles/DocumentsContracte'
+import RevisionsContracte from './pantalles/RevisionsContracte'
 
 const SECCIONS = [
   { ruta: '/immobles', clau: 'menu.immobles' },
@@ -58,6 +59,10 @@ function Estructura(): React.JSX.Element {
           <Route
             path="/immobles/:id/contractes/:idContracte/documents"
             element={<DocumentsContracte />}
+          />
+          <Route
+            path="/immobles/:id/contractes/:idContracte/revisions"
+            element={<RevisionsContracte />}
           />
           <Route path="/inquilins" element={<Inquilins />} />
           <Route

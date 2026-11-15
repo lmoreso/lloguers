@@ -402,6 +402,45 @@
     "exportOk": "Exportación correcta",
     "exportOkDesc": "Se ha creado el archivo: "
   },
+  "revisions": {
+    "titol": "Revisiones de alquiler",
+    "subtitol": "{{adreca}} · Contrato del {{inici}}",
+    "actual": "Alquiler actual: {{lloguer}}, vigente desde el {{data}}.",
+    "nova": "Nueva revisión",
+    "pendent": "La carta de la última revisión todavía no se ha enviado: no se puede crear una revisión nueva hasta que se envíe.",
+    "desada": "Revisión guardada.",
+    "eliminada": "Revisión eliminada.",
+    "tancat": "Contrato cerrado: no se pueden crear revisiones nuevas. Se puede consultar el historial y modificar o eliminar la última revisión.",    
+    "seccions": {
+      "nova": "Nueva revisión",
+      "editar": "Revisión del {{data}}",
+      "historial": "Historial"
+    },
+    "camps": {
+      "lloguerAnterior": "Alquiler anterior",
+      "percentatge": "% aplicado",
+      "incrementCalculat": "Incremento calculado",
+      "incrementAplicat": "Incremento aplicado",
+      "lloguerNou": "Alquiler nuevo",
+      "dataEfecte": "Día de efecto",
+      "dataEnviament": "Fecha de envío de la carta",
+      "comentari": "Comentario"
+    },
+    "historial": {
+      "buit": "Este contrato todavía no tiene ninguna revisión.",
+      "nota": "Solo se puede modificar la última revisión; las anteriores son historial.",
+      "pendent": "Pendiente",
+      "carta": "Carta"
+    },
+    "eliminar": {
+      "titol": "Eliminar la revisión",
+      "confirmacio": "¿Seguro que quieres eliminar la revisión del {{efecte}}? El contrato recuperará el alquiler de {{lloguer}} y la fecha de revisión del {{data}}."
+    },
+    "validacio": {
+      "efecteAnterior": "El día de efecto no puede ser anterior al {{data}}.",
+      "lloguerNegatiu": "El alquiler nuevo no puede ser negativo."
+    }
+  },  
   "proves": {
     "titol": "Pruebas de Mantine",
     "dataPicker": "Selecciona una fecha",

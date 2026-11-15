@@ -402,6 +402,45 @@
     "exportOk": "Exportació correcta",
     "exportOkDesc": "S'ha creat el fitxer: "
   },
+  "revisions": {
+    "titol": "Revisions de lloguer",
+    "subtitol": "{{adreca}} · Contracte del {{inici}}",
+    "actual": "Lloguer actual: {{lloguer}}, vigent des del {{data}}.",
+    "nova": "Nova revisió",
+    "pendent": "La carta de l'última revisió encara no s'ha enviat: no es pot crear una revisió nova fins que s'enviï.",
+    "desada": "Revisió desada.",
+    "eliminada": "Revisió eliminada.",
+    "tancat": "Contracte tancat: no es poden crear revisions noves. Es pot consultar l'historial i modificar o eliminar l'última revisió.",    
+    "seccions": {
+      "nova": "Nova revisió",
+      "editar": "Revisió del {{data}}",
+      "historial": "Historial"
+    },
+    "camps": {
+      "lloguerAnterior": "Lloguer anterior",
+      "percentatge": "% aplicat",
+      "incrementCalculat": "Increment calculat",
+      "incrementAplicat": "Increment aplicat",
+      "lloguerNou": "Lloguer nou",
+      "dataEfecte": "Dia d'efecte",
+      "dataEnviament": "Data d'enviament de la carta",
+      "comentari": "Comentari"
+    },
+    "historial": {
+      "buit": "Aquest contracte encara no té cap revisió.",
+      "nota": "Només es pot modificar l'última revisió; les anteriors són historial.",
+      "pendent": "Pendent",
+      "carta": "Carta"
+    },
+    "eliminar": {
+      "titol": "Eliminar la revisió",
+      "confirmacio": "Segur que vols eliminar la revisió del {{efecte}}? El contracte recuperarà el lloguer de {{lloguer}} i la data de revisió del {{data}}."
+    },
+    "validacio": {
+      "efecteAnterior": "El dia d'efecte no pot ser anterior al {{data}}.",
+      "lloguerNegatiu": "El lloguer nou no pot ser negatiu."
+    }
+  },  
   "proves": {
     "titol": "Proves de Mantine",
     "dataPicker": "Sel·lecciona una data",

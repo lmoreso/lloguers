@@ -91,6 +91,7 @@ export function crearRevisio(idContracte: number, dades: RevisioDades): RevisioL
   return db.transaction(() => {
     const c = obtenirContracte(idContracte)
     if (!c) throw new Error('Contracte inexistent')
+    if (c.data_fi !== null) throw new Error('No es poden crear revisions en un contracte tancat')
     const darrera = ultima(idContracte)
     if (darrera && esPendent(darrera)) {
       throw new Error("L'última carta de revisió encara no s'ha enviat")

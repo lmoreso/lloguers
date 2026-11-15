@@ -23,7 +23,6 @@ import CanvisSenseDesar from '../components/CanvisSenseDesar'
 import { adreca } from '../utils/adreca'
 import { aNumeroForm, buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
-import RevisarLloguer from './RevisarLloguer'
 import { MOTIUS_FI } from '../../../shared/tipus'
 import type {
   Contracte,
@@ -302,27 +301,6 @@ function FormulariContracte({
     }
   }
 
-  // Revisar lloguer: NO escriu a la BD; només posa el lloguer actual i la data de revisió als camps del formulari,
-  // que es desen amb Desar.
-  function revisar(): void {
-    const dataInici = form.values.data_inici
-    if (!dataInici) return
-    modals.open({
-      title: t('contractes.revisar.titol'),
-      children: (
-        <RevisarLloguer
-          lloguerActual={aNumeroForm(form.values.lloguer_actual) ?? 0}
-          dataUltimaRevisio={form.values.data_ultima_revisio ?? dataInici}
-          dataInici={dataInici}
-          onAcceptar={(lloguer, data) => {
-            form.setFieldValue('lloguer_actual', lloguer)
-            form.setFieldValue('data_ultima_revisio', data)
-          }}
-        />
-      )
-    })
-  }
-
   // Desa el formulari (alta o edició). Retorna el contracte tal com ha quedat a la BD, o null si ha fallat
   // (l'error ja s'ha notificat).
   async function desarValors(v: Valors): Promise<Contracte | null> {
@@ -337,9 +315,10 @@ function FormulariContracte({
       id_inquili_2: v.id_inquili_2 ? Number(v.id_inquili_2) : null,
       d_fi_prevista: v.d_fi_prevista as string,
       lloguer_inicial: lloguerInicial,
-      // En crear, el Main fixa el lloguer actual i la data de revisió a partir de l'inicial i de la data d'inici.
-      lloguer_actual: contracte ? (aNumeroForm(v.lloguer_actual) as number) : lloguerInicial,
-      data_ultima_revisio: contracte ? (v.data_ultima_revisio as string) : (v.data_inici as string),
+      // El lloguer actual i la data de l'última revisió els canvien només les revisions: en actualitzar, el Main
+      // ignora aquests dos valors. En crear, els fixa a partir del lloguer inicial i de la data d'inici.
+      lloguer_actual: contracte ? contracte.lloguer_actual : lloguerInicial,
+      data_ultima_revisio: contracte ? contracte.data_ultima_revisio : (v.data_inici as string),
       fianca_adicional: aNumeroForm(v.fianca_adicional) as number,
       fianca_import: aNumeroForm(v.fianca_import),
       fianca_nc: buitANull(v.fianca_nc),
@@ -521,7 +500,7 @@ function FormulariContracte({
                   label={t('contractes.camps.fiancaAdicional')}
                   {...form.getInputProps('fianca_adicional')}
                 />
-                {/* El lloguer actual i la data de revisió només existeixen en editar, i només els canvia Revisar lloguer. */}
+                {/* El lloguer actual i la data de revisió només existeixen en editar, i només els canvien les revisions. */}
                 {contracte && (
                   <>
                     <CampNumeric
@@ -537,15 +516,19 @@ function FormulariContracte({
                       label={t('contractes.camps.dataUltimaRevisio')}
                       value={form.values.data_ultima_revisio}
                     />
-                    {/* A la mateixa línia que els dos camps, a la dreta, a l'altura dels camps. */}
+                    {/* A la mateixa línia que els dos camps, a la dreta. Porta a la pantalla de revisions (amb la
+                        protecció de canvis sense desar), també amb el contracte tancat: llavors és de consulta. */}
                     <Group justify="flex-end" align="flex-end">
                       <Button
                         variant="default"
-                        disabled={teFi}
                         leftSection={<IconCurrencyEuro size={16} />}
-                        onClick={revisar}
+                        onClick={() =>
+                          anarAmbGuarda(() =>
+                            navigate(`/immobles/${immoble.id}/contractes/${contracte.id}/revisions`)
+                          )
+                        }
                       >
-                        {t('contractes.revisar.titol')}
+                        {t('revisions.titol')}
                       </Button>
                     </Group>
                   </>

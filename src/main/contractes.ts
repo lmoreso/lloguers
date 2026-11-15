@@ -240,20 +240,24 @@ export function crearContracte(d: ContracteDades): Contracte {
   return obtenirContracte(Number(r.lastInsertRowid)) as Contracte
 }
 
-// L'immoble no es pot canviar (`id_inmoble` s'ignora). Mentre el contracte no s'ha revisat mai (la data de
-// l'última revisió és la d'inici), si el lloguer actual i la data de revisió arriben iguals als desats, segueixen
-// el lloguer inicial i la data d'inici. Si arriben diferents, és una revisió feta des del formulari: s'accepta
-// (la BD exigeix que la data sigui >= data_inici).
+// L'immoble no es pot canviar (`id_inmoble` s'ignora). El lloguer actual i la data de l'última revisió els canvien
+// només les revisions (`revisions_lloguer`): els valors que arribin al formulari s'ignoren. L'única excepció és
+// l'arrossegament: mentre el contracte no s'ha revisat mai (la data de l'última revisió és la d'inici) i no té cap
+// revisió registrada, el lloguer actual i la data segueixen el lloguer inicial i la data d'inici. Sense la
+// comprovació de les revisions, una revisió amb el dia d'efecte igual al d'inici es confondria amb "mai revisat".
 export function actualitzarContracte(id: number, d: ContracteDades): void {
   db.transaction(() => {
     const antic = obtenirContracte(id)
     if (!antic) return
-    const p = preparar(d)
-    const maiRevisat = antic.data_ultima_revisio === antic.data_inici
-    const senseRevisar =
-      p.lloguer_actual === antic.lloguer_actual &&
-      p.data_ultima_revisio === antic.data_ultima_revisio
-    if (maiRevisat && senseRevisar) {
+    const p = preparar({
+      ...d,
+      lloguer_actual: antic.lloguer_actual,
+      data_ultima_revisio: antic.data_ultima_revisio
+    })
+    const teRevisions =
+      db.prepare('SELECT 1 FROM revisions_lloguer WHERE id_contracte = ? LIMIT 1').get(id) !==
+      undefined
+    if (!teRevisions && antic.data_ultima_revisio === antic.data_inici) {
       p.lloguer_actual = p.lloguer_inicial
       p.data_ultima_revisio = p.data_inici
     }
