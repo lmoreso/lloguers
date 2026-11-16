@@ -1,10 +1,12 @@
 {
   "name": "lloguers",
   "version": "1.0.9",
-  "description": "Gestió de lloguers d'immobles: immobles, inquilins, contractes i documents",
+  "description": "Gestió de lloguers d'immobles. Gestiona immobles, inquilins, contractes, fiances, revisions del lloguer i documents relacionats.", 
   "main": "./out/main/index.js",
   "author": "Lluís Moreso Bosch <lmoreso@yahoo.com>",
   "homepage": "https://github.com/lmoreso/lloguers",
+  "license": "MIT",
+  "section": "office",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -18,7 +20,7 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "npm run typecheck && electron-vite build && electron-builder --linux deb AppImage"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -68,5 +70,16 @@
     "esbuild@0.28.2": true,
     "electron-winstaller": false,
     "better-sqlite3@13.0.3": true
+  },
+"build": {
+  "linux": {
+    "category": "Office",
+    "synopsis": "Gestió de lloguers d'immobles",
+    "description": "Gestió de lloguers d'immobles. Gestiona immobles, inquilins, contractes, fiances, revisions del lloguer i documents relacionats." 
+  },
+  "deb": {
+    "packageCategory": "office",
+    "priority": "optional"
   }
+}  
 }
