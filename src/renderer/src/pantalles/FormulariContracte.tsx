@@ -36,6 +36,7 @@ import type {
 import { hiHaCapaOberta } from '../utils/teclat'
 import { ingresPendent } from '../utils/avisosContracte'
 import DocumentUnicContracte from './DocumentUnicContracte'
+import { useTornar } from '../utils/useTornar'
 
 // Els selectors treballen amb text (id com a string); les dates són text ISO AAAA-MM-DD; els imports, número
 // (o text mentre s'escriu).
@@ -402,7 +403,10 @@ function FormulariContracte({
     })
   }
 
-  const tornar = (): void => anarAmbGuarda(() => navigate(`/immobles/${immoble.id}/contractes`))
+  // Torna a la pantalla que ha cridat aquesta (la llista de contractes, "Últims contractes"...), preguntant abans si
+  // hi ha canvis sense desar. Si no hi ha cap pantalla anterior, va a la llista de contractes de l'immoble.
+  const tornarEnrere = useTornar(`/immobles/${immoble.id}/contractes`)
+  const tornar = (): void => anarAmbGuarda(tornarEnrere)
 
   // Ctrl+S desa; Escape = Tornar, amb la mateixa protecció. Cap dels dos actua si hi ha una finestra o un
   // desplegable obert (calendari, diàleg de canvis sense desar, revisar lloguer...). Intro NO desa: el formulari no
@@ -528,7 +532,7 @@ function FormulariContracte({
                           )
                         }
                       >
-                        {t('revisions.titol')}
+                        {t('contractes.revisar.titol')}
                       </Button>
                     </Group>
                   </>

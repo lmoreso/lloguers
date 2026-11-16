@@ -55,7 +55,7 @@
     "inquilins": "Inquilinos",
     "contractes": "Contratos",
     "configuracio": "Configuración",
-    "revisions": "Revisiones de alquiler",    
+    "revisions": "Cartas de revisiones",    
     "quantA": "Acerca de"
   },
   "comu": {
@@ -79,7 +79,8 @@
     "obligatori": "Este campo es obligatorio.",
     "tornar": "Volver",
     "capResultat": "Sin resultados",
-    "acceptar": "Aceptar"    
+    "acceptar": "Aceptar",
+    "i": " y "    
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El período se solapa con otro contrato de este inmueble.",
@@ -416,8 +417,8 @@
       "immoble": "Inmueble",
       "obrir": "Abrir las revisiones del contrato"
     },    
-    "titol": "Revisiones de alquiler",
-    "subtitol": "{{adreca}} · Contrato del {{inici}}",
+    "titol": "Cartas de revisiones de alquiler",
+    "subtitol": "{{adreca}} · Inquilinos: {{inquilins}} · Contrato del {{inici}}",
     "actual": "Alquiler actual: {{lloguer}}, vigente desde el {{data}}.",
     "nova": "Nueva revisión",
     "pendent": "La carta de la última revisión todavía no se ha enviado: no se puede crear una revisión nueva hasta que se envíe.",

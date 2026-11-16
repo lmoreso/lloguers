@@ -31,7 +31,9 @@ import { formatData } from '../utils/dates'
 import { aNumeroForm, buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
 import { hiHaCapaOberta } from '../utils/teclat'
-import type { Contracte, Immoble, RevisioDades, RevisioLloguer } from '../../../shared/tipus'
+import type { ContracteLlistat, Immoble, RevisioDades, RevisioLloguer } from '../../../shared/tipus'
+import { nomsInquilinsContracte } from '../utils/inquilins'
+import { useTornar } from '../utils/useTornar'
 
 // Els imports i el percentatge són número (o text mentre s'escriu); les dates, text ISO AAAA-MM-DD.
 interface Valors {
@@ -50,7 +52,7 @@ const cts = (n: number): number => Math.round(n * 100)
 
 interface PantallaProps {
   immoble: Immoble
-  contracte: Contracte
+  contracte: ContracteLlistat
   revisions: RevisioLloguer[] // l'última primer
   revisio: RevisioLloguer | null // la que s'edita; null = una de nova
   pendent: boolean // l'última té la carta pendent
@@ -73,12 +75,13 @@ function PantallaRevisions({
   onEliminada
 }: PantallaProps): React.JSX.Element {
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
   const euros = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
   const nombre = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 4 })
   const tornarUrl = `/immobles/${immoble.id}/contractes/${contracte.id}`
+  const tornarEnrere = useTornar(tornarUrl)
   // Amb el contracte tancat no es poden crear revisions noves: sense una revisió carregada, la pantalla és només de consulta.
   const nomesConsulta = tancat && revisio === null
+  const nomsInquilins = nomsInquilinsContracte(contracte)
 
   // El lloguer del qual parteix la revisió, i el dia a partir del qual pot tenir efecte.
   const lloguerAnterior = revisio ? revisio.lloguer_anterior : contracte.lloguer_actual
@@ -192,7 +195,7 @@ function PantallaRevisions({
     })
   }
 
-  const tornar = (): void => anarAmbGuarda(() => navigate(tornarUrl))
+  const tornar = (): void => anarAmbGuarda(tornarEnrere)
 
   // Elimina l'última revisió: el contracte recupera el lloguer i la data de revisió que tenia abans.
   function demanarEliminar(r: RevisioLloguer): void {
@@ -241,11 +244,18 @@ function PantallaRevisions({
     <>
       <Stack gap="sm" mb="md">
         <div>
-          <Title order={2}>{t('revisions.titol')}</Title>
+          <Group justify="space-between">
+            <Title order={2}>{t('contractes.revisar.titol')}</Title>
+            <Button variant="default" onClick={tornar} leftSection={<IconCornerUpLeft size={16} />}>
+              {t('comu.tornar')}
+            </Button>
+          </Group>
+
           <Text c="dimmed">
             {t('revisions.subtitol', {
               adreca: adreca(immoble),
-              inici: formatData(contracte.data_inici)
+              inici: formatData(contracte.data_inici),
+              inquilins: nomsInquilins
             })}
           </Text>
         </div>
@@ -290,9 +300,6 @@ function PantallaRevisions({
               </>
             )}
           </Group>
-          <Button variant="default" leftSection={<IconCornerUpLeft size={16} />} onClick={tornar}>
-            {t('comu.tornar')}
-          </Button>
         </Group>
       </Stack>
 
@@ -305,12 +312,17 @@ function PantallaRevisions({
                 : t('revisions.seccions.nova')
             }
           >
-            <SimpleGrid cols={{ base: 1, sm: 3 }}>
+            <SimpleGrid cols={{ base: 1, sm: 2 }}>
               <CampNumeric
                 disabled
                 tipus="import"
                 label={t('revisions.camps.lloguerAnterior')}
                 value={lloguerAnterior}
+              />
+              <CampData
+                disabled
+                label={t('contractes.camps.dataUltimaRevisio')}
+                value={contracte.data_ultima_revisio}
               />
               {/* El % és un camp numèric amb el sufix canviat; pot ser negatiu (una baixada de lloguer). */}
               <CampNumeric
@@ -342,7 +354,6 @@ function PantallaRevisions({
                 label={t('revisions.camps.lloguerNou')}
                 value={lloguerNou}
               />
-              <div />
               <CampData
                 withAsterisk
                 label={t('revisions.camps.dataEfecte')}
@@ -445,7 +456,7 @@ function RevisionsContracte(): React.JSX.Element {
   const navigate = useNavigate()
   const { id, idContracte } = useParams()
   const [immoble, setImmoble] = useState<Immoble | null>(null)
-  const [contracte, setContracte] = useState<Contracte | null>(null)
+  const [contracte, setContracte] = useState<ContracteLlistat | null>(null)
   const [revisions, setRevisions] = useState<RevisioLloguer[]>([])
   const [carregant, setCarregant] = useState(true)
   // Cada cop que canvia, l'efecte torna a llegir les dades de la BD.
@@ -460,7 +471,7 @@ function RevisionsContracte(): React.JSX.Element {
     let cancelat = false
     Promise.all([
       window.api.inmobles.obtenirUn(Number(id)),
-      window.api.contractes.obtenirUn(Number(idContracte)),
+      window.api.contractes.obtenirUnExt(Number(idContracte)),
       window.api.revisions.obtenir(Number(idContracte))
     ]).then(([rImmoble, rContracte, rRevisions]) => {
       if (cancelat) return

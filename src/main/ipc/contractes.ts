@@ -5,6 +5,7 @@ import {
   crearContracte,
   eliminarContracte,
   obtenirContracte,
+  obtenirContracteExt,
   obtenirContractes,
   obtenirUltimsContractes
 } from '../contractes'
@@ -20,6 +21,10 @@ export function registrarIpcContractes(): void {
 
   ipcMain.handle('contractes:obtenirUn', (_, id: number) =>
     executar(() => obtenirContracte(id) ?? null)
+  )
+
+  ipcMain.handle('contractes:obtenirUnExt', (_, id: number) =>
+    executar(() => obtenirContracteExt(id) ?? null)
   )
 
   ipcMain.handle('contractes:crear', (_, dades: ContracteDades) =>

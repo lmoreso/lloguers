@@ -55,7 +55,7 @@
     "inquilins": "Inquilins",
     "contractes": "Contractes",
     "configuracio": "Configuració",
-    "revisions": "Revisions de lloguer",    
+    "revisions": "Cartes de revisions",    
     "quantA": "Quant a"
   },
   "comu": {
@@ -79,7 +79,8 @@
     "obligatori": "Aquest camp és obligatori.",
     "tornar": "Tornar",
     "capResultat": "Cap resultat",
-    "acceptar": "Acceptar"
+    "acceptar": "Acceptar",
+    "i": " i "
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
@@ -416,8 +417,8 @@
       "immoble": "Immoble",
       "obrir": "Obrir les revisions del contracte"
     },    
-    "titol": "Revisions de lloguer",
-    "subtitol": "{{adreca}} · Contracte del {{inici}}",
+    "titol": "Cartes de revisions de lloguer",
+    "subtitol": "{{adreca}} · Inquilins: {{inquilins}} · Contracte del {{inici}}",
     "actual": "Lloguer actual: {{lloguer}}, vigent des del {{data}}.",
     "nova": "Nova revisió",
     "pendent": "La carta de l'última revisió encara no s'ha enviat: no es pot crear una revisió nova fins que s'enviï.",

@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 export const DIES_AVIS = 60
 // Dies d'antelació per als avisos dels contractes vigents.
 export const DIES_AVIS_FI = 90
-export const DIES_AVIS_REVISIO = 30
+export const DIES_AVIS_REVISIO = 60
 
 export type EstatCaducitat = 'caducat' | 'aviat' | null
 

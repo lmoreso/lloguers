@@ -20,6 +20,7 @@ import {
   documentsQueFalten,
   ingresPendent
 } from '../utils/avisosContracte'
+import { useTornar } from '../utils/useTornar'
 
 // /immobles/:id/contractes/nou  i  /immobles/:id/contractes/:idContracte
 function FitxaContracte(): React.JSX.Element {
@@ -39,6 +40,8 @@ function FitxaContracte(): React.JSX.Element {
   const [llistat, setLlistat] = useState<ContracteLlistat | null>(null)
   // Canvia després de desar: es tornen a llegir les dades i els avisos.
   const [versioDades, setVersioDades] = useState(0)
+  // Torna a la pantalla que ha cridat aquesta; si no n'hi ha cap, a la llista de l'immoble (o a Immobles, si l'immoble no existeix).
+  const tornarEnrere = useTornar(`/immobles/${id}/contractes`)
 
   useEffect(() => {
     let cancelat = false
@@ -110,7 +113,7 @@ function FitxaContracte(): React.JSX.Element {
         const resposta = await window.api.contractes.eliminar(c.id)
         if (!esOk(resposta)) return
         notifications.show({ color: 'green', message: t('contractes.eliminat') })
-        navigate(`/immobles/${c.id_inmoble}/contractes`)
+        tornarEnrere()
       }
     })
   }
@@ -122,9 +125,15 @@ function FitxaContracte(): React.JSX.Element {
     return (
       <Stack gap="sm" mb="md">
         <div>
-          <Title order={2}>
-            {idContracte === undefined ? t('contractes.nou') : t('contractes.editar')}
-          </Title>
+          <Group justify="space-between">
+            <Title order={2}>
+              {idContracte === undefined ? t('contractes.nou') : t('contractes.editar')}
+            </Title>
+            <Button variant="default" onClick={tornar} leftSection={<IconCornerUpLeft size={16} />}>
+              {t('comu.tornar')}
+            </Button>
+          </Group>
+
           {immoble && <Text c="dimmed">{adreca(immoble)}</Text>}
         </div>
 
@@ -192,9 +201,6 @@ function FitxaContracte(): React.JSX.Element {
               </>
             )}
           </Group>
-          <Button variant="default" leftSection={<IconCornerUpLeft size={16} />} onClick={tornar}>
-            {t('comu.tornar')}
-          </Button>
         </Group>
       </Stack>
     )

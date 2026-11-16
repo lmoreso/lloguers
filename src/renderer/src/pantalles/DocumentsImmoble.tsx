@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react'
 import { ActionIcon, Button, Group, Menu, Stack, Table, Text, Title, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconDots, IconEye, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
+import {
+  IconCornerUpLeft,
+  IconDots,
+  IconEye,
+  IconPencil,
+  IconPlus,
+  IconTrash
+} from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
@@ -109,16 +116,23 @@ function DocumentsImmoble(): React.JSX.Element {
         <>
           <Stack gap="sm" mb="md">
             <div>
-              <Title order={2}>{t('documentsImmoble.titol')}</Title>
+              <Group justify="space-between">
+                <Title order={2}>{t('documentsImmoble.titol')}</Title>
+                <Button
+                  variant="default"
+                  onClick={() => navigate(`/immobles/${immoble.id}`)}
+                  leftSection={<IconCornerUpLeft size={16} />}
+                >
+                  {t('comu.tornar')}
+                </Button>
+              </Group>
+
               <Text c="dimmed">{adreca(immoble)}</Text>
             </div>
             {/* Mateixa fila que a l'edició d'immoble: Afegir a l'esquerra, Tornar a la dreta. */}
             <Group justify="space-between">
               <Button leftSection={<IconPlus size={16} />} onClick={afegir}>
                 {t('comu.afegir')}
-              </Button>
-              <Button variant="default" onClick={() => navigate(`/immobles/${immoble.id}`)}>
-                {t('comu.tornar')}
               </Button>
             </Group>
           </Stack>

@@ -177,10 +177,10 @@ function UltimsContractes(): React.JSX.Element {
                       </Tooltip>
                     </>
                   ) : (
-                    <Tooltip label={t('comu.editar')}>
+                    <Tooltip label={t('contractes.editar')}>
                       <ActionIcon
                         variant="subtle"
-                        aria-label={t('comu.editar')}
+                        aria-label={t('contractes.editar')}
                         onClick={() =>
                           editarContracte({ ...c, id_inmoble: immoble.id } as ContracteLlistat)
                         }

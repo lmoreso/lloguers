@@ -90,7 +90,12 @@ function FitxaImmoble(): React.JSX.Element {
     return (
       <Stack gap="sm" mb="md">
         <div>
-          <Title order={2}>{titol}</Title>
+          <Group justify="space-between">
+            <Title order={2}>{titol}</Title>
+            <Button variant="default" onClick={tornar} leftSection={<IconCornerUpLeft size={16} />}>
+              {t('comu.tornar')}
+            </Button>
+          </Group>
           {immoble && (
             <Text c="dimmed">
               {t('immobles.subtitol', { id: immoble.id, adreca: adreca(immoble) })}
@@ -153,11 +158,6 @@ function FitxaImmoble(): React.JSX.Element {
                 </Button>
               </>
             )}
-          </Group>
-          <Group gap="xs">
-            <Button variant="default" onClick={tornar} leftSection={<IconCornerUpLeft size={16} />}>
-              {t('comu.tornar')}
-            </Button>
           </Group>
         </Group>
       </Stack>

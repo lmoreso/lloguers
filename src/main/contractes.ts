@@ -42,8 +42,8 @@ const COLUMNES = ['id', ...CAMPS].join(', ')
 // Les mateixes columnes amb el prefix de la taula, més els noms dels dos inquilins (JOIN) i si el
 // contracte té algun document de les classes de la fiança (EXISTS: 0 o 1).
 const COLUMNES_LLISTAT = `${['id', ...CAMPS].map((c) => `c.${c}`).join(', ')},
-  q.nom AS inquili_nom, q.cognoms AS inquili_cognoms,
-  q2.nom AS inquili2_nom, q2.cognoms AS inquili2_cognoms,
+  q.nom AS inquili_nom, q.cognoms AS inquili_cognoms, q.nif AS inquili1_nif, q.telefon_1 AS inquili1_telefon,
+  q2.nom AS inquili2_nom, q2.cognoms AS inquili2_cognoms, q2.nif AS inquili2_nif, q2.telefon_1 AS inquili2_telefon,
   EXISTS (SELECT 1 FROM documents_contracte d
     WHERE d.id_contracte = c.id AND d.tipus = 'fianca_model2') AS te_doc_model2,
   EXISTS (SELECT 1 FROM documents_contracte d
@@ -136,6 +136,17 @@ export function obtenirUltimsContractes(): ImmobleAmbContractes[] {
 export function obtenirContracte(id: number): Contracte | undefined {
   return db.prepare(`SELECT ${COLUMNES} FROM contractes WHERE id = ?`).get(id) as
     Contracte | undefined
+}
+
+export function obtenirContracteExt(id: number): ContracteLlistat | undefined {
+  return db
+    .prepare(
+      `SELECT ${COLUMNES_LLISTAT} FROM contractes c
+       JOIN inquilins q ON q.id = c.id_inquili
+       LEFT JOIN inquilins q2 ON q2.id = c.id_inquili_2
+       WHERE c.id = ?`
+    )
+    .get(id) as ContracteLlistat | undefined
 }
 
 // ---- Validació (el Renderer no és de fiar; les columnes noves no porten CHECK) ----

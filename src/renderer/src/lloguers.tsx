@@ -15,8 +15,8 @@ import RevisionsContracte from './pantalles/RevisionsContracte'
 import Revisions from './pantalles/Revisions'
 
 const SECCIONS = [
-  { ruta: '/immobles', clau: 'menu.immobles' },
   { ruta: '/ultims-contractes', clau: 'menu.ultimsContractes' },
+  { ruta: '/immobles', clau: 'menu.immobles' },
   { ruta: '/revisions', clau: 'menu.revisions' },
   { ruta: '/inquilins', clau: 'menu.inquilins' },
   { ruta: '/configuracio', clau: 'menu.configuracio' },
@@ -46,7 +46,7 @@ function Estructura(): React.JSX.Element {
 
       <AppShell.Main>
         <Routes>
-          <Route path="/" element={<Navigate to="/immobles" replace />} />
+          <Route path="/" element={<Navigate to="/ultims-contractes" replace />} />
           <Route path="/immobles" element={<Immobles />} />
           <Route path="/immobles/nou" element={<FitxaImmoble key="nou" />} />
           <Route path="/immobles/:id" element={<FitxaImmoble key="edicio" />} />

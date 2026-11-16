@@ -31,6 +31,7 @@ import AfegirDocument from './AfegirDocument'
 import EditarDocument from './EditarDocument'
 import type { Contracte, DocumentContracte, Immoble } from '../../../shared/tipus'
 import { TIPUS_UNICS_CONTRACTE } from '../../../shared/tipus'
+import { useTornar } from '../utils/useTornar'
 
 // Documents d'un contracte (/immobles/:id/contractes/:idContracte/documents). Les accions van a la capçalera,
 // no a sota.
@@ -81,9 +82,8 @@ function DocumentsContracte(): React.JSX.Element {
   // Un contracte que no existeix, o que és d'un altre immoble, es tracta com a no trobat.
   const noTrobat =
     !carregant && (immoble === null || contracte === null || contracte.id_inmoble !== Number(id))
-  const tornar = (): void => {
-    navigate(`/immobles/${id}/contractes/${idContracte}`)
-  }
+
+  const tornar = useTornar(`/immobles/${id}/contractes/${idContracte}`)
 
   // S'obre amb l'aplicació del sistema. Si el fitxer ja no és al disc, esOk mostra l'error traduït.
   async function visualitzar(d: DocumentContracte): Promise<void> {
@@ -159,7 +159,17 @@ function DocumentsContracte(): React.JSX.Element {
         <>
           <Stack gap="sm" mb="md">
             <div>
-              <Title order={2}>{t('documents.titol')}</Title>
+              <Group justify="space-between">
+                <Title order={2}>{t('documents.titol')}</Title>
+                <Button
+                  variant="default"
+                  onClick={tornar}
+                  leftSection={<IconCornerUpLeft size={16} />}
+                >
+                  {t('comu.tornar')}
+                </Button>
+              </Group>
+
               <Text c="dimmed">
                 {t('documents.subtitol', {
                   adreca: adreca(immoble),
@@ -180,13 +190,6 @@ function DocumentsContracte(): React.JSX.Element {
             <Group justify="space-between">
               <Button leftSection={<IconPlus size={16} />} onClick={afegir}>
                 {t('comu.afegir')}
-              </Button>
-              <Button
-                variant="default"
-                leftSection={<IconCornerUpLeft size={16} />}
-                onClick={tornar}
-              >
-                {t('comu.tornar')}
               </Button>
             </Group>
           </Stack>

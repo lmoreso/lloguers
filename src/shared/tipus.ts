@@ -87,8 +87,12 @@ export type ContracteDades = Omit<Contracte, 'id'>
 export interface ContracteLlistat extends Contracte {
   inquili_nom: string | null
   inquili_cognoms: string | null
+  inquili1_nif: string | null
+  inquili1_telefon: string | null
   inquili2_nom: string | null // null si no hi ha segon inquilí
   inquili2_cognoms: string | null
+  inquili2_nif: string | null
+  inquili2_telefon: string | null
   // Si el contracte té algun document adjunt de la classe corresponent (calculat al Main).
   te_doc_model2: boolean
   te_doc_notificacio: boolean
