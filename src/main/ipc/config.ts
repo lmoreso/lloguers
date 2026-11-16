@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import { executar } from '../errors'
 import { obtenirConfig, desarConfig } from '../config'
-import { esIdioma, esPathDirectory } from '../../shared/validacions'
+import { esIdioma, esPathDirectory, esPosicioMenu } from '../../shared/validacions'
 import { esFormatExportacio } from '../../shared/validacions'
 import type { Config } from '../../shared/tipus'
 
@@ -28,14 +28,14 @@ export function registrarIpcConfig(): void {
 
       if (configNeta.pathImportDocs !== undefined && !esPathDirectory(configNeta.pathImportDocs)) {
         console.log(
-          `[ipc.config.desr] Ruta d'importació invàlida (${configNeta.pathImportDocs}); s'ignora la propietat`
+          `[ipc.config.desar] Ruta d'importació invàlida (${configNeta.pathImportDocs}); s'ignora la propietat`
         )
         delete configNeta.pathImportDocs
       }
 
       if (configNeta.idioma !== undefined && !esIdioma(configNeta.idioma)) {
         console.log(
-          `[ipc.config.desr] Idioma invàlid (${configNeta.idioma}); s'ignora la propietat`
+          `[ipc.config.desar] Idioma invàlid (${configNeta.idioma}); s'ignora la propietat`
         )
         delete configNeta.idioma
       }
@@ -43,9 +43,16 @@ export function registrarIpcConfig(): void {
       // eslint-disable-next-line prettier/prettier
       if (configNeta.formatExportacio !== undefined && !esFormatExportacio(configNeta.formatExportacio)) {
         console.log(
-          `[ipc.config.desr] Format d'exportació invàlid (${configNeta.formatExportacio}); s'ignora la propietat`
+          `[ipc.config.desar] Format d'exportació invàlid (${configNeta.formatExportacio}); s'ignora la propietat`
         )
         delete configNeta.formatExportacio
+      }
+
+      if (configNeta.posicioMenu !== undefined && !esPosicioMenu(configNeta.posicioMenu)) {
+        console.log(
+          `[ipc.config.desar] Posició del menú invàlida (${configNeta.posicioMenu}); s'ignora la propietat`
+        )
+        delete configNeta.idioma
       }
 
       if (Object.keys(configNeta).length > 0) {

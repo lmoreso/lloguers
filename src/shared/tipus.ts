@@ -242,12 +242,16 @@ export interface DocumentImmoble {
 // Camps editables, i els que s'envien en adjuntar (comuns a tots els fitxers de la selecció).
 export type DocumentImmobleDades = Pick<DocumentImmoble, 'tipus' | 'comentaris' | 'data_document'>
 
+// Posició del menú de la aplicació
+export type PosicioMenu = 'top' | 'left'
+
 // Contingut de ~/Lloguers/config.json
 export interface Config {
   idioma: Idioma
   pathExportFiles: string
   formatExportacio: FormatExportacio
   pathImportDocs: string
+  posicioMenu: PosicioMenu
 }
 
 // Resposta de config:obtenir: la configuració, més si ve del fitxer (confirmat)

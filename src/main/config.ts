@@ -2,8 +2,14 @@ import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import { DADES } from './database'
-import type { Config, ConfigObtinguda, FormatExportacio, Idioma } from '../shared/tipus'
-import { esFormatExportacio, esIdioma, esPathDirectory } from '../shared/validacions'
+import type {
+  Config,
+  ConfigObtinguda,
+  FormatExportacio,
+  Idioma,
+  PosicioMenu
+} from '../shared/tipus'
+import { esFormatExportacio, esIdioma, esPathDirectory, esPosicioMenu } from '../shared/validacions'
 
 const configPath = path.join(DADES, 'config.json')
 
@@ -18,9 +24,9 @@ function idiomaDelSistema(): Idioma {
     return base
   }
 
-  console.log(
-    `[main.idiomaDelSistema.idioma] Sistema: "${locale}" -> "${base}" no suportat; s'usa "ca"`
-  )
+  // console.log(
+  //   `[main.idiomaDelSistema.idioma] Sistema: "${locale}" -> "${base}" no suportat; s'usa "ca"`
+  // )
   return 'ca'
 }
 
@@ -30,7 +36,8 @@ function obtenirConfigPerDefecte(): Config {
     idioma: idiomaDelSistema(),
     pathExportFiles: app.getPath('downloads'),
     pathImportDocs: app.getPath('documents'),
-    formatExportacio: 'xlsx'
+    formatExportacio: 'xlsx',
+    posicioMenu: 'left'
   }
 }
 
@@ -58,7 +65,10 @@ function normalitzarConfig(brut: unknown): {
       : perDefecte.pathImportDocs,
     formatExportacio: esFormatExportacio(dades.formatExportacio)
       ? (dades.formatExportacio as FormatExportacio)
-      : perDefecte.formatExportacio
+      : perDefecte.formatExportacio,
+    posicioMenu: esPosicioMenu(dades.posicioMenu)
+      ? (dades.posicioMenu as PosicioMenu)
+      : perDefecte.posicioMenu
   }
 
   return { config, idiomaConfirmat }
@@ -69,7 +79,7 @@ export function obtenirConfig(): ConfigObtinguda {
   if (configEnMemoria !== null) return configEnMemoria
 
   if (!fs.existsSync(configPath)) {
-    console.log("[main.config.obtenir] config.json no existeix; s'utilitzen els valors per defecte")
+    // console.log("[main.config.obtenir] config.json no existeix; s'utilitzen els valors per defecte")
     configEnMemoria = { ...obtenirConfigPerDefecte(), confirmat: false }
     return configEnMemoria
   }
@@ -87,9 +97,12 @@ export function obtenirConfig(): ConfigObtinguda {
       typeof brut !== 'object' ||
       !esPathDirectory((brut as Record<string, unknown>).pathExportFiles) ||
       !esPathDirectory((brut as Record<string, unknown>).pathImportDocs) ||
-      !esFormatExportacio((brut as Record<string, unknown>).formatExportacio)
+      !esFormatExportacio((brut as Record<string, unknown>).formatExportacio) ||
+      !esPosicioMenu((brut as Record<string, unknown>).posicioMenu)
     ) {
-      console.log("[main.config.obtenir] Ruta d'exportació invàlida o absent; s'utilitza Baixades")
+      console.log(
+        '[main.config.obtenir] Algun dels paràmetres es invàlid o absent i agafarà el valor per defecte'
+      )
     }
 
     configEnMemoria = { ...config, confirmat: idiomaConfirmat }

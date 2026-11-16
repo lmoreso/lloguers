@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { IDIOMES, type FormatExportacio, type Idioma } from './tipus'
+import { IDIOMES, PosicioMenu, type FormatExportacio, type Idioma } from './tipus'
 
 export function esFormatExportacio(valor: unknown): valor is FormatExportacio {
   return ['csv', 'ods', 'xlsx'].includes(valor as string)
@@ -21,4 +21,8 @@ export function esPathDirectory(valor: unknown): valor is string {
   } catch {
     return false
   }
+}
+
+export function esPosicioMenu(valor: unknown): valor is PosicioMenu {
+  return valor === 'top' || valor === 'left'
 }

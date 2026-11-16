@@ -1,7 +1,6 @@
-import { AppShell, NavLink, Title } from '@mantine/core'
-import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { AppShell, Group, NavLink, Text, Title, UnstyledButton } from '@mantine/core'
+import { HashRouter, Link, Navigate, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import SelectorIdioma from './components/SelectorIdioma'
 import Inquilins from './pantalles/Inquilins'
 import Immobles from './pantalles/Immobles'
 import FitxaImmoble from './pantalles/FitxaImmoble'
@@ -13,6 +12,10 @@ import DocumentsImmoble from './pantalles/DocumentsImmoble'
 import DocumentsContracte from './pantalles/DocumentsContracte'
 import RevisionsContracte from './pantalles/RevisionsContracte'
 import Revisions from './pantalles/Revisions'
+import Configuracio from './pantalles/Configuracio'
+import { useEffect, useState } from 'react'
+import { PosicioMenu } from '../../shared/tipus'
+import { esPosicioMenu } from '../../shared/validacions'
 
 const SECCIONS = [
   { ruta: '/ultims-contractes', clau: 'menu.ultimsContractes' },
@@ -23,27 +26,51 @@ const SECCIONS = [
   { ruta: '/quant-a', clau: 'menu.quantA' }
 ] as const
 
-function Estructura(): React.JSX.Element {
+interface EstructuraProps {
+  posMenu: PosicioMenu
+  onCanviarPosMenu: (posicio: PosicioMenu) => void
+}
+
+function Estructura({ posMenu, onCanviarPosMenu }: EstructuraProps): React.JSX.Element {
   const { t } = useTranslation()
-  const { pathname } = useLocation()
 
-  return (
-    <AppShell navbar={{ width: 220, breakpoint: 'xs' }} padding="md">
-      <AppShell.Navbar p="md">
-        <Title order={4} mb="md">
-          {t('app.titol')}
-        </Title>
-        {SECCIONS.map((s) => (
-          <NavLink
-            key={s.ruta}
-            component={Link}
-            to={s.ruta}
-            label={t(s.clau)}
-            active={pathname === s.ruta || pathname.startsWith(`${s.ruta}/`)}
-          />
-        ))}
-      </AppShell.Navbar>
+  if (posMenu === 'top') {
+    return (
+      <AppShell header={{ height: 60 }} padding="md">
+        <AppShell.Header px="md">
+          <Group h="100%" gap="xl" wrap="nowrap">
+            <Title order={4}>{t('app.titol')}</Title>
 
+            <Group gap="md" wrap="nowrap">
+              {SECCIONS.map((s) => (
+                <UnstyledButton key={s.ruta} component={Link} to={s.ruta}>
+                  <Text size="sm">{t(s.clau)}</Text>
+                </UnstyledButton>
+              ))}
+            </Group>
+          </Group>
+        </AppShell.Header>
+        <Rutas />
+      </AppShell>
+    )
+  } else {
+    return (
+      <AppShell navbar={{ width: 220, breakpoint: 'xs' }} padding="md">
+        <AppShell.Navbar p="md">
+          <Title order={4} mb="md">
+            {t('app.titol')}
+          </Title>
+          {SECCIONS.map((s) => (
+            <NavLink key={s.ruta} component={Link} to={s.ruta} label={t(s.clau)} />
+          ))}
+        </AppShell.Navbar>
+        <Rutas />
+      </AppShell>
+    )
+  }
+
+  function Rutas(): React.JSX.Element {
+    return (
       <AppShell.Main>
         <Routes>
           <Route path="/" element={<Navigate to="/ultims-contractes" replace />} />
@@ -70,27 +97,33 @@ function Estructura(): React.JSX.Element {
           <Route path="/inquilins" element={<Inquilins />} />
           <Route
             path="/configuracio"
-            element={
-              <>
-                <Title order={2} mb="md">
-                  {t('configuracio.titol')}
-                </Title>
-                <SelectorIdioma />
-              </>
-            }
+            element={<Configuracio posicioMenu={posMenu} onCanviarPosMenu={onCanviarPosMenu} />}
           />
           <Route path="/quant-a" element={<QuantA />} />
         </Routes>
       </AppShell.Main>
-    </AppShell>
-  )
+    )
+  }
 }
 
 // HashRouter: l'app empaquetada es carrega des d'un fitxer (file://), on BrowserRouter no funciona.
 function Lloguers(): React.JSX.Element {
+  const [posicioMenu, setPosicioMenu] = useState<PosicioMenu>('top')
+
+  useEffect(() => {
+    const carregarConfig = async (): Promise<void> => {
+      const resultat = await window.api.config.obtenir()
+
+      if (resultat.ok && esPosicioMenu(resultat.dades.posicioMenu)) {
+        setPosicioMenu(resultat.dades.posicioMenu)
+      }
+    }
+
+    void carregarConfig()
+  }, [])
   return (
     <HashRouter>
-      <Estructura />
+      <Estructura posMenu={posicioMenu} onCanviarPosMenu={setPosicioMenu} />{' '}
     </HashRouter>
   )
 }

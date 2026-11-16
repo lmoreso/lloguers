@@ -91,7 +91,10 @@
   },
   "configuracio": {
     "titol": "Configuración",
-    "idioma": "Idioma"
+    "idioma": "Idioma",
+    "posicioMenu": "Posición del menú",
+    "menuSuperior": "Superior",
+    "menuLateral": "Lateral"
   },
   "quantA": {
     "titol": "Acerca de",
