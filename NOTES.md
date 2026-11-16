@@ -72,6 +72,7 @@ Tot penja d'una sola carpeta, per facilitar les còpies de seguretat i la portab
 | `003_documents_immoble` | Afegeix `documents_immoble`. |
 | `004_camps_immoble_documents` | Sis columnes noves a `inmobles`; reconstrueix `documents_immoble` (sense `CHECK` de tipus, comentari opcional). |
 | `005_fianca_i_tipus_fixos` | Quatre columnes noves a `contractes`; reconstrueix `documents_contracte` (`tipus` de text); elimina `tipus_document`. |
+| `006_revisions_lloguer` | Afegeix `revisions_lloguer` (historial de revisions del lloguer), el seu índex i trigger d'auditoria, i les vistes `v_revisions_lloguer` i `v_cartes_pendents`. Només afegeix objectes. |
 
 ## Esquema
 
@@ -82,6 +83,8 @@ Tot penja d'una sola carpeta, per facilitar les còpies de seguretat i la portab
 | `contractes` | Vegeu "Contractes". FK a `inmobles` i a `inquilins` (dues vegades). |
 | `documents_contracte` | `id_contracte` (`ON DELETE CASCADE`), `tipus` (text, validat pel Main), `nom_original`, `ruta`, `comentaris` (opcional), `data_document` (opcional, ISO). |
 | `documents_immoble` | `id_inmoble` (`ON DELETE CASCADE`), `tipus` (text, validat pel Main), `nom_original`, `ruta`, `comentaris` (opcional), `data_document` (opcional, ISO). |
+| `revisions_lloguer` | Una fila per revisió del lloguer d'un contracte (`ON DELETE CASCADE`). Vegeu "Revisions de lloguer". |
+| `v_revisions_lloguer`, `v_cartes_pendents` | Vistes per a la pantalla de revisions i per a les cartes (LibreOffice). Vegeu "Revisions de lloguer". |
 
 ## Regles de negoci
 
@@ -109,8 +112,8 @@ Tot penja d'una sola carpeta, per facilitar les còpies de seguretat i la portab
   - **Desar es queda a la pantalla** (refresca subtítol i avisos); un immoble nou passa a `/immobles/:id`. Si la validació falla, el formulari canvia a la
     pestanya del primer camp amb error.
   - **Canvis sense desar** (`form.isDirty()`): *Tornar* i els botons que canvien de pantalla pregunten (`CanvisSenseDesar`: Desar i continuar / Descartar /
-    Cancel·lar). **No cobreix el menú lateral ni `Ctrl+R`**: `HashRouter` no té `useBlocker` (caldria un router de dades). **Escape** fa el mateix que Tornar
-    (no actua amb una finestra o un calendari obert) i **Intro** desa.
+    Cancel·lar). **No cobreix el menú lateral ni `Ctrl+R`**: `HashRouter` no té `useBlocker` (caldria un router de dades). **Ctrl+S** desa, **Intro no desa** i **Escape** fa el
+    mateix que Tornar (cap dels dos actua amb una finestra o un desplegable visible: `hiHaCapaOberta`).
   - **Validacions** (formulari i Main, `validacionsImmoble.ts`), cada regla entre dos camps només si hi són els dos: superfície útil <= superfície; valor
     cadastral de la construcció <= total; data de compra >= 1 de gener de l'any de construcció; any entre 1800 i l'any actual; imports >= 0.
 - **Documents d'immoble** (`/immobles/:id/documents`):
@@ -160,15 +163,17 @@ dues o cap; les dades de devolució (dates, import i motiu) només amb el contra
 - Imports, lloguers i fiança addicional >= 0 (la fiança addicional, si no arriba, és 0). `motiu_fi` ha de ser de la llista.
 - **Justificació obligatòria** si l'import a retornar és inferior a `fianca_import + fianca_adicional`.
 
-### Lloguer actual i revisió
+### Lloguer actual i revisions
 
+- `lloguer_actual` i `data_ultima_revisio` són la dada viva que fa servir tota l'app (i l'avís de revisió). **Només les canvien les revisions** (vegeu "Revisions de
+  lloguer"): en desar el contracte des del formulari, el Main **ignora** els valors que arribin per a aquests dos camps.
 - En **crear**, el Main fixa `lloguer_actual = lloguer_inicial` i `data_ultima_revisio = data_inici` (ignora el que arribi). Un trigger no pot fer-ho: la
   columna `NOT NULL` fallaria abans.
-- En **actualitzar**, `id_inmoble` s'ignora (l'immoble no es pot canviar). Mentre el contracte no s'ha revisat mai (`data_ultima_revisio = data_inici`), si el lloguer
-  actual i la data de revisió arriben iguals als desats, segueixen el lloguer inicial i la data d'inici. Si arriben diferents, és una revisió feta des del
-  formulari i s'accepta. (Cas límit assumit: una revisió feta el mateix dia que `data_inici` no es distingeix de "mai revisat".)
-- **Revisar lloguer** és un botó del formulari que obre una finestra (import i data **alhora**; l'import pot ser igual: lloguer congelat) i **no escriu a la BD**:
-  només posa els dos valors als camps, que es desen amb *Desar*. Desactivat amb el contracte tancat. No hi ha historial de revisions.
+- En **actualitzar**, `id_inmoble` s'ignora (l'immoble no es pot canviar). L'única excepció és l'**arrossegament**: mentre el contracte no s'ha revisat mai
+  (`data_ultima_revisio = data_inici`) **i no té cap fila a `revisions_lloguer`**, el lloguer actual i la data segueixen el lloguer inicial i la data d'inici. La
+  comprovació de les revisions evita que una revisió amb el dia d'efecte igual al d'inici es confongui amb "mai revisat".
+- Els contractes revisats **abans** que existís l'historial no tenen files a `revisions_lloguer`: la primera revisió nova en captura el lloguer i la data actuals, i
+  eliminar-la els restaura.
 
 ### Formulari (`/immobles/:id/contractes/nou` i `/immobles/:id/contractes/:idContracte`)
 
@@ -182,7 +187,7 @@ dues o cap; les dades de devolució (dates, import i motiu) només amb el contra
 - **Pestanya Dades**:
   - *Dades del contracte*: immoble (de només lectura), inquilins (desplegables cercables), *Inici* (amb el clip del document *Contracte*), *Fi prevista* i comentari.
   - *Lloguer*: primera fila *Lloguer inicial*, *Fiança INCASOL* i *Fiança addicional*; segona fila (en editar) *Lloguer actual* i *Última revisió* (de només lectura) i
-    el botó *Revisar lloguer* a la dreta.
+    el botó *Revisions de lloguer* a la dreta: porta a la pantalla de revisions del contracte (preguntant abans si hi ha canvis sense desar), també amb el contracte tancat.
   - *Tancament*: *Data de fi* (**sempre editable**, també en un contracte nou), *Motiu de fi*, *Import a retornar* i *Justificació de l'import a retornar*
     (multilínia). Els tres últims, **desactivats** mentre no hi ha data de fi. En posar la data de fi per primer cop, l'import a retornar surt amb la **suma de les dues
     fiances**. Esborrar la data de fi buida els camps de tancament i de devolució i els desactiva. La justificació és obligatòria si l'import és inferior a la suma.
@@ -196,12 +201,12 @@ dues o cap; les dades de devolució (dates, import i motiu) només amb el contra
 
 - **Tipus fixos al codi** (`TIPUS_DOCUMENT_CONTRACTE`): `contracte`, `annex`, `fianca_model2`, `fianca_notificacio`, `fianca_model3`, `rebut`, `altres`, `documents_inquili`.
   El nom visible surt de `documents.tipus.<tipus>`. **No hi ha taula de tipus, ni classes, ni sembrat.**
-- **Documents únics** (`TIPUS_UNICS_CONTRACTE`: contracte, model 2, notificació i model 3), amb un **clip** al costat de la data de la seva secció del formulari: *Inici*,
-  *Data del model 2*, *Data de la notificació* i *Data de sol·licitud* (model 3). Un sol document per contracte, garantit només per l'app. Sense document, *Afegir*
+- **Documents únics** (`TIPUS_UNICS_CONTRACTE`: contracte, model 2, notificació, model 3 i rebut), amb un **clip** al costat de la data de la seva secció del formulari: *Inici*,
+  *Data del model 2*, *Data de l'ingrés* (rebut), *Data de la notificació* i *Data de sol·licitud* (model 3). Un sol document per contracte, garantit només per l'app. Sense document, *Afegir*
   obre **directament** el diàleg del sistema (un sol fitxer, sense comentari); amb document, *Visualitzar* i *Eliminar* (no hi ha *Editar*: per canviar el fitxer, s'elimina i
   se'n torna a adjuntar un). Es desen a l'instant, sense passar per Desar, i refresquen la barra d'avisos. En un contracte nou, els clips són desactivats. La **data**
   no es desa: es mostra la de la secció del contracte.
-- **Tipus lliures** (`TIPUS_LLIURES_CONTRACTE`: annex, rebut, altres i **documents de l'inquilí**, que són dades sensibles i es guarden amb el contracte), només des de la
+- **Tipus lliures** (`TIPUS_LLIURES_CONTRACTE`: els que no són únics: annex, altres i **documents de l'inquilí**, que són dades sensibles i es guarden amb el contracte), només des de la
   pantalla de documents.
 - **Pantalla de documents** (`/immobles/:id/contractes/:idContracte/documents`): títol, subtítol (adreça i data d'inici), barra d'avisos de documents que falten i una fila
   *Afegir* (esquerra) / *Tornar* (dreta, porta al formulari). Llista per ordre d'adjuntat, amb menú *Visualitzar*, *Editar* i *Eliminar* (els quatre tipus únics, sense *Editar*).
@@ -216,12 +221,14 @@ dues o cap; les dades de devolució (dates, import i motiu) només amb el contra
 | Fi prevista | A **90 dies** de `d_fi_prevista` (`DIES_AVIS_FI`), i també un cop passada (sense pròrroga, és l'única senyal) | contractes vigents |
 | Revisió de lloguer | A **30 dies** (`DIES_AVIS_REVISIO`) de l'aniversari de l'última revisió (`data_ultima_revisio` + 1 any), i també un cop passat | contractes vigents |
 | Ingrés pendent | *Fiança INCASOL* > 0 i sense data d'ingrés | contractes vigents |
-| Falten documents | Una data (model 2, notificació o sol·licitud de devolució) sense el document del seu tipus | tots |
+| Carta pendent | Una revisió del lloguer sense data d'enviament i amb un increment diferent de 0 € | tots (també els tancats) |
+| Falten documents | Una data (model 2, notificació o sol·licitud de devolució) sense el document del seu tipus; o la data de l'ingrés, sense data de notificació, sense el rebut | tots |
 | Devolució pendent | Contracte tancat amb model 2, notificació o sol·licitud i **sense data d'abonament** | contractes tancats |
 
 Es calculen a `utils/avisosContracte.ts` (les mateixes funcions per a les llistes, "Últims contractes", la barra de l'edició i l'etiqueta d'Immobles) i es comparen sempre
 només els dies, en hora local. Risc assumit: un contracte antic amb la fiança ja retornada però no anotada avisa fins que s'hi posa l'abonament. Els indicadors de
-documents (`te_doc_model2`, `te_doc_notificacio`, `te_doc_model3`) els calcula el Main amb un `EXISTS` sobre `documents_contracte`.
+documents (`te_doc_model2`, `te_doc_notificacio`, `te_doc_model3`, `te_doc_rebut`) els calcula el Main amb un `EXISTS` sobre `documents_contracte`, i `carta_pendent`
+amb un `EXISTS` sobre `revisions_lloguer`.
 
 ### Llistes
 
@@ -234,11 +241,42 @@ documents (`te_doc_model2`, `te_doc_notificacio`, `te_doc_model3`) els calcula e
   tancat a futur amb un de posterior, els dos; tots acabats, només l'últim. Els immobles sense contracte hi surten ("Sense contracte" i un botó *Afegir*). Només dos estats
   visibles (un tancat a futur surt com a *Tancat*, amb la data de fi a la columna). L'adreça porta a la llista de contractes de l'immoble.
 
+### Revisions de lloguer
+
+- **Taula `revisions_lloguer`** (migració 006): una fila per revisió. `id_contracte` (`ON DELETE CASCADE`), `data_efecte`, `lloguer_anterior` i `data_revisio_anterior`
+  (els valors que tenia el contracte abans: es desen perquè, en eliminar la revisió, es pugui restaurar exactament el que hi havia), `percentatge` (**el que ha introduït
+  l'usuari**; pot ser `NULL`), `increment_aplicat` (pot ser diferent del calculat a partir del %; pot ser negatiu: una baixada), `lloguer_nou`, `data_enviament` (**buida =
+  carta pendent**) i `comentari`. `CHECK`s: dates estrictes (`IS`), `lloguer_anterior >= 0`, `lloguer_nou >= 0` i `round(lloguer_nou - lloguer_anterior - increment_aplicat, 2) = 0`.
+- **Regles** (al Main, `revisions.ts`, cada operació en una transacció):
+  - **Crear**: captura `lloguer_actual` i `data_ultima_revisio` del contracte, calcula el lloguer nou en cèntims i actualitza el contracte (`lloguer_actual` i
+    `data_ultima_revisio` = dia d'efecte). **No es pot crear** si l'última revisió és una carta pendent, ni en un contracte tancat; el dia d'efecte no pot ser anterior a l'última revisió.
+  - **Carta pendent**: sense `data_enviament` i amb increment diferent de 0. Un **lloguer congelat** (0 €) es pot registrar, però no és pendent: no surt a la vista de pendents,
+    ni al filtre, ni a l'avís, i no impedeix crear la revisió següent.
+  - **Només l'última revisió d'un contracte** es pot modificar o eliminar; les anteriors són historial. **Modificar**: el contracte en segueix l'import i el dia d'efecte; es pot
+    modificar encara que ja s'hagi enviat. `data_enviament` és **un camp més**: desar no la toca (l'usuari l'omple o la buida quan li interessa). **Eliminar**: restaura
+    `lloguer_actual` i `data_ultima_revisio` del contracte amb els valors `anterior` desats.
+  - El % desat és l'introduït; el **% efectiu** (increment / lloguer anterior) el calcula la vista.
+- **Pantalla del contracte** (`/immobles/:id/contractes/:idContracte/revisions`, editable; s'hi arriba amb el botó *Revisions de lloguer* del formulari): títol, subtítol, lloguer actual
+  i data de la revisió, i una fila de botons (*Desar*, *Nova revisió* i *Eliminar* a l'esquerra; *Tornar* a la dreta; res a sota). **Ctrl+S** desa, **Intro no desa**, **Escape** = Tornar,
+  amb la protecció de canvis sense desar. Formulari: *Lloguer anterior* (desactivat), **% aplicat**, *Increment calculat* (desactivat), **Increment aplicat** (editable: en canviar el %, es
+  posa igual al calculat, i després es pot modificar a mà), *Lloguer nou* (desactivat), *Dia d'efecte* (per defecte, l'aniversari de l'última revisió), *Data d'enviament* i *Comentari*.
+  S'obre amb l'última revisió si és pendent; si no, amb una de nova. **Amb el contracte tancat és de consulta**: no es creen revisions noves, però l'última es pot modificar o eliminar.
+  Sota, l'**historial** (l'última primer, amb alçada màxima, scroll i capçalera fixa; el llapis només a l'última).
+- **Pantalla global** (`/revisions`, entrada pròpia al menú lateral, **només de consulta**): interruptor **"Només pendents"** (activat per defecte), recompte de cartes pendents i taula
+  ordenada pel **dia d'efecte** i després pels **cognoms i el nom del primer inquilí**. L'ordre dels noms es fa al Main amb `localeCompare` en català: SQLite ordena en binari i "Àlvarez"
+  quedaria després de "Zamora". Una icona a la primera columna porta a la pantalla de revisions del contracte.
+- **Vistes per a les cartes** (LibreOffice): `v_revisions_lloguer` porta totes les revisions amb les dades dels dos inquilins (el segon, en blanc si no n'hi ha), les bàsiques de l'immoble
+  i les del contracte. Cada dada va **en dues versions**: la crua (per ordenar o calcular) i una de text (`..._text`: dates `DD/MM/AAAA`, imports amb punt de milers i coma, sense el símbol
+  `€`). Hi ha `inquilins_noms` ("Anna Puig i Joan Mas") i el % introduït i l'efectiu. `v_cartes_pendents` és la mateixa filtrada: **sense data d'enviament i sense increments de 0 €**.
+  El seu `ORDER BY` és binari: el LibreOffice ordena pel seu compte. La connexió és **directa a la vista** (controlador ODBC/JDBC, que gestiona l'usuari); no hi ha botó d'exportar.
+- **Avís "Carta pendent"**: etiqueta a les llistes i a "Últims contractes", línia a la barra d'avisos de l'edició del contracte, i compta per a "Contractes amb avisos" d'Immobles.
+  Surt també als contractes tancats.
+
 ## Convencions de l'app
 
 - **Main i Renderer**: tota la lògica de BD i fitxers és al **Main**; React només crida per IPC (`window.api.*`), amb els tipus a `src/preload/index.d.ts`. Cada bloc nou de l'API
   s'afegeix als **dos** fitxers del preload (`index.ts` i `index.d.ts`) i **dins de `api`**, no dins d'un altre bloc (si s'oblida, el `typecheck` falla només a l'`.d.ts`: la consola de
-  les DevTools no comprova tipus). Blocs actuals: `inmobles`, `inquilins`, `config`, `contractes`, `documents`, `documentsImmoble` i `app` (versió i obrir enllaços).
+  les DevTools no comprova tipus). Blocs actuals: `inmobles`, `inquilins`, `config`, `contractes`, `documents`, `documentsImmoble`, `revisions` i `app` (versió i obrir enllaços).
 - **Resposta dels handlers**: `Resultat<T> = { ok: true; dades: T } | { ok: false; error: CodiError }`. `CodiError`: `CONTRACTE_SOLAPAT`, `FK_VIOLADA`, `CHECK_VIOLAT`,
   `FITXER_NO_TROBAT`, `DESCONEGUT`. El Main converteix les excepcions de `better-sqlite3` (`SQLITE_CONSTRAINT_TRIGGER`, `_FOREIGNKEY`, `_CHECK`) amb `traduirError`, mai retorna
   el text de SQLite; el Renderer ho tradueix amb `t('errors.<CODI>')` i `esOk(resposta)` (`utils/resultat.ts`) notifica l'error traduït i retorna `false` si ha fallat.
@@ -253,8 +291,8 @@ documents (`te_doc_model2`, `te_doc_notificacio`, `te_doc_model3`) els calcula e
   aquest criteri a la resta (vegeu "Pendents").
 - **Icones**: `@tabler/icons-react`. Editar i eliminar a Inquilins i als documents d'un contracte, icona sola amb `Tooltip` i `aria-label` traduïts, **una columna per icona**;
   la resta d'accions, un **menú d'accions** d'una sola icona amb icona i text. Les accions principals (Afegir) són botons amb icona. Els avisos es mostren apilats (`Stack`).
-- **Components i utilitats compartits** (a `src/renderer/src/`): `CampData` (data amb entrada manual, `DD/MM/AAAA`, que arregla un error que girava el dia i el mes),
-  `CampNumeric` (`NumberInput` amb punt de milers, coma decimal i unitat `€` o `m²` segons l'idioma actiu), `CanvisSenseDesar`, `AccionsContracte`, `AvisosContracte`;
+- **Components i utilitats compartits** (a `src/renderer/src/`): `CampData` (data amb entrada manual, `DD/MM/AAAA`; arregla un error que girava el dia i el mes, rebutja les dates inexistents com `30/02` i fa servir l'idioma actiu per al calendari),
+  `CampNumeric` (`NumberInput` amb punt de milers, coma decimal i el sufix del seu tipus: `import` `€`, `superficie` `m²`, `percentatge` `%`; també `quantitat`, `unitats`, `dies`, `mesos` i `anys`), `CanvisSenseDesar`, `AccionsContracte`, `AvisosContracte`;
   `utils/`: `adreca`, `dates` (`formatData`), `formats` (`formatM2`), `formulari` (`buitANull`, `aNumero`, `aNumeroForm`), `inquilins` (`nomInquili`), `caducitat`,
   `avisosContracte`, `avisosImmoble`, `teclat`, `useEditarContracte`, `resultat`.
 - **Quant a**: icona, versió (la del `package.json`, via el Main), descripció, autor, llicència i repositori, tecnologies i la menció a Claude, amb enllaços que s'obren al navegador
@@ -273,8 +311,9 @@ documents (`te_doc_model2`, `te_doc_notificacio`, `te_doc_model3`) els calcula e
 - **Dates**: a la BD, text ISO `AAAA-MM-DD`; `DatePickerInput` i `DateInput` treballen directament amb aquest text, així que **no cal convertir** entre `Date` i text. Mai usar
   `toISOString()` (passa per UTC i pot desplaçar el dia); per a "avui" o càlculs, dayjs en hora local: `dayjs().format('YYYY-MM-DD')`. `minDate` accepta text ISO.
 - **Números**: els formularis fan servir `CampNumeric` (el valor és un número, o `''` si és buit) i `aNumeroForm` per llegir-lo. Es desen amb punt decimal i `NULL` si són buits.
-- **Menú de l'esquerra**: Immobles, Últims contractes, Inquilins, Configuració i Quant a. Contractes no té entrada pròpia: s'hi entra des d'Immobles.
-- **Tecles**: a Contractes, Ctrl+S desa i Escape torna (amb protecció de canvis); a Immobles, Intro desa i Escape torna (vegeu "Pendents").
+- **Menú de l'esquerra**: Immobles, Últims contractes, Revisions de lloguer, Inquilins, Configuració i Quant a. Contractes no té entrada pròpia: s'hi entra des d'Immobles.
+- **Tecles**: a Immobles, Contractes i Revisions, **Ctrl+S** desa, **Intro no desa** i **Escape** torna (amb protecció de canvis). Cap dels dos actua si hi ha una finestra o un
+  desplegable visible (`hiHaCapaOberta`, `utils/teclat.ts`).
 
 ## Multiidioma (i18n)
 
@@ -353,23 +392,22 @@ natius (`dialog.showOpenDialog`) reben els títols **ja traduïts** del Renderer
 
 ## Estat
 
-**Fet**: base (projecte, BD amb migracions, tipus compartits); backend de tots els blocs (immobles, inquilins, configuració, contractes, documents i documents d'immoble); base de la UI
-(Mantine, i18n, router, utilitats); Inquilins; Immobles (llista, edició en pestanyes, avisos, camps nous, documents únics i pantalla de documents); Contractes (formulari reorganitzat amb
-fiança INCASOL i devolució, documents amb clips i pantalla pròpia, avisos, "Últims contractes"); idioma al primer arrencament; primera versió empaquetada (`.deb`, icona, Quant a).
+**Fet**: base (projecte, BD amb migracions, tipus compartits); backend de tots els blocs (immobles, inquilins, configuració, contractes, documents, documents d'immoble i revisions);
+base de la UI (Mantine, i18n, router, utilitats); Inquilins; Immobles (llista, edició en pestanyes, avisos, camps nous, documents únics i pantalla de documents); Contractes (formulari
+reorganitzat amb fiança INCASOL i devolució, documents amb clips i pantalla pròpia, avisos, "Últims contractes"); **revisions de lloguer** (historial, pantalla del contracte, pantalla
+global, vistes per a les cartes i avís); idioma al primer arrencament; publicació empaquetada (`.deb`, icona, Quant a).
 
 **Pendents** (decidits, no fets):
 
 - **Revisar la UI**: la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar (resulta confús) i el criteri "cap botó a sota" als formularis que encara en tenen
   (Inquilins, en modal).
-- **Immobles**: unificar l'Escape amb `hiHaCapaOberta` i fer servir Ctrl+S (ara fa servir un `querySelector` directe i Intro).
-- **`CampData`**: el `dateParser` construeix la data amb `new Date(any, mes - 1, dia)`, i JavaScript desplaça les dates inexistents (`30/02/2025` passa a ser el 2 de març); cal comprovar
-  que el dia i el mes resultants coincideixen amb els escrits.
 - **Fase 3 de contractes** (no analitzada en detall; convé un resum funcional abans de programar): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable;
-  els documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble), historial de revisions de lloguer i canvi de signants (annex; ara només s'edita
-  `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans).
+  els documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble) i canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es
+  guarda qui hi havia abans). L'historial de revisions de lloguer ja és fet.
 - **Configuració i Quant a**: Configuració només té el selector d'idioma. Pantalla de tipus de documents: ja no cal (són fixos al codi).
-- **Empaquetat**: publicada una versió amb tot el que hi ha fins ara, provada a l'amfitrió (BD real) i al portàtil (BD nova). Abans d'instal·lar una versió amb
-  migracions noves, còpia de seguretat de la BD (les migracions que reconstrueixen taules tenen guarda, però la còpia és la xarxa de seguretat).
+- **Empaquetat**: publicat tot fins als documents i la fiança (passos fins al 26). Les **revisions de lloguer** (migració 006 i les seves pantalles) encara no s'han empaquetat. Abans
+  d'instal·lar una versió amb migracions noves, còpia de seguretat de la BD.
+- **LibreOffice**: connexió directa a la vista `v_cartes_pendents` (controlador ODBC/JDBC) i plantilla de la carta; ho gestiona l'usuari.
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD (validacions del Main). Només cosmètic.
 
 **Idees per a més endavant** (no decidides; l'usuari les demana si les vol):
@@ -380,6 +418,6 @@ fiança INCASOL i devolució, documents amb clips i pantalla pròpia, avisos, "�
 - **Llista de contractes**: columna `Id`; poder navegar entre immobles des de la capçalera. **Llista d'immobles**: acció per editar directament l'últim contracte.
 - **Últims contractes**: immobles sense contracte al final, ordenats per adreça; que *Tornar* des d'un immoble porti a "Últims contractes".
 - **Generals**: menú contextual (botó dret) als camps de dades (copiar, enganxar...); barra superior amb el nom de la pantalla; menú Sortir; submenús d'Immobles al menú lateral (Editar,
-  Documents, Contractes).
+  Documents, Contractes); comptador de cartes pendents al menú lateral.
 - **Configuració**: ruta i nom de la BD a escollir (fitxer de configuració a una carpeta estàndard del SO), poder treballar amb diverses BD i carregar sempre l'última; mantenir l'idioma a la carpeta de la BD.
 - **Empaquetat**: suport per a Windows (i icones de macOS i Windows).

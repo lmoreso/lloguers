@@ -29,6 +29,8 @@
   s'apliquen soles en la primera arrencada).
 - **Fitxers que l'usuari retoca a mà** (p. ex. `CampData`, `formats.ts`, els formularis): demanar-ne el contingut abans de reescriure'ls sencers,
   perquè no es desfacin els seus canvis.
+- **`NOTES.md` i `PROGRES.md` només es toquen quan l'usuari ho demana**; llavors es reescriuen i es presenten.
+- En lliurar codi, **evitar `\d` a les expressions regulars** (en copiar-les, les barres es poden duplicar): usar `[0-9]` (vegeu la incidència 22).
 
 ## Entorn (verificat)
 
@@ -82,7 +84,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 26.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, avisos i documents), fase 2 (devolució de la fiança) i **formulari reorganitzat** (26: pestanyes Dades i Fiança INCASOL, devolució i tancament dins del formulari, documents únics amb clips, tipus de document fixos al codi). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23), els camps nous i els documents únics d'immoble (24) i els documents de contracte com a pantalla pròpia (25). **La BD és a `user_version = 5`.** **Tot fins al pas 26 està empaquetat i provat** (`.deb` instal·lat a l'anfitrió, amb la BD real, i al portàtil, amb una BD nova).
+**Fases A, B i C fetes; Fase D feta fins al pas 29.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, avisos i documents), fase 2 (devolució de la fiança) i **formulari reorganitzat** (26: pestanyes Dades i Fiança INCASOL, devolució i tancament dins del formulari, documents únics amb clips, tipus de document fixos al codi). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23), els camps nous i els documents únics d'immoble (24), els documents de contracte com a pantalla pròpia (25), una publicació (27), dos petits pendents (28) i les **revisions de lloguer** (29: historial, pantalla del contracte, pantalla global, vistes per a les cartes i avís). **La BD és a `user_version = 6`.** **Tot fins al pas 26 està empaquetat i provat** (`.deb` instal·lat a l'anfitrió, amb la BD real, i al portàtil, amb una BD nova); **els passos 28 i 29 (migració 006) no s'han empaquetat encara**.
 
 ### Fase A: base (feta)
 
@@ -341,6 +343,36 @@ a **tots**, Editar i (després d'una línia) Eliminar en vermell. Les confirmaci
   de sol·licitud. Tot a `utils/avisosContracte.ts` (`documentsQueFalten`, `ingresPendent`...), compartit amb les llistes i amb l'etiqueta d'Immobles.
 - **Llista de contractes**: títol i, a sota, *Afegir* (esquerra) i *Tornar* (dreta) amb icona; icona d'editar a la primera columna (`useEditarContracte`); menú d'accions amb **Documents, Editar i Eliminar**.
 
+**Pas 27: publicació dels passos 22 a 26, feta.**
+
+- Versió pujada al `package.json`; `npm run build:linux`; `.deb` inspeccionat amb `dpkg-deb -I`; prova d'instal·lació des de zero amb `HOME=/tmp/provahome` (les cinc migracions
+  aplicades seguides, `user_version = 5`, pantalla de selecció d'idioma). Instal·lat a l'anfitrió (BD real, amb còpia de seguretat prèvia) i al portàtil (BD nova): tot correcte.
+  (L'usuari va citar la versió instal·lada com a `1.07`.)
+
+**Pas 28: petits pendents, fets.**
+
+- **28-1, `CampData`**: el `dateParser` rebutja les dates inexistents (`30/02`, `31/04`, `29/02` d'un any no de traspàs) comprovant que dia, mes i any de la data construïda coincideixen amb els
+  escrits; el `locale` segueix l'idioma actiu (`i18n.language`) en lloc d'estar fixat a `ca`.
+- **28-2, edició d'immoble**: **Ctrl+S desa, Intro no desa** (el formulari ja no és un `<form>`: el botó *Desar* crida `desarFormulari` i `AccionsCapcalera` porta `desar` en lloc d'`idFormulari`) i
+  **Escape amb `hiHaCapaOberta`** (la incidència 19 queda resolta també a Immobles; ja no hi ha cap `querySelector` de capes).
+
+**Pas 29: revisions de lloguer, fet.**
+
+- **29-1, migració `006_revisions_lloguer.sql`** (només afegeix objectes): taula `revisions_lloguer` (`CHECK`s estrictes i `lloguer_nou = lloguer_anterior + increment_aplicat`), índex, trigger d'auditoria i
+  les vistes `v_revisions_lloguer` (cada dada crua i en text `_text`; dues inquilins; immoble i contracte) i `v_cartes_pendents` (sense enviar i sense increments de 0 €). `user_version = 6`. Provada
+  sobre còpies i des de zero (recomptes, regles, vistes amb dades, trigger i cascade).
+- **29-2, backend**: `src/main/revisions.ts` (crear, modificar, eliminar i llistat), `ipc/revisions.ts` i el bloc `revisions` del preload. Tipus `RevisioLloguer`, `RevisioDades` i `RevisioLlistat`; `ContracteLlistat`
+  porta `carta_pendent`. **Crear** captura el lloguer i la data anteriors, calcula el nou en cèntims i actualitza el contracte, en una transacció; no es pot crear amb la carta anterior pendent ni amb el contracte
+  tancat. Només l'última revisió es pot modificar o eliminar; **eliminar restaura** el lloguer i la data anteriors. `data_enviament` és un camp més (desar no la toca). Provat des de les DevTools (28 casos).
+- **29-3, pantalla del contracte** (`RevisionsContracte.tsx`, `/immobles/:id/contractes/:idContracte/revisions`): formulari amb % aplicat, increment calculat (desactivat), increment aplicat (editable) i lloguer nou
+  (desactivat); historial amb alçada màxima i scroll; Ctrl+S, Escape i protecció de canvis; amb el contracte tancat és de consulta. El botó *Revisar lloguer* del formulari de contracte passa a dir **"Revisions de
+  lloguer"** i hi porta (sense modal); s'esborra `RevisarLloguer.tsx`. **`actualitzarContracte` ignora `lloguer_actual` i `data_ultima_revisio`**: només l'arrossegament (mai revisat i sense revisions) els pot
+  canviar.
+- **29-4, pantalla global** (`Revisions.tsx`, `/revisions`, entrada al menú lateral): només de consulta; interruptor "Només pendents" (activat per defecte), recompte i ordre pel dia d'efecte, cognoms i nom del
+  primer inquilí (ordenat al Main amb `localeCompare('ca')`, vegeu la incidència 24).
+- **29-5, avís "Carta pendent"**: `cartaPendent` a `utils/avisosContracte.ts`, etiqueta a `AvisosContracte`, línia a la barra d'avisos del contracte i compta per a "Contractes amb avisos" d'Immobles.
+- L'usuari ha ampliat `CampNumeric` amb més tipus (`percentatge`, `quantitat`, `unitats`, `dies`, `mesos`, `anys`) i el camp del % de les revisions el fa servir.
+
 ### Fase E: empaquetat (feta al portàtil)
 
 Prova d'empaquetat anticipada a la VM (`npm run build:unpack`): migracions incrustades; `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`
@@ -368,27 +400,28 @@ Al portàtil (14-10-2026):
 
 ### Pendent de confirmar
 
-- **Commit** del pas 26 (si queda alguna cosa) i d'aquest `PROGRES.md`; `git push`.
-- **`NOTES.md`**: reescrit sencer (nova versió); substituir l'antic. Ja inclou el disseny final dels passos 24 a 26.
-- **Pas 26-6 (neteja)**: `npm run lint` (imports i variables sense ús), el script de claus de text sense ús (`/tmp/claus_sense_us.js`; cal esborrar les claus també de `es.json`) i la matriu
-  de coherència dels avisos (llistes, barra de dalt, pantalla de documents i etiqueta d'Immobles). No en consten els resultats.
-- **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes i documents; en aquest ordre invers per les claus foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també
-  `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/` (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/prova*` són temporals.
+- **Commit** del pas 29-5 (si queda alguna cosa) i d'aquests dos documents; `git push`.
 - Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
+- **Pas 26-6 (neteja)**: `npm run lint`, el script de claus de text sense ús (`/tmp/claus_sense_us.js`; cal esborrar les claus també de `es.json`) i la matriu de coherència dels avisos. No en consten els resultats.
+  Quan es torni a passar, hi sortiran `contractes.revisar.*` i `contractes.validacio.revisioAnterior` (només les feia servir `RevisarLloguer.tsx`, ja esborrat).
+- **Propera publicació** (anfitrió i portàtil): pujar la versió, còpia de seguretat de `~/Lloguers/lloguers.sqlite`; la migració 006 s'hi aplicarà sola (només afegeix objectes). Comprovar `user_version = 6`.
+- **LibreOffice**: connexió directa a la vista `v_cartes_pendents` i plantilla de la carta (ho gestiona l'usuari).
+- **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes, documents i revisions; en aquest ordre invers per les claus foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també
+  `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/` (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/prova*` són temporals.
 
 ## Pròxim pas
 
 Cap pas en curs. Opcions, per decidir amb l'usuari:
 
-**1. Nova publicació: feta.** Els passos 22 a 26 s'han empaquetat i instal·lat a l'anfitrió i al portàtil (vegeu Fase E). La propera publicació només caldrà quan hi hagi funcionalitat nova.
+**1. Nova publicació** (les revisions de lloguer, migració 006): pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el `.deb`. Provar-hi la pantalla de revisions, la global i
+la connexió de LibreOffice a la vista.
 
-**2. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar, i aplicar a Immobles el mateix criteri que a Contractes
-(Ctrl+S i `hiHaCapaOberta`, en lloc d'Intro i del `querySelector`).
+**2. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable; els
+documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble) i canvi de signants (annex). L'historial de revisions ja és fet.
 
-**3. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable;
-els documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble), historial de revisions de lloguer, canvi de signants (annex).
+**3. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar, i els botons Desar i Cancel·lar del modal d'Inquilins.
 
-**4. Menors**: el `dateParser` de `CampData` (dates inexistents), la columna `Id` a les llistes, Configuració i la resta de notes de `NOTES.md` ("Idees per a més endavant", només si l'usuari les demana).
+**4. Menors**: la columna `Id` a les llistes de contractes i d'inquilins, Configuració, i la resta de notes de `NOTES.md` ("Idees per a més endavant", només si l'usuari les demana).
 
 ## Versions reals vs. la guia
 
@@ -547,27 +580,41 @@ Un `DROP TABLE contractes` amb les claus foranes actives fa un `DELETE` implíci
 `'2026-02-20' < '2026-1-10'` és cert com a text, i el Main rebutjava la regla de l'abonament amb un error genèric abans que el `CHECK` de la BD parlés (`DESCONEGUT` en lloc de `CHECK_VIOLAT`). Solució:
 les comparacions d'ordre només s'apliquen si les dues dates tenen forma ISO (`esISO`); el format l'imposa la BD.
 
+### 22. Una expressió regular amb barres dobles feia que les comprovacions de dates se saltessin en silenci
+
+En copiar una expressió regular amb `\d` d'un bloc de codi, les barres es van duplicar (`\\d`): la regex no coincidia mai amb cap data, `esISO` retornava sempre fals i **les comparacions d'ordre de dates
+no s'aplicaven** (es van poder crear revisions amb un dia d'efecte anterior). Totes les proves posteriors fallaven per la raó equivocada (la carta pendent bloquejava abans d'arribar a la validació). Solució:
+`/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/`, sense cap barra. Una prova que "falla" amb un error diferent de l'esperat vol dir que la validació provada potser no s'ha executat.
+
+### 23. Un formulari que es torna a muntar abans que arribin les dades noves mostra les antigues
+
+A `RevisionsContracte`, en desar es pujava un comptador (`versio`) que era a la `key` del formulari: el formulari es tornava a muntar a l'instant, amb les dades d'abans de la recàrrega, i l'historial (que sí que
+llegia les noves) quedava desquadrat. Solució: la `key` fa servir un segon comptador (`versioDades`) que es puja **dins del `.then()` de l'efecte**, un cop han arribat les dades.
+
+### 24. SQLite ordena en binari: "Àlvarez" quedava després de "Zamora"
+
+L'`ORDER BY` d'SQLite compara bytes (majúscules abans de minúscules, accents al final). Per a la pantalla de revisions, l'ordre dels cognoms i dels noms es fa al Main amb
+`localeCompare(..., 'ca', { sensitivity: 'base' })`. La vista `v_cartes_pendents` conserva un `ORDER BY` binari: el LibreOffice ordena pel seu compte.
+
 ## Altres pendents
 
-- `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD (p. ex. l'idioma invàlid o les validacions de `contractes`, `immobles` i `documents`). Només cosmètic.
+- `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD (p. ex. l'idioma invàlid o les validacions de `contractes`, `immobles`, `documents` i `revisions`). Només cosmètic.
 - Configuració només té el selector d'idioma.
 - Els noms dels tipus de document ja no són dada de l'usuari: surten de la traducció (`documents.tipus.*`).
-- `CampData`: el `dateParser` construeix la data amb `new Date(any, mes - 1, dia)` i JavaScript desplaça les dates inexistents (`30/02/2025` passa a ser el 2 de març); cal comprovar que dia i mes coincideixen.
-- Immobles: l'Escape fa servir un `querySelector` directe i Intro per desar; unificar amb `hiHaCapaOberta` i Ctrl+S.
 - Si una BD de proves té dos documents del mateix tipus únic en un immoble o en un contracte, el clip en mostra el primer; no hi ha cap validació.
 - L'avís "Devolució pendent" pot persistir en contractes antics amb la fiança ja retornada però no anotada, fins que s'hi posa l'abonament.
-- Casos límit assumits: una revisió de lloguer feta el mateix dia que `data_inici` no es distingeix de "mai revisat"; una correcció d'una data de revisió ha de poder retrocedir.
 - Un contracte nou sense `data_fi` solapa amb qualsevol d'un altre posterior del mateix immoble: els contractes antics s'han d'entrar amb la data de fi des del primer moment.
-- Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans), correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els
-  documents), historial de revisions de lloguer.
+- Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans) i correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els documents).
 - Editar un contracte des d'"Últims contractes" torna a la llista de contractes de l'immoble (no a la vista d'origen).
 - La icona dels menús d'accions (`IconDots` o `IconMenu2`) és una decisió estètica pendent d'uniformar.
 - `Immobles.tsx` i `FitxaImmoble.tsx` fan cadascun una crida a `contractes.ultims()` només per saber si hi ha avisos.
 - `inmobles` té dates sense cap `CHECK` (conté dades reals; el selector de dates ja protegeix l'app).
+- Revisions: eliminar la darrera revisió d'un contracte restaura `data_revisio_anterior`; si entremig s'ha canviat la `data_inici` a una data posterior, el `CHECK data_ultima_revisio >= data_inici` pot fallar (cas rar, no tractat).
+- Revisions: `esPendent` està escrit dues vegades (`Revisions.tsx` i `RevisionsContracte.tsx`); es pot unificar a `utils/` si cal.
 - `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren (`App.tsx.bak` es va fer fora de Git: comprovar-ho amb `git status` abans de `git add -A`).
 - Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida; icones de macOS/Windows i suport per a Windows.
 
 ## Git
 
-- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit confirmat: el dels documents únics de contracte i la pantalla de documents restringida (26-5). Queda per confirmar el
-  d'aquest `PROGRES.md` i el del nou `NOTES.md` (vegeu "Pendent de confirmar").
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últims commits confirmats: els del bloc de revisions de lloguer (pas 29, fins a l'avís "Carta pendent"). Queda per confirmar el d'aquests dos
+  documents (vegeu "Pendent de confirmar").
