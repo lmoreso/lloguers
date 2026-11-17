@@ -1,24 +1,25 @@
-import { Stack, Text, Title } from '@mantine/core'
+import { Fieldset, Stack, Text, Title } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
+import { Config, ConfigObtinguda } from '../../../shared/tipus'
 import SelectorIdioma from '../components/SelectorIdioma'
 import SelectorPosicioMenu from '../components/SelectorPosicioMenu'
-import type { PosicioMenu } from '../../../shared/tipus'
+import SelectorDiesAvis from '@renderer/components/SelectorDiesAvis'
 
 interface Props {
-  posicioMenu: PosicioMenu
-  onCanviarPosMenu: (posicio: PosicioMenu) => void
+  config: ConfigObtinguda
+  onCanviarConfig: (canvis: Partial<Config>) => void
 }
 
-function Configuracio({ posicioMenu, onCanviarPosMenu }: Props): React.JSX.Element {
+function Configuracio({ config, onCanviarConfig }: Props): React.JSX.Element {
   const { t } = useTranslation()
 
   return (
     <>
-      <Title order={2} mb="md">
-        {t('configuracio.titol')}
-      </Title>
+      <Stack gap="lg" maw={500} mx="auto">
+        <Title order={2} mb="md">
+          {t('configuracio.titol')}
+        </Title>
 
-      <Stack gap="lg" maw={350}>
         <Stack gap="xs">
           <Text fw={500}>{t('configuracio.idioma')}</Text>
           <SelectorIdioma />
@@ -26,8 +27,36 @@ function Configuracio({ posicioMenu, onCanviarPosMenu }: Props): React.JSX.Eleme
 
         <Stack gap="xs">
           <Text fw={500}>{t('configuracio.posicioMenu')}</Text>
-          <SelectorPosicioMenu posicio={posicioMenu} onCanviar={onCanviarPosMenu} />
+          <SelectorPosicioMenu
+            posicio={config.posicioMenu}
+            onCanviar={(posicio) => onCanviarConfig({ posicioMenu: posicio })}
+          />
         </Stack>
+
+        <Fieldset legend={t('configuracio.avisos')}>
+          <Stack gap="lg">
+            <SelectorDiesAvis
+              label={t('configuracio.diesDocumentCaducat')}
+              valor={config.diesAvisDocumentCaducat}
+              clau="diesAvisDocumentCaducat"
+              onCanviar={(valor) => onCanviarConfig({ diesAvisDocumentCaducat: valor })}
+            />
+
+            <SelectorDiesAvis
+              label={t('configuracio.diesFiContracte')}
+              valor={config.diesAvisFiContracte}
+              clau="diesAvisFiContracte"
+              onCanviar={(valor) => onCanviarConfig({ diesAvisFiContracte: valor })}
+            />
+
+            <SelectorDiesAvis
+              label={t('configuracio.diesRevisioLloguer')}
+              valor={config.diesAvisRevisioLloguer}
+              clau="diesAvisRevisioLloguer"
+              onCanviar={(valor) => onCanviarConfig({ diesAvisRevisioLloguer: valor })}
+            />
+          </Stack>
+        </Fieldset>
       </Stack>
     </>
   )

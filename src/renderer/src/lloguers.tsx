@@ -14,8 +14,7 @@ import RevisionsContracte from './pantalles/RevisionsContracte'
 import Revisions from './pantalles/Revisions'
 import Configuracio from './pantalles/Configuracio'
 import { useEffect, useState } from 'react'
-import { PosicioMenu } from '../../shared/tipus'
-import { esPosicioMenu } from '../../shared/validacions'
+import { Config, ConfigObtinguda } from '../../shared/tipus'
 
 const SECCIONS = [
   { ruta: '/ultims-contractes', clau: 'menu.ultimsContractes' },
@@ -26,15 +25,59 @@ const SECCIONS = [
   { ruta: '/quant-a', clau: 'menu.quantA' }
 ] as const
 
-interface EstructuraProps {
-  posMenu: PosicioMenu
-  onCanviarPosMenu: (posicio: PosicioMenu) => void
+interface RutasProps {
+  config: ConfigObtinguda
+  onCanviarConfig: (canvis: Partial<Config>) => void
 }
 
-function Estructura({ posMenu, onCanviarPosMenu }: EstructuraProps): React.JSX.Element {
+function Rutas({ config, onCanviarConfig }: RutasProps): React.JSX.Element {
+  return (
+    <AppShell.Main>
+      <Routes>
+        <Route path="/" element={<Navigate to="/ultims-contractes" replace />} />
+        <Route path="/immobles" element={<Immobles config={config} />} />
+        <Route path="/immobles/nou" element={<FitxaImmoble key="nou" config={config} />} />
+        <Route path="/immobles/:id" element={<FitxaImmoble key="edicio" config={config} />} />
+        <Route path="/immobles/:id/contractes" element={<Contractes config={config} />} />
+        <Route
+          path="/immobles/:id/contractes/nou"
+          element={<FitxaContracte key="nou" config={config} />}
+        />
+        <Route path="/immobles/:id/documents" element={<DocumentsImmoble />} />
+        <Route path="/ultims-contractes" element={<UltimsContractes config={config} />} />
+        <Route path="/revisions" element={<Revisions />} />
+        <Route
+          path="/immobles/:id/contractes/:idContracte"
+          element={<FitxaContracte key="edicio" config={config} />}
+        />
+        <Route
+          path="/immobles/:id/contractes/:idContracte/documents"
+          element={<DocumentsContracte />}
+        />
+        <Route
+          path="/immobles/:id/contractes/:idContracte/revisions"
+          element={<RevisionsContracte />}
+        />
+        <Route path="/inquilins" element={<Inquilins />} />
+        <Route
+          path="/configuracio"
+          element={<Configuracio config={config} onCanviarConfig={onCanviarConfig} />}
+        />
+        <Route path="/quant-a" element={<QuantA />} />
+      </Routes>
+    </AppShell.Main>
+  )
+}
+
+interface EstructuraProps {
+  config: ConfigObtinguda
+  onCanviarConfig: (canvis: Partial<Config>) => void
+}
+
+function Estructura({ config, onCanviarConfig }: EstructuraProps): React.JSX.Element {
   const { t } = useTranslation()
 
-  if (posMenu === 'top') {
+  if (config.posicioMenu === 'top') {
     return (
       <AppShell header={{ height: 60 }} padding="md">
         <AppShell.Header px="md">
@@ -50,7 +93,7 @@ function Estructura({ posMenu, onCanviarPosMenu }: EstructuraProps): React.JSX.E
             </Group>
           </Group>
         </AppShell.Header>
-        <Rutas />
+        <Rutas config={config} onCanviarConfig={onCanviarConfig} />
       </AppShell>
     )
   } else {
@@ -64,66 +107,35 @@ function Estructura({ posMenu, onCanviarPosMenu }: EstructuraProps): React.JSX.E
             <NavLink key={s.ruta} component={Link} to={s.ruta} label={t(s.clau)} />
           ))}
         </AppShell.Navbar>
-        <Rutas />
+        <Rutas config={config} onCanviarConfig={onCanviarConfig} />
       </AppShell>
-    )
-  }
-
-  function Rutas(): React.JSX.Element {
-    return (
-      <AppShell.Main>
-        <Routes>
-          <Route path="/" element={<Navigate to="/ultims-contractes" replace />} />
-          <Route path="/immobles" element={<Immobles />} />
-          <Route path="/immobles/nou" element={<FitxaImmoble key="nou" />} />
-          <Route path="/immobles/:id" element={<FitxaImmoble key="edicio" />} />
-          <Route path="/immobles/:id/contractes" element={<Contractes />} />
-          <Route path="/immobles/:id/contractes/nou" element={<FitxaContracte key="nou" />} />
-          <Route path="/immobles/:id/documents" element={<DocumentsImmoble />} />
-          <Route path="/ultims-contractes" element={<UltimsContractes />} />
-          <Route path="/revisions" element={<Revisions />} />
-          <Route
-            path="/immobles/:id/contractes/:idContracte"
-            element={<FitxaContracte key="edicio" />}
-          />
-          <Route
-            path="/immobles/:id/contractes/:idContracte/documents"
-            element={<DocumentsContracte />}
-          />
-          <Route
-            path="/immobles/:id/contractes/:idContracte/revisions"
-            element={<RevisionsContracte />}
-          />
-          <Route path="/inquilins" element={<Inquilins />} />
-          <Route
-            path="/configuracio"
-            element={<Configuracio posicioMenu={posMenu} onCanviarPosMenu={onCanviarPosMenu} />}
-          />
-          <Route path="/quant-a" element={<QuantA />} />
-        </Routes>
-      </AppShell.Main>
     )
   }
 }
 
 // HashRouter: l'app empaquetada es carrega des d'un fitxer (file://), on BrowserRouter no funciona.
 function Lloguers(): React.JSX.Element {
-  const [posicioMenu, setPosicioMenu] = useState<PosicioMenu>('top')
+  const [config, setConfig] = useState<ConfigObtinguda | null>(null)
 
   useEffect(() => {
     const carregarConfig = async (): Promise<void> => {
       const resultat = await window.api.config.obtenir()
 
-      if (resultat.ok && esPosicioMenu(resultat.dades.posicioMenu)) {
-        setPosicioMenu(resultat.dades.posicioMenu)
+      if (resultat.ok) {
+        setConfig(resultat.dades)
       }
     }
 
     void carregarConfig()
   }, [])
+
+  function canviarConfig(canvis: Partial<Config>): void {
+    setConfig((actual) => (actual ? { ...actual, ...canvis } : actual))
+  }
+
   return (
     <HashRouter>
-      <Estructura posMenu={posicioMenu} onCanviarPosMenu={setPosicioMenu} />{' '}
+      {config && <Estructura config={config} onCanviarConfig={canviarConfig} />}
     </HashRouter>
   )
 }

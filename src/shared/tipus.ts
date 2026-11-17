@@ -245,6 +245,15 @@ export type DocumentImmobleDades = Pick<DocumentImmoble, 'tipus' | 'comentaris' 
 // Posició del menú de la aplicació
 export type PosicioMenu = 'top' | 'left'
 
+export const DIES_MINIMS_AVIS = 15
+export const DIES_MAXIMS_AVIS = 180
+export const DIES_DOCUMENT_DEF = 60
+export const DIES_FI_CONTR_DEF = 90
+export const DIES_REVISIO_DEF = 60
+
+export type ClauDiesAvis =
+  'diesAvisDocumentCaducat' | 'diesAvisFiContracte' | 'diesAvisRevisioLloguer'
+
 // Contingut de ~/Lloguers/config.json
 export interface Config {
   idioma: Idioma
@@ -252,6 +261,9 @@ export interface Config {
   formatExportacio: FormatExportacio
   pathImportDocs: string
   posicioMenu: PosicioMenu
+  diesAvisDocumentCaducat: number
+  diesAvisFiContracte: number
+  diesAvisRevisioLloguer: number
 }
 
 // Resposta de config:obtenir: la configuració, més si ve del fitxer (confirmat)

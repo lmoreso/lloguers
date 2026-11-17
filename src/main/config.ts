@@ -9,7 +9,13 @@ import type {
   Idioma,
   PosicioMenu
 } from '../shared/tipus'
-import { esFormatExportacio, esIdioma, esPathDirectory, esPosicioMenu } from '../shared/validacions'
+import {
+  esDiesAvis,
+  esFormatExportacio,
+  esIdioma,
+  esPathDirectory,
+  esPosicioMenu
+} from '../shared/validacions'
 
 const configPath = path.join(DADES, 'config.json')
 
@@ -37,7 +43,10 @@ function obtenirConfigPerDefecte(): Config {
     pathExportFiles: app.getPath('downloads'),
     pathImportDocs: app.getPath('documents'),
     formatExportacio: 'xlsx',
-    posicioMenu: 'left'
+    posicioMenu: 'left',
+    diesAvisDocumentCaducat: 60,
+    diesAvisFiContracte: 90,
+    diesAvisRevisioLloguer: 60
   }
 }
 
@@ -68,7 +77,16 @@ function normalitzarConfig(brut: unknown): {
       : perDefecte.formatExportacio,
     posicioMenu: esPosicioMenu(dades.posicioMenu)
       ? (dades.posicioMenu as PosicioMenu)
-      : perDefecte.posicioMenu
+      : perDefecte.posicioMenu,
+    diesAvisDocumentCaducat: esDiesAvis(dades.diesAvisDocumentCaducat)
+      ? (dades.diesAvisDocumentCaducat as number)
+      : perDefecte.diesAvisDocumentCaducat,
+    diesAvisFiContracte: esDiesAvis(dades.diesAvisFiContracte)
+      ? (dades.diesAvisFiContracte as number)
+      : perDefecte.diesAvisFiContracte,
+    diesAvisRevisioLloguer: esDiesAvis(dades.diesAvisRevisióLloguer)
+      ? (dades.diesAvisRevisióLloguer as number)
+      : perDefecte.diesAvisRevisioLloguer
   }
 
   return { config, idiomaConfirmat }

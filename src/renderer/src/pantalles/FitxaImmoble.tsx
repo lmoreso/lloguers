@@ -18,9 +18,12 @@ import { teAvisos } from '../utils/avisosContracte'
 import { esOk } from '../utils/resultat'
 import FormulariImmoble from './FormulariImmoble'
 import type { AccionsCapcalera } from './FormulariImmoble'
-import type { Immoble } from '../../../shared/tipus'
+import type { ConfigObtinguda, Immoble } from '../../../shared/tipus'
 
-function FitxaImmoble(): React.JSX.Element {
+interface Props {
+  config: ConfigObtinguda
+}
+function FitxaImmoble({ config }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams() // undefined a /immobles/nou
@@ -42,7 +45,9 @@ function FitxaImmoble(): React.JSX.Element {
         if (esOk(rImmoble)) setImmoble(rImmoble.dades)
         if (esOk(rUltims)) {
           setContractesAmbAvisos(
-            rUltims.dades.some((x) => x.immoble.id === Number(id) && x.contractes.some(teAvisos))
+            rUltims.dades.some(
+              (x) => x.immoble.id === Number(id) && x.contractes.some((c) => teAvisos(c, config))
+            )
           )
         }
         setCarregant(false)
@@ -86,7 +91,7 @@ function FitxaImmoble(): React.JSX.Element {
   // a la dreta). Es veu a totes les pestanyes. La dibuixa el formulari a dalt de tot, i ens dona
   // `anarAmbGuarda` per preguntar abans de sortir si hi ha canvis sense desar.
   function capcalera({ anarAmbGuarda, desar, tornar }: AccionsCapcalera): React.ReactNode {
-    const alertesImmoble = immoble ? alertes(immoble) : []
+    const alertesImmoble = immoble ? alertes(immoble, config.diesAvisDocumentCaducat) : []
     return (
       <Stack gap="sm" mb="md">
         <div>

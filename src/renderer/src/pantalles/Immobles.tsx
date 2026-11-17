@@ -17,7 +17,7 @@ import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
-import type { Immoble } from '../../../shared/tipus'
+import type { ConfigObtinguda, Immoble } from '../../../shared/tipus'
 import {
   IconDots,
   IconFileText,
@@ -31,7 +31,11 @@ import { teAvisos } from '../utils/avisosContracte'
 import { alertes } from '../utils/avisosImmoble'
 import { formatM2 } from '@renderer/utils/formats'
 
-function Immobles(): React.JSX.Element {
+interface Props {
+  config: ConfigObtinguda
+}
+
+function Immobles({ config }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [immobles, setImmobles] = useState<Immoble[]>([])
@@ -40,7 +44,9 @@ function Immobles(): React.JSX.Element {
   const [ambAvisosContractes, setAmbAvisosContractes] = useState<Set<number>>(new Set())
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
-  const ambAvisos = immobles.filter((i) => alertes(i).length > 0).length
+  const ambAvisos = immobles.filter(
+    (i) => alertes(i, config.diesAvisDocumentCaducat).length > 0
+  ).length
 
   useEffect(() => {
     let cancelat = false
@@ -51,7 +57,9 @@ function Immobles(): React.JSX.Element {
         if (esOk(rUltims)) {
           setAmbAvisosContractes(
             new Set(
-              rUltims.dades.filter((x) => x.contractes.some(teAvisos)).map((x) => x.immoble.id)
+              rUltims.dades
+                .filter((x) => x.contractes.some((c) => teAvisos(c, config)))
+                .map((x) => x.immoble.id)
             )
           )
         }
@@ -136,7 +144,7 @@ function Immobles(): React.JSX.Element {
                 </Table.Td>
                 <Table.Td>
                   <Stack gap={4} align="flex-start">
-                    {alertes(i).map((a) => (
+                    {alertes(i, config.diesAvisDocumentCaducat).map((a) => (
                       <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
                         {t(`immobles.caducitats.${a.clau}`)}: {t(`immobles.caducitats.${a.estat}`)}
                       </Badge>

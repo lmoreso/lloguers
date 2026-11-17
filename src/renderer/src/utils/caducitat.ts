@@ -1,16 +1,10 @@
 import dayjs from 'dayjs'
 
-// Dies d'antelació amb què s'avisa que un document d'un immoble està a punt de caducar.
-export const DIES_AVIS = 60
-// Dies d'antelació per als avisos dels contractes vigents.
-export const DIES_AVIS_FI = 90
-export const DIES_AVIS_REVISIO = 60
-
 export type EstatCaducitat = 'caducat' | 'aviat' | null
 
 // `data` és text ISO AAAA-MM-DD (o null). Es compara només el dia, en hora local:
 // el dia de la data encara es considera vigent.
-export function estatCaducitat(data: string | null, diesAvis: number = DIES_AVIS): EstatCaducitat {
+export function estatCaducitat(data: string | null, diesAvis: number): EstatCaducitat {
   if (!data) return null
   const caducitat = dayjs(data)
   if (!caducitat.isValid()) return null

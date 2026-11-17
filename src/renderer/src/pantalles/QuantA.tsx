@@ -99,7 +99,8 @@ function QuantA(): React.JSX.Element {
   }
 
   return (
-    <Stack gap="md" maw={640} h="100%" style={{ minHeight: 0 }}>
+    // <Stack gap="md" maw={640} h="100%" style={{ minHeight: 0 }}>
+    <Stack gap="lg" maw={800} mx="auto">
       <Group gap="sm">
         <Title order={2}>{t('quantA.titol')}</Title>
       </Group>

@@ -94,7 +94,12 @@
     "idioma": "Idioma",
     "posicioMenu": "Posición del menú",
     "menuSuperior": "Superior",
-    "menuLateral": "Lateral"
+    "menuLateral": "Lateral",
+    "avisos": "Avisos",
+    "diesDocumentCaducat": "Documentos caducados (días de antelación)",
+    "diesFiContracte": "Fin de contrato (días de antelación)",
+    "diesRevisioLloguer": "Revisión del alquiler (días de antelación)"
+
   },
   "quantA": {
     "titol": "Acerca de",

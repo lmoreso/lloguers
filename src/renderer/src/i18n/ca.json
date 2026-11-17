@@ -94,7 +94,11 @@
     "idioma": "Idioma",
     "posicioMenu": "Posició del menú",
     "menuSuperior": "Superior",
-    "menuLateral": "Lateral"
+    "menuLateral": "Lateral",
+    "avisos": "Avisos",
+    "diesDocumentCaducat": "Documents caducats (dies d'antelació)",
+    "diesFiContracte": "Fi de contracte (dies d'antelació)",
+    "diesRevisioLloguer": "Revisió del lloguer (dies d'antelació)"
   },
   "quantA": {
     "titol": "Quant a",

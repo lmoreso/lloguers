@@ -6,14 +6,17 @@ import { adreca } from '../utils/adreca'
 import { formatData } from '../utils/dates'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
-import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
+import type { ConfigObtinguda, ContracteLlistat, Immoble } from '../../../shared/tipus'
 import AccionsContracte from './AccionsContracte'
 import AvisosContracte from '../components/AvisosContracte'
 import { IconCornerUpLeft, IconPencil, IconPlus } from '@tabler/icons-react'
 import { useEditarContracte } from '../utils/useEditarContracte'
 
+interface Props {
+  config: ConfigObtinguda
+}
 // Contractes d'un immoble. S'hi entra només des d'Immobles (/immobles/:id/contractes).
-function Contractes(): React.JSX.Element {
+function Contractes({ config }: Props): React.JSX.Element {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams()
@@ -133,7 +136,7 @@ function Contractes(): React.JSX.Element {
                     </Table.Td>
                     <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
                     <Table.Td>
-                      <AvisosContracte contracte={c} />
+                      <AvisosContracte contracte={c} config={config} />
                     </Table.Td>
                     <Table.Td style={{ width: 1 }}>
                       <AccionsContracte contracte={c} onCanvi={() => setVersio((v) => v + 1)} />

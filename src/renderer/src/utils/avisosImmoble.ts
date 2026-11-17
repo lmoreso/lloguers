@@ -8,10 +8,11 @@ const DOCUMENTS = [
 
 // Documents d'un immoble que estan caducats o a punt de caducar.
 export function alertes(
-  i: Immoble
+  i: Immoble,
+  diesAvis: number
 ): { clau: 'certificat' | 'cedula'; estat: 'caducat' | 'aviat' }[] {
   return DOCUMENTS.flatMap((d) => {
-    const estat = estatCaducitat(i[d.camp])
+    const estat = estatCaducitat(i[d.camp], diesAvis)
     return estat ? [{ clau: d.clau, estat }] : []
   })
 }

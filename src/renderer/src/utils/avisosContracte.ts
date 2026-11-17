@@ -1,15 +1,19 @@
-import { aniversariRevisio, DIES_AVIS_FI, DIES_AVIS_REVISIO, estatCaducitat } from './caducitat'
-import type { Contracte, ContracteLlistat } from '../../../shared/tipus'
+import { aniversariRevisio, estatCaducitat } from './caducitat'
+import type { ConfigObtinguda, Contracte, ContracteLlistat } from '../../../shared/tipus'
 
 // Avisos d'un contracte. Només els vigents (sense data de fi) en tenen.
 export function avisos(
-  c: ContracteLlistat
+  c: ContracteLlistat,
+  config: ConfigObtinguda
 ): { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] {
   if (c.data_fi !== null) return []
   const llista: { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] = []
-  const fi = estatCaducitat(c.d_fi_prevista, DIES_AVIS_FI)
+  const fi = estatCaducitat(c.d_fi_prevista, config.diesAvisFiContracte)
   if (fi) llista.push({ clau: 'fi', estat: fi })
-  const revisio = estatCaducitat(aniversariRevisio(c.data_ultima_revisio), DIES_AVIS_REVISIO)
+  const revisio = estatCaducitat(
+    aniversariRevisio(c.data_ultima_revisio),
+    config.diesAvisRevisioLloguer
+  )
   if (revisio) llista.push({ clau: 'revisio', estat: revisio })
   return llista
 }
@@ -61,9 +65,9 @@ export function devolucioPendent(c: ContracteLlistat): boolean {
 }
 
 // Cert si el contracte té algun avís de qualsevol tipus.
-export function teAvisos(c: ContracteLlistat): boolean {
+export function teAvisos(c: ContracteLlistat, config: ConfigObtinguda): boolean {
   return (
-    avisos(c).length > 0 ||
+    avisos(c, config).length > 0 ||
     cartaPendent(c) ||
     faltenDocuments(c) ||
     ingresPendent(c) ||

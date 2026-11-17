@@ -14,7 +14,8 @@ import type {
   Immoble,
   ImmobleAmbContractes,
   DadesExportacio,
-  ExtensioExportacio
+  ExtensioExportacio,
+  ConfigObtinguda
 } from '../../../shared/tipus'
 import { IconFileExport, IconPencil, IconPlus } from '@tabler/icons-react'
 import { useEditarContracte } from '@renderer/utils/useEditarContracte'
@@ -32,9 +33,12 @@ interface Fila {
   contracte: ContracteLlistat | null
 }
 
+interface Props {
+  config: ConfigObtinguda
+}
 // Vista "Últims contractes": per a cada immoble, els contractes en curs (vigents o tancats a futur) i,
 // si ja han acabat tots, l'últim. Els immobles sense contracte també hi són.
-function UltimsContractes(): React.JSX.Element {
+function UltimsContractes({ config }: Props): React.JSX.Element {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [dades, setDades] = useState<ImmobleAmbContractes[]>([])
@@ -71,7 +75,7 @@ function UltimsContractes(): React.JSX.Element {
     if (ingresPendent(c)) avisosText.add(t('contractes.avisos.ingresPendent'))
     if (faltenDocuments(c)) avisosText.add(t('contractes.avisos.documents'))
     if (devolucioPendent(c)) avisosText.add(t('contractes.avisos.devolucioPendent'))
-    avisos(c).map((a) => avisosText.add(t(`contractes.avisos.${a.clau}.${a.estat}`)))
+    avisos(c, config).map((a) => avisosText.add(t(`contractes.avisos.${a.clau}.${a.estat}`)))
     // console.log('AvisosContracteSet', c, avisosText)
     return avisosText.size > 0 ? Array.from(avisosText).join(' | ') : null
   }
@@ -227,7 +231,7 @@ function UltimsContractes(): React.JSX.Element {
                     <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
                     <Table.Td>{formatData(c.data_ultima_revisio)}</Table.Td>
                     <Table.Td>
-                      <AvisosContracte contracte={c} />
+                      <AvisosContracte contracte={c} config={config} />
                     </Table.Td>
                     <Table.Td style={{ width: 1 }}>
                       <AccionsContracte contracte={c} onCanvi={() => setVersio((v) => v + 1)} />

@@ -7,15 +7,20 @@ import {
   faltenDocuments,
   ingresPendent
 } from '../utils/avisosContracte'
-import type { ContracteLlistat } from '../../../shared/tipus'
+import type { ConfigObtinguda, ContracteLlistat } from '../../../shared/tipus'
+
+interface Props {
+  contracte: ContracteLlistat
+  config: ConfigObtinguda
+}
 
 // Etiquetes d'avís d'un contracte, apilades. Compartit per la llista de contractes d'un immoble
 // i per la vista "Últims contractes".
-function AvisosContracte({ contracte: c }: { contracte: ContracteLlistat }): React.JSX.Element {
+function AvisosContracte({ contracte: c, config }: Props): React.JSX.Element {
   const { t } = useTranslation()
   return (
     <Stack gap={4} align="flex-start">
-      {avisos(c).map((a) => (
+      {avisos(c, config).map((a) => (
         <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
           {t(`contractes.avisos.${a.clau}.${a.estat}`)}
         </Badge>

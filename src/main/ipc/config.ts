@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import { executar } from '../errors'
 import { obtenirConfig, desarConfig } from '../config'
-import { esIdioma, esPathDirectory, esPosicioMenu } from '../../shared/validacions'
+import { esDiesAvis, esIdioma, esPathDirectory, esPosicioMenu } from '../../shared/validacions'
 import { esFormatExportacio } from '../../shared/validacions'
 import type { Config } from '../../shared/tipus'
 
@@ -53,6 +53,36 @@ export function registrarIpcConfig(): void {
           `[ipc.config.desar] Posició del menú invàlida (${configNeta.posicioMenu}); s'ignora la propietat`
         )
         delete configNeta.idioma
+      }
+
+      if (
+        configNeta.diesAvisDocumentCaducat !== undefined &&
+        !esDiesAvis(configNeta.diesAvisDocumentCaducat)
+      ) {
+        console.log(
+          `[ipc.config.desar] Dies avis docs caducats invàlids (${configNeta.diesAvisDocumentCaducat}); s'ignora la propietat`
+        )
+        delete configNeta.diesAvisDocumentCaducat
+      }
+
+      if (
+        configNeta.diesAvisFiContracte !== undefined &&
+        !esDiesAvis(configNeta.diesAvisFiContracte)
+      ) {
+        console.log(
+          `[ipc.config.desar] Dies avis fi contracte invàlids (${configNeta.diesAvisFiContracte}); s'ignora la propietat`
+        )
+        delete configNeta.diesAvisFiContracte
+      }
+
+      if (
+        configNeta.diesAvisRevisioLloguer !== undefined &&
+        !esDiesAvis(configNeta.diesAvisRevisioLloguer)
+      ) {
+        console.log(
+          `[ipc.config.desar] Dies avis revisió lloguer invàlids (${configNeta.diesAvisRevisioLloguer}); s'ignora la propietat`
+        )
+        delete configNeta.diesAvisRevisioLloguer
       }
 
       if (Object.keys(configNeta).length > 0) {

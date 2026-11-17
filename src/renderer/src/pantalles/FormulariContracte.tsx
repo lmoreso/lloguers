@@ -25,6 +25,7 @@ import { aNumeroForm, buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
 import { MOTIUS_FI } from '../../../shared/tipus'
 import type {
+  ConfigObtinguda,
   Contracte,
   ContracteDades,
   DocumentContracte,
@@ -92,6 +93,8 @@ export interface AccionsCapcalera {
   desar: () => void
   // Torna a la llista de contractes de l'immoble (amb la mateixa protecció).
   tornar: () => void
+  // Configuració de l'aplicació
+  config: ConfigObtinguda
 }
 
 interface Props {
@@ -107,6 +110,8 @@ interface Props {
   onPestanya: (pestanya: string) => void
   // Es crida quan s'afegeix o s'elimina un document des d'un clip (la fitxa refresca la barra d'avisos).
   onDocumentsCanvi: () => void
+  // Configuració de l'aplicació
+  config: ConfigObtinguda
 }
 
 function FormulariContracte({
@@ -117,7 +122,8 @@ function FormulariContracte({
   capcalera,
   pestanya,
   onPestanya,
-  onDocumentsCanvi
+  onDocumentsCanvi,
+  config
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -428,7 +434,7 @@ function FormulariContracte({
 
   return (
     <>
-      {capcalera({ anarAmbGuarda, desar: desarFormulari, tornar })}
+      {capcalera({ anarAmbGuarda, desar: desarFormulari, tornar, config })}
 
       <Tabs value={pestanya} onChange={(v) => v && onPestanya(v)} keepMounted>
         <Tabs.List>

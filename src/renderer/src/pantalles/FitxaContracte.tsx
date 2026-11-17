@@ -7,7 +7,13 @@ import { adreca } from '../utils/adreca'
 import { esOk } from '../utils/resultat'
 import FormulariContracte from './FormulariContracte'
 import type { AccionsCapcalera } from './FormulariContracte'
-import type { Contracte, Immoble, Inquili, ContracteLlistat } from '../../../shared/tipus'
+import type {
+  Contracte,
+  Immoble,
+  Inquili,
+  ContracteLlistat,
+  ConfigObtinguda
+} from '../../../shared/tipus'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
@@ -22,8 +28,12 @@ import {
 } from '../utils/avisosContracte'
 import { useTornar } from '../utils/useTornar'
 
+interface Props {
+  config: ConfigObtinguda
+}
+
 // /immobles/:id/contractes/nou  i  /immobles/:id/contractes/:idContracte
-function FitxaContracte(): React.JSX.Element {
+function FitxaContracte({ config }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id, idContracte } = useParams() // idContracte és undefined en un contracte nou
@@ -121,7 +131,7 @@ function FitxaContracte(): React.JSX.Element {
   // Capçalera: títol, subtítol i una sola fila de botons (Desar i Documents a l'esquerra; Tornar a la dreta). La
   // dibuixa el formulari a dalt de tot, i ens dona `anarAmbGuarda` per preguntar abans de sortir si hi ha
   // canvis sense desar.
-  function capcalera({ anarAmbGuarda, desar, tornar }: AccionsCapcalera): React.ReactNode {
+  function capcalera({ anarAmbGuarda, desar, tornar, config }: AccionsCapcalera): React.ReactNode {
     return (
       <Stack gap="sm" mb="md">
         <div>
@@ -140,7 +150,7 @@ function FitxaContracte(): React.JSX.Element {
         {llistat &&
           (() => {
             const linies: string[] = [
-              ...avisos(llistat).map((a) => t(`contractes.avisos.${a.clau}.${a.estat}`)),
+              ...avisos(llistat, config).map((a) => t(`contractes.avisos.${a.clau}.${a.estat}`)),
               ...(cartaPendent(llistat) ? [t('contractes.avisCarta')] : []),
               ...(ingresPendent(llistat) ? [t('contractes.avisIngres')] : []),
               ...documentsQueFalten(llistat).map((d) => t(`documents.avis.${d}`)),
@@ -237,6 +247,7 @@ function FitxaContracte(): React.JSX.Element {
           pestanya={pestanya}
           onPestanya={setPestanya}
           onDocumentsCanvi={() => setVersioDades((v) => v + 1)}
+          config={config}
         />
       )}
     </>
