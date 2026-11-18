@@ -57,6 +57,8 @@ const api = {
       ipcRenderer.invoke('contractes:ultims'),
     obtenirUn: (id: number): Promise<Resultat<Contracte | null>> =>
       ipcRenderer.invoke('contractes:obtenirUn', id),
+    ultimImmoble: (id: number): Promise<Resultat<ContracteLlistat | null>> =>
+      ipcRenderer.invoke('contractes:ultimImmoble', id),
     obtenirUnExt: (id: number): Promise<Resultat<ContracteLlistat | null>> =>
       ipcRenderer.invoke('contractes:obtenirUnExt', id),
     crear: (dades: ContracteDades): Promise<Resultat<Contracte>> =>

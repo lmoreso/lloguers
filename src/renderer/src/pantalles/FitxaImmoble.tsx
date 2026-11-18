@@ -19,6 +19,7 @@ import { esOk } from '../utils/resultat'
 import FormulariImmoble from './FormulariImmoble'
 import type { AccionsCapcalera } from './FormulariImmoble'
 import type { ConfigObtinguda, Immoble } from '../../../shared/tipus'
+import { useTornar } from '../utils/useTornar'
 
 interface Props {
   config: ConfigObtinguda
@@ -35,6 +36,8 @@ function FitxaImmoble({ config }: Props): React.JSX.Element {
   const [versioForm, setVersioForm] = useState(0)
   // Pestanya activa del formulari. Viu aquí perquè es conservi quan el formulari es torna a muntar en desar.
   const [pestanya, setPestanya] = useState('adreca')
+  // Torna a la pantalla que ha cridat aquesta; si no n'hi ha cap, a la llista d'Immobles.
+  const tornarEnrere = useTornar('/immobles')
 
   useEffect(() => {
     if (id === undefined) return
@@ -57,7 +60,7 @@ function FitxaImmoble({ config }: Props): React.JSX.Element {
     return () => {
       cancelat = true
     }
-  }, [id])
+  }, [config, id])
 
   const noTrobat = id !== undefined && !carregant && immoble === null
   const titol = id !== undefined ? t('immobles.editar') : t('immobles.nou')
@@ -82,7 +85,7 @@ function FitxaImmoble({ config }: Props): React.JSX.Element {
         const resposta = await window.api.inmobles.eliminar(i.id)
         if (!esOk(resposta)) return
         notifications.show({ color: 'green', message: t('immobles.eliminat') })
-        navigate('/immobles')
+        tornarEnrere()
       }
     })
   }
@@ -182,7 +185,7 @@ function FitxaImmoble({ config }: Props): React.JSX.Element {
       {noTrobat && (
         <>
           <Text c="dimmed">{t('immobles.noTrobat')}</Text>
-          <Button mt="md" variant="default" onClick={() => navigate('/immobles')}>
+          <Button mt="md" variant="default" onClick={tornarEnrere}>
             {t('comu.tornar')}
           </Button>
         </>

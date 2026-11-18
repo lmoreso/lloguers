@@ -11,6 +11,7 @@ import AccionsContracte from './AccionsContracte'
 import AvisosContracte from '../components/AvisosContracte'
 import { IconCornerUpLeft, IconPencil, IconPlus } from '@tabler/icons-react'
 import { useEditarContracte } from '../utils/useEditarContracte'
+import { useTornar } from '../utils/useTornar'
 
 interface Props {
   config: ConfigObtinguda
@@ -25,8 +26,9 @@ function Contractes({ config }: Props): React.JSX.Element {
   const [carregant, setCarregant] = useState(true)
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
-
   const editarContracte = useEditarContracte()
+  // Torna a la pantalla que ha cridat aquesta (la llista d'Immobles, l'edició de l'immoble, "Últims contractes"...).
+  const tornar = useTornar('/immobles')
 
   useEffect(() => {
     let cancelat = false
@@ -57,7 +59,7 @@ function Contractes({ config }: Props): React.JSX.Element {
             mt="md"
             variant="default"
             leftSection={<IconCornerUpLeft size={16} />}
-            onClick={() => navigate('/immobles')}
+            onClick={tornar}
           >
             {t('comu.tornar')}
           </Button>
@@ -78,7 +80,7 @@ function Contractes({ config }: Props): React.JSX.Element {
               <Button
                 variant="default"
                 leftSection={<IconCornerUpLeft size={16} />}
-                onClick={() => navigate('/immobles')}
+                onClick={tornar}
               >
                 {t('comu.tornar')}
               </Button>

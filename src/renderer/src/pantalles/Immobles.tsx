@@ -70,7 +70,7 @@ function Immobles({ config }: Props): React.JSX.Element {
     return () => {
       cancelat = true
     }
-  }, [versio])
+  }, [config, versio])
 
   function demanarEliminar(i: Immoble): void {
     modals.openConfirmModal({

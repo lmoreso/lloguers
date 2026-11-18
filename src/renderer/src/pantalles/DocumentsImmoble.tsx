@@ -10,7 +10,7 @@ import {
   IconPlus,
   IconTrash
 } from '@tabler/icons-react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
 import { formatData } from '../utils/dates'
@@ -19,19 +19,22 @@ import AfegirDocumentImmoble from './AfegirDocumentImmoble'
 import EditarDocumentImmoble from './EditarDocumentImmoble'
 import { TIPUS_UNICS_IMMOBLE } from '../../../shared/tipus'
 import type { DocumentImmoble, Immoble } from '../../../shared/tipus'
+import { useTornar } from '../utils/useTornar'
 
 // Documents d'un immoble (/immobles/:id/documents). Les accions van a la capçalera, no a sota.
 // Els tipus únics (certificat, cèdula i fitxa cadastral) aquí només es poden visualitzar i eliminar: s'afegeixen
 // i s'editen des de l'edició de l'immoble.
 function DocumentsImmoble(): React.JSX.Element {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { id } = useParams()
   const [immoble, setImmoble] = useState<Immoble | null>(null)
   const [documents, setDocuments] = useState<DocumentImmoble[]>([])
   const [carregant, setCarregant] = useState(true)
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
+  // Torna a la pantalla que ha cridat aquesta (la llista d'Immobles o l'edició de l'immoble). Per defecte, l'edició
+  // de l'immoble; si l'immoble no existeix, la llista d'Immobles.
+  const tornar = useTornar(immoble === null ? '/immobles' : `/immobles/${id}`)
 
   useEffect(() => {
     let cancelat = false
@@ -106,7 +109,7 @@ function DocumentsImmoble(): React.JSX.Element {
       {!carregant && immoble === null && (
         <>
           <Text c="dimmed">{t('immobles.noTrobat')}</Text>
-          <Button mt="md" variant="default" onClick={() => navigate('/immobles')}>
+          <Button mt="md" variant="default" onClick={tornar}>
             {t('comu.tornar')}
           </Button>
         </>
@@ -120,7 +123,7 @@ function DocumentsImmoble(): React.JSX.Element {
                 <Title order={2}>{t('documentsImmoble.titol')}</Title>
                 <Button
                   variant="default"
-                  onClick={() => navigate(`/immobles/${immoble.id}`)}
+                  onClick={tornar}
                   leftSection={<IconCornerUpLeft size={16} />}
                 >
                   {t('comu.tornar')}

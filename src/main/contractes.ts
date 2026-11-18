@@ -133,6 +133,25 @@ export function obtenirUltimsContractes(): ImmobleAmbContractes[] {
   }))
 }
 
+// Últim contracte d'un immoble (només un x immoble)
+export function obtenirUltimContracteImmoble(id_inmoble: number): ContracteLlistat | undefined {
+  return db
+    .prepare(
+      `SELECT ${COLUMNES_LLISTAT}
+       FROM contractes c
+       JOIN inquilins q ON q.id = c.id_inquili
+       LEFT JOIN inquilins q2 ON q2.id = c.id_inquili_2
+       WHERE c.id = (
+            SELECT c2.id FROM contractes c2
+            WHERE c2.id_inmoble = c.id_inmoble
+            ORDER BY c2.data_inici DESC, c2.id DESC
+            LIMIT 1
+          )
+		  AND c.id_inmoble = ?`
+    )
+    .get(id_inmoble) as ContracteLlistat | undefined
+}
+
 export function obtenirContracte(id: number): Contracte | undefined {
   return db.prepare(`SELECT ${COLUMNES} FROM contractes WHERE id = ?`).get(id) as
     Contracte | undefined

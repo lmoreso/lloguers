@@ -7,6 +7,7 @@ import {
   obtenirContracte,
   obtenirContracteExt,
   obtenirContractes,
+  obtenirUltimContracteImmoble,
   obtenirUltimsContractes
 } from '../contractes'
 import type { ContracteDades } from '../../shared/tipus'
@@ -21,6 +22,10 @@ export function registrarIpcContractes(): void {
 
   ipcMain.handle('contractes:obtenirUn', (_, id: number) =>
     executar(() => obtenirContracte(id) ?? null)
+  )
+
+  ipcMain.handle('contractes:ultimImmoble', (_, id: number) =>
+    executar(() => obtenirUltimContracteImmoble(id) ?? null)
   )
 
   ipcMain.handle('contractes:obtenirUnExt', (_, id: number) =>

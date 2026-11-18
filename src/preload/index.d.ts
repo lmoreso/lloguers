@@ -44,6 +44,7 @@ declare global {
       contractes: {
         obtenir: (idInmoble: number) => Promise<Resultat<ContracteLlistat[]>>
         ultims: () => Promise<Resultat<ImmobleAmbContractes[]>>
+        ultimImmoble: (id: number) => Promise<Resultat<ContracteLlistat | null>>
         obtenirUnExt: (id: number) => Promise<Resultat<ContracteLlistat | null>>
         obtenirUn: (id: number) => Promise<Resultat<Contracte | null>>
         crear: (dades: ContracteDades) => Promise<Resultat<Contracte>>

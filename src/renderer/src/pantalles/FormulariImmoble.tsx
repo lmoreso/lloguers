@@ -3,7 +3,6 @@ import { Fieldset, Group, SimpleGrid, Stack, Tabs, TextInput } from '@mantine/co
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import CanvisSenseDesar from '../components/CanvisSenseDesar'
 import { esOk } from '../utils/resultat'
@@ -18,6 +17,7 @@ import DocumentUnicImmoble from './DocumentUnicImmoble'
 import { CampData } from '@renderer/components/CampData'
 import CampNumeric from '@renderer/components/CampNumeric'
 import { hiHaCapaOberta } from '../utils/teclat'
+import { useTornar } from '../utils/useTornar'
 
 // Els camps de text són sempre string al formulari; a la BD els buits són NULL.
 // Les dates són text ISO AAAA-MM-DD (o null), tal com les desa la BD. Els números (superfícies, imports i
@@ -101,7 +101,6 @@ function FormulariImmoble({
   onPestanya
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const anyActual = new Date().getFullYear()
 
   // Documents de l'immoble (els de tipus únic són els que es mostren a les icones de les seccions). Es desen a
@@ -301,7 +300,10 @@ function FormulariImmoble({
     })
   }
 
-  const tornar = (): void => anarAmbGuarda(() => navigate('/immobles'))
+  // Torna a la pantalla que ha cridat aquesta (la llista d'Immobles, un altre immoble, "Últims contractes"...),
+  // preguntant abans si hi ha canvis sense desar. Si no n'hi ha cap, va a la llista d'Immobles.
+  const tornarEnrere = useTornar('/immobles')
+  const tornar = (): void => anarAmbGuarda(tornarEnrere)
 
   // Desa el formulari (botó Desar i Ctrl+S). Si la validació falla, es canvia a la pestanya del primer error.
   function desarFormulari(): void {
