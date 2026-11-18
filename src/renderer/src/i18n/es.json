@@ -153,7 +153,12 @@
     "pestanyes": {
       "adreca": "Dirección y catastro",
       "certificat": "Certificado y cédula"
-    },      
+    },     
+    "afegirContracte" : "Añadir contrato",
+    "llistaContractes" : "Lista contratos",
+    "mesDadesContracte": "Mas datos del último contrato",
+    "inquili1": "Primer Inquilino",
+    "inquili2": "Segundo inquilino",
     "seccions": {
       "adreca": "Dirección",
       "cadastre": "Catastro",
@@ -270,7 +275,7 @@
     "desat": "Contrato guardado.",
     "ultims": {
       "titol": "Últimos contratos",
-      "senseContracte": "Sin contrato"
+      "senseContracte": "Inmueble sin contratos informados"
     }, 
     "editarInquili": "Editar el inquilino",    
     "avisIngres": "Hay que gestionar el ingreso de la fianza en el INCASOL: todavía no consta la fecha del ingreso.",    

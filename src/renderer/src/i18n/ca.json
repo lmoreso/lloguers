@@ -152,7 +152,12 @@
     "pestanyes": {
       "adreca": "Adreça i cadastre",
       "certificat": "Certificat i cèdula"
-    },      
+    },    
+    "afegirContracte" : "Afegir contracte",
+    "llistaContractes" : "Llista contractes",
+    "mesDadesContracte": "Mes dades del últim contracte",
+    "inquili1": "Primer Inquilí",
+    "inquili2": "Segon inquilí",
     "seccions": {
       "adreca": "Adreça",
       "cadastre": "Cadastre",
@@ -269,7 +274,7 @@
     "desat": "Contracte desat.",
     "ultims": {
       "titol": "Últims contractes",
-      "senseContracte": "Sense contracte"
+      "senseContracte": "Immoble sense contractes informats"
     },   
     "editarInquili": "Editar l'inquilí",
     "avisIngres": "Cal gestionar l'ingrés de la fiança a l'INCASOL: encara no consta la data de l'ingrés.",   

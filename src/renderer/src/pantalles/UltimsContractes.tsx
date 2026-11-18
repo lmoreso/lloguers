@@ -198,11 +198,13 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
                 <Table.Td>{adreca(immoble)}</Table.Td>
                 {c === null ? (
                   <>
-                    <Table.Td colSpan={7}>
-                      <Badge variant="light" color="gray">
+                    <Table.Td colSpan={6} ta="center">
+                      <Badge variant="outline" color="gray">
                         {t('contractes.ultims.senseContracte')}
                       </Badge>
                     </Table.Td>
+
+                    <Table.Td></Table.Td>
                     <Table.Td style={{ width: 1 }}>
                       <Tooltip label={t('comu.afegir')}>
                         <ActionIcon
