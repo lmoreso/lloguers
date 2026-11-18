@@ -20,7 +20,7 @@ import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { IconCheck, IconCornerUpLeft, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import dayjs from 'dayjs'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CampData } from '../components/CampData'
 import CampNumeric from '../components/CampNumeric'
@@ -453,7 +453,6 @@ function PantallaRevisions({
 // /immobles/:id/contractes/:idContracte/revisions
 function RevisionsContracte(): React.JSX.Element {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { id, idContracte } = useParams()
   const [immoble, setImmoble] = useState<Immoble | null>(null)
   const [contracte, setContracte] = useState<ContracteLlistat | null>(null)
@@ -466,6 +465,8 @@ function RevisionsContracte(): React.JSX.Element {
   // Canvia cada cop que han arribat dades noves de la BD. El formulari es torna a muntar amb aquesta clau (i no amb
   // `versio`, que canvia abans que les dades arribin: llavors el formulari agafaria les antigues).
   const [versioDades, setVersioDades] = useState(0)
+  // Per al missatge de "no trobat": si no n'hi ha cap pantalla anterior, a la llista de contractes (o a Immobles, si l'immoble no existeix).
+  const tornarNoTrobat = useTornar(immoble === null ? '/immobles' : `/immobles/${id}/contractes`)
 
   useEffect(() => {
     let cancelat = false
@@ -515,7 +516,7 @@ function RevisionsContracte(): React.JSX.Element {
             mt="md"
             variant="default"
             leftSection={<IconCornerUpLeft size={16} />}
-            onClick={() => navigate(immoble === null ? '/immobles' : `/immobles/${id}/contractes`)}
+            onClick={tornarNoTrobat}
           >
             {t('comu.tornar')}
           </Button>

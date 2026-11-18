@@ -22,7 +22,7 @@ import {
   IconPlus,
   IconTrash
 } from '@tabler/icons-react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { adreca } from '../utils/adreca'
 import { formatData } from '../utils/dates'
@@ -37,7 +37,6 @@ import { useTornar } from '../utils/useTornar'
 // no a sota.
 function DocumentsContracte(): React.JSX.Element {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { id, idContracte } = useParams()
   const [immoble, setImmoble] = useState<Immoble | null>(null)
   const [contracte, setContracte] = useState<Contracte | null>(null)
@@ -84,6 +83,8 @@ function DocumentsContracte(): React.JSX.Element {
     !carregant && (immoble === null || contracte === null || contracte.id_inmoble !== Number(id))
 
   const tornar = useTornar(`/immobles/${id}/contractes/${idContracte}`)
+  // Per al missatge de "no trobat": si no n'hi ha cap pantalla anterior, a la llista de contractes (o a Immobles, si l'immoble no existeix).
+  const tornarNoTrobat = useTornar(immoble === null ? '/immobles' : `/immobles/${id}/contractes`)
 
   // S'obre amb l'aplicació del sistema. Si el fitxer ja no és al disc, esOk mostra l'error traduït.
   async function visualitzar(d: DocumentContracte): Promise<void> {
@@ -145,11 +146,7 @@ function DocumentsContracte(): React.JSX.Element {
           <Text c="dimmed">
             {immoble === null ? t('immobles.noTrobat') : t('contractes.noTrobat')}
           </Text>
-          <Button
-            mt="md"
-            variant="default"
-            onClick={() => navigate(immoble === null ? '/immobles' : `/immobles/${id}/contractes`)}
-          >
+          <Button mt="md" variant="default" onClick={tornarNoTrobat}>
             {t('comu.tornar')}
           </Button>
         </>

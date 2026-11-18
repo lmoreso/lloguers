@@ -225,11 +225,7 @@ function FitxaContracte({ config }: Props): React.JSX.Element {
           <Text c="dimmed">
             {immoble === null ? t('immobles.noTrobat') : t('contractes.noTrobat')}
           </Text>
-          <Button
-            mt="md"
-            variant="default"
-            onClick={() => navigate(immoble === null ? '/immobles' : `/immobles/${id}/contractes`)}
-          >
+          <Button mt="md" variant="default" onClick={tornarEnrere}>
             {t('comu.tornar')}
           </Button>
         </>
