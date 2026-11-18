@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  ActionIcon,
   Button,
   Fieldset,
   Group,
@@ -9,12 +10,13 @@ import {
   Tabs,
   Text,
   Textarea,
-  TextInput
+  TextInput,
+  Tooltip
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconCurrencyEuro } from '@tabler/icons-react'
+import { IconCurrencyEuro, IconUserEdit } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CampData } from '../components/CampData'
@@ -38,6 +40,7 @@ import { hiHaCapaOberta } from '../utils/teclat'
 import { ingresPendent } from '../utils/avisosContracte'
 import DocumentUnicContracte from './DocumentUnicContracte'
 import { useTornar } from '../utils/useTornar'
+import FormulariInquili from './FormulariInquili'
 
 // Els selectors treballen amb text (id com a string); les dates són text ISO AAAA-MM-DD; els imports, número
 // (o text mentre s'escriu).
@@ -112,6 +115,8 @@ interface Props {
   onDocumentsCanvi: () => void
   // Configuració de l'aplicació
   config: ConfigObtinguda
+  // Es crida quan s'ha desat un inquilí des de la icona d'edició (la fitxa torna a llegir la llista d'inquilins).
+  onInquilinsCanvi: () => void
 }
 
 function FormulariContracte({
@@ -123,6 +128,7 @@ function FormulariContracte({
   pestanya,
   onPestanya,
   onDocumentsCanvi,
+  onInquilinsCanvi,
   config
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
@@ -150,6 +156,66 @@ function FormulariContracte({
   function alCanviDocuments(): void {
     setVersioDocs((v) => v + 1)
     onDocumentsCanvi()
+  }
+
+  // Obre la finestra d'edició d'un inquilí (la mateixa que a la pantalla d'Inquilins). L'inquilí es desa a l'instant,
+  // sense passar per Desar del contracte; després es refresquen els desplegables amb el nom nou. Edita l'inquilí
+  // triat ara al desplegable, encara que el contracte no s'hagi desat.
+  function editarInquili(idInquili: string | null): void {
+    const inquili = inquilins.find((i) => String(i.id) === idInquili)
+    if (!inquili) return
+    modals.open({
+      title: t('inquilins.editar'),
+      children: (
+        <FormulariInquili
+          inquili={inquili}
+          onTancar={() => modals.closeAll()}
+          onDesat={() => {
+            modals.closeAll()
+            onInquilinsCanvi()
+          }}
+        />
+      )
+    })
+  }
+
+  // Desplegable d'inquilí amb la icona d'edició a la dreta (fora del camp, per no barrejar-se amb la fletxa del
+  // desplegable). La icona és activa només si hi ha un inquilí triat.
+  function campInquili(
+    camp: 'id_inquili' | 'id_inquili_2',
+    etiquetaCamp: string,
+    obligatori: boolean
+  ): React.ReactNode {
+    const triat = form.values[camp]
+    return (
+      <Group gap="xs" align="flex-start" wrap="nowrap">
+        <Select
+          style={{ flex: 1 }}
+          withAsterisk={obligatori}
+          clearable={!obligatori}
+          searchable
+          data={opcions}
+          nothingFoundMessage={t('comu.capResultat')}
+          placeholder={t('contractes.cercarInquili')}
+          label={etiquetaCamp}
+          {...form.getInputProps(camp)}
+        />
+        {/* El div fa que el tooltip també surti amb la icona desactivada. L'espai de dalt l'alinea amb el camp. */}
+        <Tooltip label={t('contractes.editarInquili')}>
+          <div style={{ marginTop: 26 }}>
+            <ActionIcon
+              variant="default"
+              size={36}
+              disabled={!triat}
+              aria-label={t('contractes.editarInquili')}
+              onClick={() => editarInquili(triat)}
+            >
+              <IconUserEdit size={18} />
+            </ActionIcon>
+          </div>
+        </Tooltip>
+      </Group>
+    )
   }
 
   // Etiqueta d'un camp amb la icona del seu document al costat.
@@ -453,24 +519,8 @@ function FormulariContracte({
                   value={adreca(immoble)}
                   style={{ gridColumn: '1 / -1' }}
                 />
-                <Select
-                  withAsterisk
-                  searchable
-                  data={opcions}
-                  nothingFoundMessage={t('comu.capResultat')}
-                  placeholder={t('contractes.cercarInquili')}
-                  label={t('contractes.camps.inquili')}
-                  {...form.getInputProps('id_inquili')}
-                />
-                <Select
-                  searchable
-                  clearable
-                  data={opcions}
-                  nothingFoundMessage={t('comu.capResultat')}
-                  placeholder={t('contractes.cercarInquili')}
-                  label={t('contractes.camps.inquili2')}
-                  {...form.getInputProps('id_inquili_2')}
-                />
+                {campInquili('id_inquili', t('contractes.camps.inquili'), true)}
+                {campInquili('id_inquili_2', t('contractes.camps.inquili2'), false)}
                 <CampData
                   // withAsterisk
                   label={etiqueta(t('contractes.camps.dataInici'), 'contracte', true)}

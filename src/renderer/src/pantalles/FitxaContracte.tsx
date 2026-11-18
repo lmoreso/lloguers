@@ -247,6 +247,7 @@ function FitxaContracte({ config }: Props): React.JSX.Element {
           pestanya={pestanya}
           onPestanya={setPestanya}
           onDocumentsCanvi={() => setVersioDades((v) => v + 1)}
+          onInquilinsCanvi={() => setVersioDades((v) => v + 1)}
           config={config}
         />
       )}
