@@ -173,7 +173,9 @@ dues o cap; les dades de devolució (dates, import i motiu) només amb el contra
   (`data_ultima_revisio = data_inici`) **i no té cap fila a `revisions_lloguer`**, el lloguer actual i la data segueixen el lloguer inicial i la data d'inici. La
   comprovació de les revisions evita que una revisió amb el dia d'efecte igual al d'inici es confongui amb "mai revisat".
 - Els contractes revisats **abans** que existís l'historial no tenen files a `revisions_lloguer`: la primera revisió nova en captura el lloguer i la data actuals, i
-  eliminar-la els restaura.
+  eliminar-la els restaura. A la BD real, els contractes que ja estaven revisats van rebre (una sola vegada, per SQL) una **fila consolidada**: `data_efecte` = `data_ultima_revisio`,
+  anterior = lloguer inicial i data d'inici, increment = la diferència, sense %, `data_enviament` = el dia d'efecte (no és pendent) i comentari «Revisió anterior a l'historial
+  (consolidada)». Per recuperar-ne el detall, s'elimina la fila (restaura el lloguer i la data inicials) i es tornen a introduir les revisions cronològicament.
 
 ### Formulari (`/immobles/:id/contractes/nou` i `/immobles/:id/contractes/:idContracte`)
 
@@ -185,7 +187,7 @@ dues o cap; les dades de devolució (dates, import i motiu) només amb el contra
   poden quedar muntats i amagats). *Eliminar* no pregunta pels canvis.
 - **Desar es queda a la pantalla**; un contracte nou passa a l'edició. Si la validació falla, canvia a la pestanya del primer camp amb error.
 - **Pestanya Dades**:
-  - *Dades del contracte*: immoble (de només lectura), inquilins (desplegables cercables), *Inici* (amb el clip del document *Contracte*), *Fi prevista* i comentari.
+  - *Dades del contracte*: immoble (de només lectura), inquilins (desplegables cercables, cadascun amb una icona a la dreta per **editar l'inquilí** a la mateixa finestra de la pantalla d'Inquilins; la del segon només és activa si n'hi ha un; l'inquilí és compartit per tots els seus contractes i el canvi no embruta el formulari), *Inici* (amb el clip del document *Contracte*), *Fi prevista* i comentari.
   - *Lloguer*: primera fila *Lloguer inicial*, *Fiança INCASOL* i *Fiança addicional*; segona fila (en editar) *Lloguer actual* i *Última revisió* (de només lectura) i
     el botó *Revisions de lloguer* a la dreta: porta a la pantalla de revisions del contracte (preguntant abans si hi ha canvis sense desar), també amb el contracte tancat.
   - *Tancament*: *Data de fi* (**sempre editable**, també en un contracte nou), *Motiu de fi*, *Import a retornar* i *Justificació de l'import a retornar*
@@ -289,12 +291,16 @@ amb un `EXISTS` sobre `revisions_lloguer`.
   indicador `cancelat`, i es recarrega amb un comptador (`versio`) a les dependències.
 - **Pantalles noves: cap botó a sota.** Les accions van a la capçalera, al costat del títol (si la llista o el formulari és gran, els botons de sota es perden). Pendent d'unificar
   aquest criteri a la resta (vegeu "Pendents").
+- **Tornar** torna a la pantalla que ha cridat l'actual (`useTornar`, a `utils/useTornar.ts`): fa un pas enrere a l'historial i, només si no n'hi ha cap (`key === 'default'`), va a la pantalla
+  "natural" de sortida que li passa cada pantalla (la llista de contractes de l'immoble, Immobles...), sense afegir-hi cap entrada nova (`replace`). Les pantalles que es converteixen en edició en desar
+  (immoble o contracte nou) fan servir `navigate(..., { replace: true })` perquè l'historial no quedi duplicat. Aplicat a la llista de contractes, a la fitxa, als documents i a les revisions d'un
+  contracte, i a la fitxa i als documents d'un immoble, amb els seus missatges de "no trobat" (amb icona). Les pantalles d'entrada del menú (Immobles, Últims contractes, Revisions, Inquilins...) no tenen *Tornar*.
 - **Icones**: `@tabler/icons-react`. Editar i eliminar a Inquilins i als documents d'un contracte, icona sola amb `Tooltip` i `aria-label` traduïts, **una columna per icona**;
   la resta d'accions, un **menú d'accions** d'una sola icona amb icona i text. Les accions principals (Afegir) són botons amb icona. Els avisos es mostren apilats (`Stack`).
 - **Components i utilitats compartits** (a `src/renderer/src/`): `CampData` (data amb entrada manual, `DD/MM/AAAA`; arregla un error que girava el dia i el mes, rebutja les dates inexistents com `30/02` i fa servir l'idioma actiu per al calendari),
   `CampNumeric` (`NumberInput` amb punt de milers, coma decimal i el sufix del seu tipus: `import` `€`, `superficie` `m²`, `percentatge` `%`; també `quantitat`, `unitats`, `dies`, `mesos` i `anys`), `CanvisSenseDesar`, `AccionsContracte`, `AvisosContracte`;
   `utils/`: `adreca`, `dates` (`formatData`), `formats` (`formatM2`), `formulari` (`buitANull`, `aNumero`, `aNumeroForm`), `inquilins` (`nomInquili`), `caducitat`,
-  `avisosContracte`, `avisosImmoble`, `teclat`, `useEditarContracte`, `resultat`.
+  `avisosContracte`, `avisosImmoble`, `teclat`, `useEditarContracte`, `useTornar`, `resultat`.
 - **Quant a**: icona, versió (la del `package.json`, via el Main), descripció, autor, llicència i repositori, tecnologies i la menció a Claude, amb enllaços que s'obren al navegador
   del sistema. L'obertura passa pel Main (`app:obrirEnllac`), que **només accepta `https`**; el `setWindowOpenHandler` de la finestra també.
 - **Icona de l'aplicació**: `build/icon.png` (paquet), `resources/icon.png` (finestra) i `src/renderer/src/assets/icon.png` (Quant a) han de ser **iguals**. `build/icon.icns` i
@@ -399,14 +405,14 @@ global, vistes per a les cartes i avís); idioma al primer arrencament; publicac
 
 **Pendents** (decidits, no fets):
 
-- **Revisar la UI**: la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar (resulta confús) i el criteri "cap botó a sota" als formularis que encara en tenen
-  (Inquilins, en modal).
+- **Revisar la UI**: el botó "Descartar" del diàleg de canvis sense desar (resulta confús) i el criteri "cap botó a sota" als formularis que encara en tenen (Inquilins, en modal). La navegació de
+  sortida ja segueix la regla "Tornar torna a qui t'ha cridat"; el menú lateral i `Ctrl+R` continuen sense la protecció de canvis sense desar.
 - **Fase 3 de contractes** (no analitzada en detall; convé un resum funcional abans de programar): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable;
   els documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble) i canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es
   guarda qui hi havia abans). L'historial de revisions de lloguer ja és fet.
 - **Configuració i Quant a**: Configuració només té el selector d'idioma. Pantalla de tipus de documents: ja no cal (són fixos al codi).
-- **Empaquetat**: publicat tot fins als documents i la fiança (passos fins al 26). Les **revisions de lloguer** (migració 006 i les seves pantalles) encara no s'han empaquetat. Abans
-  d'instal·lar una versió amb migracions noves, còpia de seguretat de la BD.
+- **Empaquetat**: publicada la **1.0.9**, amb tot el que hi havia fins a les revisions de lloguer (migració 006). La **1.0.10** és en desenvolupament (`Tornar` a qui ha cridat i la icona d'edició de l'inquilí;
+  no hi ha migracions noves). Abans d'instal·lar una versió amb migracions noves, còpia de seguretat de la BD.
 - **LibreOffice**: connexió directa a la vista `v_cartes_pendents` (controlador ODBC/JDBC) i plantilla de la carta; ho gestiona l'usuari.
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD (validacions del Main). Només cosmètic.
 
@@ -416,7 +422,7 @@ global, vistes per a les cartes i avís); idioma al primer arrencament; publicac
 - **Inquilins**: columna `Id` a la llista; camp IBAN; no deixar marcar WhatsApp o Bizum sense telèfon; documents de l'inquilí (DNI, vida laboral, nòmina...), de moment només com a tipus
   de document del contracte.
 - **Llista de contractes**: columna `Id`; poder navegar entre immobles des de la capçalera. **Llista d'immobles**: acció per editar directament l'últim contracte.
-- **Últims contractes**: immobles sense contracte al final, ordenats per adreça; que *Tornar* des d'un immoble porti a "Últims contractes".
+- **Últims contractes**: immobles sense contracte al final, ordenats per adreça.
 - **Generals**: menú contextual (botó dret) als camps de dades (copiar, enganxar...); barra superior amb el nom de la pantalla; menú Sortir; submenús d'Immobles al menú lateral (Editar,
   Documents, Contractes); comptador de cartes pendents al menú lateral.
 - **Configuració**: ruta i nom de la BD a escollir (fitxer de configuració a una carpeta estàndard del SO), poder treballar amb diverses BD i carregar sempre l'última; mantenir l'idioma a la carpeta de la BD.

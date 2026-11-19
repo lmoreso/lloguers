@@ -84,7 +84,7 @@ Com es va instal·lar (ordre seguit):
 
 ## Estat actual
 
-**Fases A, B i C fetes; Fase D feta fins al pas 29.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, avisos i documents), fase 2 (devolució de la fiança) i **formulari reorganitzat** (26: pestanyes Dades i Fiança INCASOL, devolució i tancament dins del formulari, documents únics amb clips, tipus de document fixos al codi). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23), els camps nous i els documents únics d'immoble (24), els documents de contracte com a pantalla pròpia (25), una publicació (27), dos petits pendents (28) i les **revisions de lloguer** (29: historial, pantalla del contracte, pantalla global, vistes per a les cartes i avís). **La BD és a `user_version = 6`.** **Tot fins al pas 26 està empaquetat i provat** (`.deb` instal·lat a l'anfitrió, amb la BD real, i al portàtil, amb una BD nova); **els passos 28 i 29 (migració 006) no s'han empaquetat encara**.
+**Fases A, B i C fetes; Fase D feta fins al pas 33.** Contractes: fase 1 (dades, segon inquilí, lloguer i revisió, fiança fins a la notificació, avisos i documents), fase 2 (devolució de la fiança) i **formulari reorganitzat** (26: pestanyes Dades i Fiança INCASOL, devolució i tancament dins del formulari, documents únics amb clips, tipus de document fixos al codi). A més: la vista "Últims contractes" (20), una primera versió empaquetada (21), la gestió ampliada d'immobles (22), els documents d'immoble (23), els camps nous i els documents únics d'immoble (24), els documents de contracte com a pantalla pròpia (25), una publicació (27), dos petits pendents (28), les **revisions de lloguer** (29: historial, pantalla del contracte, pantalla global, vistes per a les cartes i avís), la publicació de la 1.0.9 (30), la consolidació de l'historial de les revisions antigues (31), el **`Tornar` a qui ha cridat** (32) i la icona d'edició de l'inquilí al formulari de contracte (33). **La BD és a `user_version = 6`.** **Tot fins al pas 29 està empaquetat i publicat (1.0.9)**; els passos 32 i 33 (1.0.10, en desenvolupament) no. No hi ha migracions noves.
 
 ### Fase A: base (feta)
 
@@ -373,6 +373,43 @@ a **tots**, Editar i (després d'una línia) Eliminar en vermell. Les confirmaci
 - **29-5, avís "Carta pendent"**: `cartaPendent` a `utils/avisosContracte.ts`, etiqueta a `AvisosContracte`, línia a la barra d'avisos del contracte i compta per a "Contractes amb avisos" d'Immobles.
 - L'usuari ha ampliat `CampNumeric` amb més tipus (`percentatge`, `quantitat`, `unitats`, `dies`, `mesos`, `anys`) i el camp del % de les revisions el fa servir.
 
+**Pas 30: publicació de les revisions de lloguer, feta.**
+
+- L'usuari ha publicat la **1.0.9** (passos 28 i 29, amb la migració 006). La **1.0.10** és en desenvolupament.
+
+**Pas 31: consolidació de l'historial de les revisions antigues, feta.**
+
+- Els contractes revisats **abans** que existís l'historial tenen `lloguer_actual` i `data_ultima_revisio` sense cap fila darrere, i l'app no deixa crear revisions anteriors a l'última. En lloc de buidar els camps (destructiu), es va
+  crear **una fila consolidada** per a cada un, per SQL, a la BD real, una sola vegada. L'script només actua sobre contractes sense revisions (el `NOT EXISTS` impedeix aplicar-lo dues vegades):
+
+```sql
+INSERT INTO revisions_lloguer
+  (id_contracte, data_efecte, lloguer_anterior, data_revisio_anterior, percentatge,
+   increment_aplicat, lloguer_nou, data_enviament, comentari)
+SELECT c.id, c.data_ultima_revisio, c.lloguer_inicial, c.data_inici, NULL,
+       round(c.lloguer_actual - c.lloguer_inicial, 2), c.lloguer_actual, c.data_ultima_revisio,
+       'Revisió anterior a l''historial (consolidada)'
+FROM contractes c
+WHERE c.data_ultima_revisio <> c.data_inici
+  AND NOT EXISTS (SELECT 1 FROM revisions_lloguer r WHERE r.id_contracte = c.id);
+```
+
+- La fila porta `data_enviament` (no surt com a carta pendent) i no té %. És **reversible**: *Eliminar* la fila a l'app restaura el lloguer i la data inicials, i hi pots introduir les revisions una a una, cronològicament
+  (cada una amb data d'enviament, perquè una carta pendent bloqueja la següent). Als contractes tancats no es poden crear revisions: la fila consolidada n'és la solució.
+
+**Pas 32: `Tornar` torna a la pantalla que ha cridat, fet.**
+
+- `utils/useTornar.ts`: fa `navigate(-1)` i, només si no hi ha historial (`key === 'default'`), va a la pantalla per defecte amb `replace`. Aplicat a la llista de contractes, a la fitxa (`FormulariContracte` i `FitxaContracte`),
+  als documents i a les revisions d'un contracte, i a la fitxa i als documents d'un immoble, inclosos els botons dels missatges de "no trobat" (amb la icona `IconCornerUpLeft`). Amb la protecció de canvis sense desar, *Tornar* i
+  Escape pregunten abans. Resol el detall de "Últims contractes" (editar un contracte i tornar-hi portava a la llista de l'immoble).
+- Provat des de la interfície i simulant la navegació des de la consola (vegeu la incidència 25).
+
+**Pas 33: icona d'edició de l'inquilí al formulari de contracte, feta.**
+
+- A la dreta de cada desplegable d'inquilí (`IconUserEdit`, tooltip "Editar l'inquilí") s'obre `FormulariInquili` en una finestra (`modals.open`), igual que a la pantalla d'Inquilins; edita l'inquilí triat **ara**, encara que
+  el contracte no s'hagi desat. La del segon inquilí només és activa si n'hi ha un. En desar, `onInquilinsCanvi` fa que `FitxaContracte` torni a llegir els inquilins (reutilitza `versioDades`), sense remuntar el formulari: no
+  es perd el que hi havia escrit ni es marca com a modificat. L'inquilí és compartit per tots els seus contractes.
+
 ### Fase E: empaquetat (feta al portàtil)
 
 Prova d'empaquetat anticipada a la VM (`npm run build:unpack`): migracions incrustades; `asarUnpack: '{resources/**,node_modules/better-sqlite3/**}'`
@@ -397,14 +434,14 @@ Al portàtil (14-10-2026):
   adjuntar i obrir documents (diàleg del sistema i `shell.openPath`) i la resta funcionen. Els passos 22 en endavant es van provar a la publicació següent (vegeu més avall).
 - **Publicació dels passos 22 a 26**: `.deb` instal·lat i provat a l'anfitrió (BD real, amb còpia de seguretat prèvia) i al portàtil (BD nova). Les migracions 003, 004
   i 005 es van aplicar soles en la primera arrencada, sense errors; clips dels documents, adjuntar, obrir i eliminar, Ctrl+S i Escape funcionen empaquetats.
+- **Publicació de la 1.0.9** (passos 28 i 29, migració 006): publicada per l'usuari.
 
 ### Pendent de confirmar
 
-- **Commit** del pas 29-5 (si queda alguna cosa) i d'aquests dos documents; `git push`.
-- Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
+- **Commit** d'aquests dos documents; `git push`. Pujar `NOTES.md` i `PROGRES.md` al projecte de Claude (**tots dos alhora**).
 - **Pas 26-6 (neteja)**: `npm run lint`, el script de claus de text sense ús (`/tmp/claus_sense_us.js`; cal esborrar les claus també de `es.json`) i la matriu de coherència dels avisos. No en consten els resultats.
-  Quan es torni a passar, hi sortiran `contractes.revisar.*` i `contractes.validacio.revisioAnterior` (només les feia servir `RevisarLloguer.tsx`, ja esborrat).
-- **Propera publicació** (anfitrió i portàtil): pujar la versió, còpia de seguretat de `~/Lloguers/lloguers.sqlite`; la migració 006 s'hi aplicarà sola (només afegeix objectes). Comprovar `user_version = 6`.
+  Hi sortiran `contractes.revisar.*` i `contractes.validacio.revisioAnterior` (només les feia servir `RevisarLloguer.tsx`, ja esborrat).
+- **Propera publicació (1.0.10)**: pujar la versió i còpia de seguretat de `~/Lloguers/lloguers.sqlite`; no hi ha migracions noves.
 - **LibreOffice**: connexió directa a la vista `v_cartes_pendents` i plantilla de la carta (ho gestiona l'usuari).
 - **Neteja de les files `PROVA`** de la BD de la VM (immobles, inquilins, contractes, documents i revisions; en aquest ordre invers per les claus foranes). L'usuari ho farà a mà. Si es fa per SQL, cal esborrar també
   `~/Lloguers/documents/<id>/` i `~/Lloguers/documents/immobles/<id>/` (només l'esborrat des de l'app s'emporta la carpeta); `/tmp/prova*` són temporals.
@@ -413,13 +450,12 @@ Al portàtil (14-10-2026):
 
 Cap pas en curs. Opcions, per decidir amb l'usuari:
 
-**1. Nova publicació** (les revisions de lloguer, migració 006): pujar la versió, `npm run build:linux`, còpia de seguretat de la BD de l'anfitrió i instal·lar el `.deb`. Provar-hi la pantalla de revisions, la global i
-la connexió de LibreOffice a la vista.
+**1. Revisar la UI pendent**: el botó "Descartar" del diàleg de canvis sense desar (confús: canviar-li el nom, treure'l o canviar les opcions) i els botons Desar i Cancel·lar del modal d'Inquilins.
 
 **2. Fase 3 de contractes** (decidida, no analitzada en detall; convé fer-ne un resum funcional abans de programar): corregir l'immoble d'un contracte mal assignat (entrada al menú d'accions, amb desplegable; els
 documents no es mouen perquè van per `id_contracte`; el trigger de solapament ja valida el nou immoble) i canvi de signants (annex). L'historial de revisions ja és fet.
 
-**3. Revisar la UI pendent** (l'usuari ho va deixar per a més endavant): la navegació entre pantalles, el botó "Descartar" del diàleg de canvis sense desar, i els botons Desar i Cancel·lar del modal d'Inquilins.
+**3. Publicar la 1.0.10** (`Tornar` a qui ha cridat i la icona d'edició de l'inquilí): no té migracions, així que és de poc risc.
 
 **4. Menors**: la columna `Id` a les llistes de contractes i d'inquilins, Configuració, i la resta de notes de `NOTES.md` ("Idees per a més endavant", només si l'usuari les demana).
 
@@ -596,6 +632,13 @@ llegia les noves) quedava desquadrat. Solució: la `key` fa servir un segon comp
 L'`ORDER BY` d'SQLite compara bytes (majúscules abans de minúscules, accents al final). Per a la pantalla de revisions, l'ordre dels cognoms i dels noms es fa al Main amb
 `localeCompare(..., 'ca', { sensitivity: 'base' })`. La vista `v_cartes_pendents` conserva un `ORDER BY` binari: el LibreOffice ordena pel seu compte.
 
+### 25. `location.hash = ...` no crea una entrada d'historial amb l'estat del router
+
+Canviar l'adreça des de la consola (`location.hash = '#/...'`) afegeix una entrada **sense** l'estat que hi desa React Router (`history.state?.idx` dona `undefined`); `useTornar` la tracta com la primera pantalla i va a la
+pantalla per defecte, i les proves de "Tornar" semblaven fallar. Per provar la navegació de debò, simular-la: `history.pushState({ usr: null, key: <text aleatori>, idx: (history.state?.idx ?? 0) + 1 }, '', hash)` seguit de
+`dispatchEvent(new PopStateEvent('popstate', { state: history.state }))`, o usar la interfície. Tampoc no serveix F5 per provar la sortida "sense historial": el navegador conserva l'historial en recarregar. A l'app empaquetada
+(sense barra d'adreces ni F12) aquestes entrades no es creen mai.
+
 ## Altres pendents
 
 - `traduirError` fa `console.error('Error de BD no reconegut:')` també per a errors que no són de BD (p. ex. l'idioma invàlid o les validacions de `contractes`, `immobles`, `documents` i `revisions`). Només cosmètic.
@@ -605,16 +648,16 @@ L'`ORDER BY` d'SQLite compara bytes (majúscules abans de minúscules, accents a
 - L'avís "Devolució pendent" pot persistir en contractes antics amb la fiança ja retornada però no anotada, fins que s'hi posa l'abonament.
 - Un contracte nou sense `data_fi` solapa amb qualsevol d'un altre posterior del mateix immoble: els contractes antics s'han d'entrar amb la data de fi des del primer moment.
 - Fase 3: canvi de signants (annex; ara només s'edita `id_inquili` / `id_inquili_2` i no es guarda qui hi havia abans) i correcció de l'immoble d'un contracte (ara només es pot eliminar i recrear, i això perd els documents).
-- Editar un contracte des d'"Últims contractes" torna a la llista de contractes de l'immoble (no a la vista d'origen).
 - La icona dels menús d'accions (`IconDots` o `IconMenu2`) és una decisió estètica pendent d'uniformar.
 - `Immobles.tsx` i `FitxaImmoble.tsx` fan cadascun una crida a `contractes.ultims()` només per saber si hi ha avisos.
 - `inmobles` té dates sense cap `CHECK` (conté dades reals; el selector de dates ja protegeix l'app).
 - Revisions: eliminar la darrera revisió d'un contracte restaura `data_revisio_anterior`; si entremig s'ha canviat la `data_inici` a una data posterior, el `CHECK data_ultima_revisio >= data_inici` pot fallar (cas rar, no tractat).
 - Revisions: `esPendent` està escrit dues vegades (`Revisions.tsx` i `RevisionsContracte.tsx`); es pot unificar a `utils/` si cal.
+- El menú lateral i `Ctrl+R` no passen per la protecció de canvis sense desar (`HashRouter` no té `useBlocker`).
 - `ProvesMantine.tsx` i `App.tsx.bak` són de l'usuari; decidir més endavant si s'esborren (`App.tsx.bak` es va fer fora de Git: comprovar-ho amb `git status` abans de `git add -A`).
 - Empaquetat (opcional): excloure els binaris de `better-sqlite3` d'altres plataformes per reduir la mida; icones de macOS/Windows i suport per a Windows.
 
 ## Git
 
-- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últims commits confirmats: els del bloc de revisions de lloguer (pas 29, fins a l'avís "Carta pendent"). Queda per confirmar el d'aquests dos
+- Repositori **enllaçat amb GitHub** (`lmoreso/lloguers`, branca `main`). Últim commit confirmat: el del `Tornar` a qui ha cridat i la icona d'edició de l'inquilí (1.0.10 en desenvolupament). Queda per confirmar el d'aquests dos
   documents (vegeu "Pendent de confirmar").
