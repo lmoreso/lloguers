@@ -416,8 +416,10 @@
       "nomFitxer": "ultims_contractes",
       "titolDialog": "Exportació dels contractes més recents"
     },
-    "exportOk": "Exportació correcta",
-    "exportOkDesc": "S'ha creat el fitxer: "
+    "exportOk": "L'exportació ha acabat correctament.",
+    "exportOkDesc": "S'ha generat el fitxer: ",
+    "exportCancel": "Exportació cancel·lada pel usuari.",
+    "exportError": "L'exportació ha acabat amb errors. No s'ha generat cap fitxer."
   },
   "revisions": {
     "global": {

@@ -4,34 +4,25 @@ import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import AvisosContracte from '../components/AvisosContracte'
-import { adreca } from '../utils/adreca'
-import { formatData } from '../utils/dates'
+import { adreca } from '../../../shared/utilitats'
+import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
 import AccionsContracte from './AccionsContracte'
 import type {
   ContracteLlistat,
-  Immoble,
+  FilaDades,
   ImmobleAmbContractes,
   DadesExportacio,
-  ExtensioExportacio,
-  ConfigObtinguda
+  FormatExportacio,
+  ConfigObtinguda,
+  ColumnaIFilesExport
 } from '../../../shared/tipus'
 import { IconFileExport, IconPencil, IconPlus } from '@tabler/icons-react'
 import { useEditarContracte } from '@renderer/utils/useEditarContracte'
-import {
-  ingresPendent,
-  faltenDocuments,
-  devolucioPendent,
-  avisos
-} from '@renderer/utils/avisosContracte'
+// import { AvisosContracteTxt } from '@renderer/utils/avisosContracte'
 import ModalExportacio from '../components/ModalExportacio'
-
-// Una fila de la taula: un contracte, o un immoble sense cap contracte.
-interface Fila {
-  immoble: Immoble
-  contracte: ContracteLlistat | null
-}
+import { DadesExportacioDetallades } from '../utils/exportImmoblesIContractes'
 
 interface Props {
   config: ConfigObtinguda
@@ -64,27 +55,19 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
   const euros = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
 
   // const files: Fila[] = dades.flatMap((d) =>
-  const files = dades.flatMap<Fila>((d) =>
+  const files = dades.flatMap<FilaDades>((d) =>
     d.contractes.length > 0
       ? d.contractes.map((c) => ({ immoble: d.immoble, contracte: c }))
       : [{ immoble: d.immoble, contracte: null }]
   )
 
-  const AvisosContracteTxt = (c: ContracteLlistat): string | null => {
-    const avisosText = new Set<string>()
-    if (ingresPendent(c)) avisosText.add(t('contractes.avisos.ingresPendent'))
-    if (faltenDocuments(c)) avisosText.add(t('contractes.avisos.documents'))
-    if (devolucioPendent(c)) avisosText.add(t('contractes.avisos.devolucioPendent'))
-    avisos(c, config).map((a) => avisosText.add(t(`contractes.avisos.${a.clau}.${a.estat}`)))
-    // console.log('AvisosContracteSet', c, avisosText)
-    return avisosText.size > 0 ? Array.from(avisosText).join(' | ') : null
-  }
+  async function exportar(format: FormatExportacio): Promise<void> {
+    // console.log('t enviat:', t, typeof t)
 
-  async function exportar(format: ExtensioExportacio): Promise<void> {
-    const dadesExportacio: DadesExportacio = {
-      nomFitxer: t('exportacio.ultimsContractes.nomFitxer'),
-      titolDialog: t('exportacio.ultimsContractes.titolDialog'),
-      format,
+    const dadesCuinades: ColumnaIFilesExport = DadesExportacioDetallades(files, t)
+
+    /* 
+    const dadesCuinades: ColumnaIFilesExport = {
       columnes: [
         { titol: t('immobles.seccions.adreca'), tipus: 'text' },
         { titol: t('contractes.camps.dataInici'), tipus: 'data' },
@@ -96,21 +79,35 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
         { titol: t('contractes.camps.dataUltimaRevisio'), tipus: 'data' },
         { titol: t('contractes.camps.avisos'), tipus: 'text' }
       ],
-      files: files.map(({ immoble, contracte: c }) => [
-        adreca(immoble),
-        c?.data_inici ?? null,
-        c?.data_fi ?? null,
-        c?.d_fi_prevista ?? null,
-        c === null
-          ? t('contractes.ultims.senseContracte')
-          : nomInquili(c.inquili_nom, c.inquili_cognoms),
-        c === null || c.id_inquili_2 === null
-          ? null
-          : nomInquili(c.inquili2_nom, c.inquili2_cognoms),
-        c?.lloguer_actual ?? null,
-        c?.data_ultima_revisio ?? null,
-        c === null ? null : AvisosContracteTxt(c)
-      ])
+      files: files.map(({ immoble, contracte: c }) => {
+        // console.log('Immoble:', immoble)
+        // console.log('Contracte:', c)
+
+        return [
+          adreca(immoble),
+          c?.data_inici ?? null,
+          c?.data_fi ?? null,
+          c?.d_fi_prevista ?? null,
+          c === null
+            ? t('contractes.ultims.senseContracte')
+            : nomInquili(c.inquili_nom, c.inquili_cognoms),
+          c === null || c.id_inquili_2 === null
+            ? null
+            : nomInquili(c.inquili2_nom, c.inquili2_cognoms),
+          c?.lloguer_actual ?? null,
+          c?.data_ultima_revisio ?? null,
+          c === null ? null : AvisosContracteTxt(c, config, t)
+        ]
+      })
+    }
+ */
+
+    const dadesExportacio: DadesExportacio = {
+      nomFitxer: t('exportacio.ultimsContractes.nomFitxer'),
+      titolDialog: t('exportacio.ultimsContractes.titolDialog'),
+      format,
+      columnes: dadesCuinades.columnes,
+      files: dadesCuinades.files
     }
 
     const resposta =
@@ -122,11 +119,21 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
 
     if (!esOk(resposta)) {
       console.error('Error en exportar els contractes:', resposta.error)
+      notifications.show({
+        title: t('exportacio.exportError'),
+        message: 'Error: ' + resposta.error,
+        color: 'red'
+      })
     } else if (!resposta.dades.canceled && resposta.dades.filePath) {
       notifications.show({
         title: t('exportacio.exportOk'),
         message: t('exportacio.exportOkDesc') + resposta.dades.filePath,
         color: 'green'
+      })
+    } else {
+      notifications.show({
+        message: t('exportacio.exportCancel'),
+        color: 'orange'
       })
     }
   }

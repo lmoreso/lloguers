@@ -3,7 +3,7 @@ import { ActionIcon, Badge, Group, Stack, Switch, Table, Text, Title, Tooltip } 
 import { IconPencil } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { formatData } from '../utils/dates'
+import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
 import type { RevisioLlistat } from '../../../shared/tipus'

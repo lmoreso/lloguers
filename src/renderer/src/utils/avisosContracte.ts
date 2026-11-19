@@ -1,5 +1,6 @@
 import { aniversariRevisio, estatCaducitat } from './caducitat'
 import type { ConfigObtinguda, Contracte, ContracteLlistat } from '../../../shared/tipus'
+import { TFunction } from 'i18next'
 
 // Avisos d'un contracte. Només els vigents (sense data de fi) en tenen.
 export function avisos(
@@ -16,6 +17,20 @@ export function avisos(
   )
   if (revisio) llista.push({ clau: 'revisio', estat: revisio })
   return llista
+}
+
+export function AvisosContracteTxt(
+  c: ContracteLlistat,
+  config: ConfigObtinguda,
+  t: TFunction
+): string | null {
+  const avisosText = new Set<string>()
+  if (ingresPendent(c)) avisosText.add(t('contractes.avisos.ingresPendent'))
+  if (faltenDocuments(c)) avisosText.add(t('contractes.avisos.documents'))
+  if (devolucioPendent(c)) avisosText.add(t('contractes.avisos.devolucioPendent'))
+  avisos(c, config).map((a) => avisosText.add(t(`contractes.avisos.${a.clau}.${a.estat}`)))
+  // console.log('AvisosContracteSet', c, avisosText)
+  return avisosText.size > 0 ? Array.from(avisosText).join(' | ') : null
 }
 
 // Documents de la fiança que falten: hi ha una data informada però no el document adjunt que la justifica.

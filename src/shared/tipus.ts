@@ -280,7 +280,9 @@ export type CodiError =
 // Resposta uniforme de tots els handlers IPC.
 export type Resultat<T> = { ok: true; dades: T } | { ok: false; error: CodiError }
 
-// Tipus per a l'exportació genèrica de dades.
+// Tipus per la exportació genèrica de dades
+export type ValorExportacio = string | number | boolean | null
+
 export type TipusColumnaExportacio = 'text' | 'numero' | 'decimal' | 'moneda' | 'data' | 'boolean'
 
 export interface ColumnaExportacio {
@@ -288,18 +290,25 @@ export interface ColumnaExportacio {
   tipus: TipusColumnaExportacio
 }
 
+/**
+ * Una fila de dades per exportar es composa d'un Immoble i el seu contracte, que incorpora dades dels inquilins.
+ */
+export interface FilaDades {
+  immoble: Immoble
+  contracte: ContracteLlistat | null
+}
+
+export interface ColumnaIFilesExport {
+  columnes: ColumnaExportacio[]
+  files: ValorExportacio[][]
+}
+
 export type FormatExportacio = 'ods' | 'csv' | 'xlsx'
 
-export type ExtensioExportacio = 'csv' | 'ods' | 'xlsx'
-
-export type ValorExportacio = string | number | boolean | null
-
-export interface DadesExportacio {
+export interface DadesExportacio extends ColumnaIFilesExport {
   nomFitxer: string
   titolDialog: string
   format: FormatExportacio
-  columnes: ColumnaExportacio[]
-  files: ValorExportacio[][]
 }
 
 export interface ResultatExportacio {

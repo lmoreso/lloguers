@@ -417,8 +417,10 @@
       "nomFitxer": "ultimos_contratos",
       "titolDialog": "Exportación de los contratos más recientes"
     },
-    "exportOk": "Exportación correcta",
-    "exportOkDesc": "Se ha creado el archivo: "
+    "exportOk": "La exportación ha terminado correctamente.",
+    "exportOkDesc": "Se ha generado el archivo: ",
+    "exportCancel": "Exportación cancelada por el usuario.",
+    "exportError": "La exportación ha terminado con errores. No se ha generado ningún archivo."
   },
   "revisions": {
     "global": {

@@ -34,11 +34,11 @@ import {
   IconPlus,
   IconInfoCircle
 } from '@tabler/icons-react'
-import { adreca } from '../utils/adreca'
+import { adreca } from '../../../shared/utilitats'
 import { teAvisos } from '../utils/avisosContracte'
 import { alertes } from '../utils/avisosImmoble'
-import { formatCurrency, formatM2 } from '@renderer/utils/formats'
-import { formatData } from '@renderer/utils/dates'
+import { formatCurrency, formatM2 } from '../../../shared/utilitats'
+import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '@renderer/utils/inquilins'
 import { useEditarContracte } from '@renderer/utils/useEditarContracte'
 

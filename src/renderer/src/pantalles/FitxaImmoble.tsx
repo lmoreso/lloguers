@@ -12,7 +12,7 @@ import {
 } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { adreca } from '../utils/adreca'
+import { adreca } from '../../../shared/utilitats'
 import { alertes } from '../utils/avisosImmoble'
 import { teAvisos } from '../utils/avisosContracte'
 import { esOk } from '../utils/resultat'

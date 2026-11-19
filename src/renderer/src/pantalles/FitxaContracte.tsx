@@ -3,7 +3,7 @@ import { Alert, Button, Group, Stack, Text, Title } from '@mantine/core'
 import { IconCheck, IconCornerUpLeft, IconFiles } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { adreca } from '../utils/adreca'
+import { adreca } from '../../../shared/utilitats'
 import { esOk } from '../utils/resultat'
 import FormulariContracte from './FormulariContracte'
 import type { AccionsCapcalera } from './FormulariContracte'
@@ -17,7 +17,7 @@ import type {
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
-import { formatData } from '../utils/dates'
+import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '../utils/inquilins'
 import {
   avisos,

@@ -46,7 +46,7 @@ async function arrencar(): Promise<void> {
         <MantineProvider>
           <DatesAmbIdioma>
             <ModalsProvider>
-              <Notifications />
+              <Notifications position="top-center" />
               <App />
             </ModalsProvider>
           </DatesAmbIdioma>
@@ -65,7 +65,7 @@ async function arrencar(): Promise<void> {
   arrel.render(
     <StrictMode>
       <MantineProvider>
-        <Notifications />
+        <Notifications position="top-center" />
         <SeleccioIdioma inicial={idioma} onConfirmat={pintarApp} />
       </MantineProvider>
     </StrictMode>
