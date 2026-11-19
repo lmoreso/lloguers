@@ -59,7 +59,13 @@ const COLUMNES_LLISTAT = `${['id', ...CAMPS].map((c) => `c.${c}`).join(', ')},
 // Fila tal com surt de SQLite: els indicadors són 0 o 1. El Main els converteix a boolean.
 type FilaLlistat = Omit<
   ContracteLlistat,
-  'te_doc_model2' | 'te_doc_notificacio' | 'te_doc_model3' | 'carta_pendent'
+  | 'te_doc_model2'
+  | 'te_doc_notificacio'
+  | 'te_doc_model3'
+  | 'carta_pendent'
+  // Aquests no es guarden a la BD
+  | 'caducitat_fi'
+  | 'caducitat_revisio'
 > & {
   te_doc_model2: number
   te_doc_notificacio: number
@@ -73,7 +79,9 @@ function aLlistat(f: FilaLlistat): ContracteLlistat {
     te_doc_model2: f.te_doc_model2 === 1,
     te_doc_notificacio: f.te_doc_notificacio === 1,
     te_doc_model3: f.te_doc_model3 === 1,
-    carta_pendent: f.carta_pendent === 1
+    carta_pendent: f.carta_pendent === 1,
+    caducitat_fi: null,
+    caducitat_revisio: null
   }
 }
 

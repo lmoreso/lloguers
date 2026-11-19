@@ -1,9 +1,4 @@
-import type {
-  ColumnaExportacio,
-  ColumnaIFilesExport,
-  FilaDades,
-  ValorExportacio
-} from '../../../shared/tipus'
+import type { ColumnaExportacio, ColumnaIFilesExport, FilaDades } from '../../../shared/tipus'
 import { adreca, nomSencer } from '../../../shared/utilitats'
 import type { TFunction } from 'i18next'
 
@@ -125,75 +120,98 @@ export function DadesExportacioDetallades(dades: FilaDades[], t: TFunction): Col
     { titol: t('contractes.camps.devolucioDataCobrament'), tipus: 'data' },
     { titol: t('contractes.camps.importARetornar'), tipus: 'moneda' },
     { titol: t('contractes.camps.justificacioImport'), tipus: 'text' },
-    { titol: t('contractes.camps.comentaris'), tipus: 'text' }
+    { titol: t('contractes.camps.comentaris'), tipus: 'text' },
+    { titol: t('contractes.avisos.estatCaducitat.fi.literal'), tipus: 'text' },
+    { titol: t('contractes.avisos.estatCaducitat.revisio.literal'), tipus: 'text' }
   ] as ColumnaExportacio[]
 
-  const filesExportades = dades.map(({ immoble: i, contracte: c }) => [
-    // IMMOBLE
-    i.id,
-    i.via,
-    i.num_via,
-    i.pis,
-    i.porta,
-    i.codi_postal,
-    i.localitat,
-    i.provincia,
-    i.ref_catastral,
-    i.superficie_m2,
-    i.superficie_pati,
-    i.cert_en_reg,
-    i.cert_en_class,
-    i.cert_en_data,
-    i.cert_en_caduc,
-    i.ced_hab_reg,
-    i.ced_hab_data,
-    i.ced_hab_caduc,
-    i.ced_hab_superficie_util,
-    i.val_cadastral_total,
-    i.val_cadastral_constr,
-    i.any_construccio,
-    i.data_compra,
-    i.valor_compra,
+  const filesExportades = dades.map(({ immoble: i, contracte: c }) => {
+    const caducitat_fi_txt =
+      !c || !c.caducitat_fi ? null : t(`contractes.avisos.estatCaducitat.fi.${c.caducitat_fi}`)
 
-    // INQUILÍ 1
-    c?.inquili_nom ?? null,
-    c?.inquili_cognoms ?? null,
-    c?.inquili1_nif ?? null,
-    c?.inquili1_telefon ?? null,
+    const caducitat_revisio_txt =
+      !c || !c.caducitat_revisio
+        ? null
+        : t(`contractes.avisos.estatCaducitat.fi.${c.caducitat_revisio}`)
 
-    // INQUILÍ 2
-    c?.inquili2_nom ?? null,
-    c?.inquili2_cognoms ?? null,
-    c?.inquili2_nif ?? null,
-    c?.inquili2_telefon ?? null,
+    console.log(
+      i.id,
+      c?.id,
+      c?.caducitat_fi,
+      caducitat_fi_txt,
+      c?.caducitat_revisio,
+      caducitat_revisio_txt
+    )
 
-    // CONTRACTE
-    c?.id ?? null,
-    c?.id_inmoble ?? null,
-    c?.id_inquili ?? null,
-    c?.id_inquili_2 ?? null,
-    c?.data_inici ?? null,
-    c?.data_fi ?? null,
-    c?.motiu_fi ? t(`contractes.motiusFi.${c.motiu_fi}`) : null,
-    c?.d_fi_prevista ?? null,
-    c?.lloguer_inicial ?? null,
-    c?.lloguer_actual ?? null,
-    c?.data_ultima_revisio ?? null,
-    c?.fianca_adicional ?? null,
-    c?.fianca_import ?? null,
-    c?.fianca_nc ?? null,
-    c?.fianca_data_model2 ?? null,
-    c?.fianca_data_ingres ?? null,
-    c?.fianca_data_notificacio ?? null,
-    c?.fianca_num_registre ?? null,
-    c?.fianca_comentari ?? null,
-    c?.devolucio_nc ?? null,
-    c?.devolucio_data_sollicitud ?? null,
-    c?.devolucio_data_cobrament ?? null,
-    c?.devolucio_import ?? null,
-    c?.devolucio_motiu ?? null,
-    c?.comentaris ?? null
-  ]) as ValorExportacio[][]
+    return [
+      // IMMOBLE
+      i.id,
+      i.via,
+      i.num_via,
+      i.pis,
+      i.porta,
+      i.codi_postal,
+      i.localitat,
+      i.provincia,
+      i.ref_catastral,
+      i.superficie_m2,
+      i.superficie_pati,
+      i.cert_en_reg,
+      i.cert_en_class,
+      i.cert_en_data,
+      i.cert_en_caduc,
+      i.ced_hab_reg,
+      i.ced_hab_data,
+      i.ced_hab_caduc,
+      i.ced_hab_superficie_util,
+      i.val_cadastral_total,
+      i.val_cadastral_constr,
+      i.any_construccio,
+      i.data_compra,
+      i.valor_compra,
+
+      // INQUILÍ 1
+      c?.inquili_nom ?? null,
+      c?.inquili_cognoms ?? null,
+      c?.inquili1_nif ?? null,
+      c?.inquili1_telefon ?? null,
+
+      // INQUILÍ 2
+      c?.inquili2_nom ?? null,
+      c?.inquili2_cognoms ?? null,
+      c?.inquili2_nif ?? null,
+      c?.inquili2_telefon ?? null,
+
+      // CONTRACTE
+      c?.id ?? null,
+      c?.id_inmoble ?? null,
+      c?.id_inquili ?? null,
+      c?.id_inquili_2 ?? null,
+      c?.data_inici ?? null,
+      c?.data_fi ?? null,
+      c?.motiu_fi ? t(`contractes.motiusFi.${c.motiu_fi}`) : null,
+      c?.d_fi_prevista ?? null,
+      c?.lloguer_inicial ?? null,
+      c?.lloguer_actual ?? null,
+      c?.data_ultima_revisio ?? null,
+      c?.fianca_adicional ?? null,
+      c?.fianca_import ?? null,
+      c?.fianca_nc ?? null,
+      c?.fianca_data_model2 ?? null,
+      c?.fianca_data_ingres ?? null,
+      c?.fianca_data_notificacio ?? null,
+      c?.fianca_num_registre ?? null,
+      c?.fianca_comentari ?? null,
+      c?.devolucio_nc ?? null,
+      c?.devolucio_data_sollicitud ?? null,
+      c?.devolucio_data_cobrament ?? null,
+      c?.devolucio_import ?? null,
+      c?.devolucio_motiu ?? null,
+      c?.comentaris ?? null,
+      caducitat_fi_txt,
+      caducitat_revisio_txt
+    ]
+  })
 
   return {
     columnes,

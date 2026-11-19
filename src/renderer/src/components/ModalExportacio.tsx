@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Button, Fieldset, Group, Modal, Radio, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
-import type { ExtensioExportacio } from '../../../shared/tipus'
+import type { FormatExportacio } from '../../../shared/tipus'
 import { esFormatExportacio } from '../../../shared/validacions'
 
 interface Props {
   obert: boolean
   titol: string
-  onAcceptar: (extensio: ExtensioExportacio) => void
+  onAcceptar: (extensio: FormatExportacio) => void
   onCancellar: () => void
 }
 
 function ModalExportacio({ obert, titol, onAcceptar, onCancellar }: Props): React.JSX.Element {
   const { t } = useTranslation()
-  const [format, setFormat] = useState<ExtensioExportacio>('csv')
+  const [format, setFormat] = useState<FormatExportacio>('csv')
 
   useEffect(() => {
     if (!obert) return
@@ -40,7 +40,7 @@ function ModalExportacio({ obert, titol, onAcceptar, onCancellar }: Props): Reac
   return (
     <Modal opened={obert} onClose={onCancellar} title={titol} centered>
       <Fieldset legend={t('exportacio.format')}>
-        <Radio.Group value={format} onChange={(valor) => setFormat(valor as ExtensioExportacio)}>
+        <Radio.Group value={format} onChange={(valor) => setFormat(valor as FormatExportacio)}>
           <Stack gap="sm">
             <Radio value="csv" label="CSV" description={t('exportacio.csvDescripcio')} />
             <Radio value="ods" label="ODS" description={t('exportacio.odsDescripcio')} />

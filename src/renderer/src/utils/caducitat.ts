@@ -1,10 +1,9 @@
 import dayjs from 'dayjs'
-
-export type EstatCaducitat = 'caducat' | 'aviat' | null
+import { EstatCaducitat } from '../../../shared/tipus'
 
 // `data` és text ISO AAAA-MM-DD (o null). Es compara només el dia, en hora local:
 // el dia de la data encara es considera vigent.
-export function estatCaducitat(data: string | null, diesAvis: number): EstatCaducitat {
+export function estatCaducitat(data: string | null, diesAvis: number): EstatCaducitat | null {
   if (!data) return null
   const caducitat = dayjs(data)
   if (!caducitat.isValid()) return null

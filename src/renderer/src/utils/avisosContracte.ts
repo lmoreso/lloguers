@@ -1,21 +1,47 @@
 import { aniversariRevisio, estatCaducitat } from './caducitat'
-import type { ConfigObtinguda, Contracte, ContracteLlistat } from '../../../shared/tipus'
+import type {
+  ConfigObtinguda,
+  Contracte,
+  ContracteLlistat,
+  EstatCaducitat
+} from '../../../shared/tipus'
 import { TFunction } from 'i18next'
 
-// Avisos d'un contracte. Només els vigents (sense data de fi) en tenen.
+/**
+ * Avisos d'un contracte:
+ *   - Data de Fi Prevista propera o passada.
+ *   - Data de Revisió del Lloguer propera o passada.
+ *   - Només te sentit pels contractes vigents (sense data de fi).
+ *   - Retorna:
+ *      - { clau: 'fi' | 'revisio'; estat: EstatCaducitat }[]
+ *      - Actualitza els paràmetres  c.caducitat_fi i c.caducitat_revisio
+ */
 export function avisos(
   c: ContracteLlistat,
   config: ConfigObtinguda
-): { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] {
+): { clau: 'fi' | 'revisio'; estat: EstatCaducitat }[] {
+  // Si el contracte està tancat no te sentit cap avis
   if (c.data_fi !== null) return []
+
   const llista: { clau: 'fi' | 'revisio'; estat: 'caducat' | 'aviat' }[] = []
-  const fi = estatCaducitat(c.d_fi_prevista, config.diesAvisFiContracte)
-  if (fi) llista.push({ clau: 'fi', estat: fi })
-  const revisio = estatCaducitat(
+
+  c.caducitat_fi = null
+  c.caducitat_revisio = null
+
+  const estatFi = estatCaducitat(c.d_fi_prevista, config.diesAvisFiContracte)
+  if (estatFi) {
+    llista.push({ clau: 'fi', estat: estatFi })
+    c.caducitat_fi = estatFi
+  }
+
+  const estatRev = estatCaducitat(
     aniversariRevisio(c.data_ultima_revisio),
     config.diesAvisRevisioLloguer
   )
-  if (revisio) llista.push({ clau: 'revisio', estat: revisio })
+  if (estatRev) {
+    llista.push({ clau: 'revisio', estat: estatRev })
+    c.caducitat_revisio = estatRev
+  }
   return llista
 }
 

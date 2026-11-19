@@ -385,6 +385,18 @@
     },
     "avisos": {
       "devolucioPendent": "Devolución pendiente",      
+      "estatCaducitat" : {
+        "fi": {
+          "literal": "Fin Prevista",
+          "caducat": "Pasada",
+          "aviat": "Pròxima"
+        },
+        "revisio": {
+          "literal": "Revisión Alquiler",
+          "caducat": "Pasada",
+          "aviat": "Pròxima"        
+        }
+      },  
       "fi": {
         "caducat": "Fin previsto pasado",
         "aviat": "Fin previsto próximo"
@@ -403,7 +415,6 @@
       "fet": "Contrato cerrado."
     }        
   },
-
   "exportacio": {
     "titol": "Exportar",
     "csvTitol": "Exportar a CSV",

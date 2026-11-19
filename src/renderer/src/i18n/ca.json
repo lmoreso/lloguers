@@ -384,6 +384,18 @@
     },
     "avisos": {
       "devolucioPendent": "Devolució pendent",
+      "estatCaducitat" : {
+        "fi": {
+          "literal": "Fi Prevista",
+          "caducat": "Passada",
+          "aviat": "Pròxima"
+        },
+        "revisio": {
+          "literal": "Revisió Lloguer",
+          "caducat": "Passada",
+          "aviat": "Pròxima"        
+        }
+      }, 
       "fi": {
         "caducat": "Fi prevista passada",
         "aviat": "Fi prevista pròxima"

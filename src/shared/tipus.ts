@@ -82,6 +82,8 @@ export interface Contracte {
 // `data_ultima_revisio` a partir de `lloguer_inicial` i `data_inici`; en actualitzar, `id_inmoble` s'ignora.
 export type ContracteDades = Omit<Contracte, 'id'>
 
+export type EstatCaducitat = 'caducat' | 'aviat'
+
 // Fila del llistat: el contracte més els noms dels inquilins (JOIN al Main).
 // El llistat és sempre d'un sol immoble, així que l'adreça no cal.
 export interface ContracteLlistat extends Contracte {
@@ -100,6 +102,9 @@ export interface ContracteLlistat extends Contracte {
   te_doc_model3: boolean
   // Si el contracte té una revisió de lloguer amb la carta pendent d'enviar (calculat al Main).
   carta_pendent: boolean
+  // Caducitat del Fi de Contracte i de la data de revisió del lloguer
+  caducitat_fi: EstatCaducitat | null
+  caducitat_revisio: EstatCaducitat | null
 }
 
 // Una entrada de la vista "Últims contractes": un immoble amb els seus contractes en curs o l'últim.
