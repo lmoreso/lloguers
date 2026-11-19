@@ -20,7 +20,7 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "npm run typecheck && electron-vite build && electron-builder --linux deb AppImage"
+    "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -71,16 +71,15 @@
     "electron-winstaller": false,
     "better-sqlite3@13.0.3": true
   },
-"build": {
-  "linux": {
-    "name": "Gestió de Lloguers",
-    "category": "Office",
-    "synopsis": "Gestió de lloguers d'immobles",
-    "description": "Gestió de lloguers d'immobles. Gestiona immobles, inquilins, contractes, fiances, revisions del lloguer i documents relacionats." 
-  },
-  "deb": {
-    "packageCategory": "office",
-    "priority": "optional"
-  }
-}  
+  "build": {
+    "linux": {
+      "category": "Office",
+      "synopsis": "Gestió de lloguers d'immobles",
+      "description": "Gestió de lloguers d'immobles. Gestiona immobles, inquilins, contractes, fiances, revisions del lloguer i documents relacionats." 
+    },
+    "deb": {
+      "packageCategory": "office",
+      "priority": "optional"
+    }
+  }  
 }
