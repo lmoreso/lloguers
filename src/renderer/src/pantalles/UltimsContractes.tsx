@@ -170,10 +170,10 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
                 <Table.Td style={{ width: 1 }}>
                   {c === null ? (
                     <>
-                      <Tooltip label={t('comu.afegir')}>
+                      <Tooltip label={t('immobles.afegirContracte')}>
                         <ActionIcon
                           variant="subtle"
-                          aria-label={t('comu.afegir')}
+                          aria-label={t('immobles.afegirContracte')}
                           onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
                         >
                           <IconPlus size={18} />
@@ -206,10 +206,10 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
 
                     <Table.Td></Table.Td>
                     <Table.Td style={{ width: 1 }}>
-                      <Tooltip label={t('comu.afegir')}>
+                      <Tooltip label={t('immobles.afegirContracte')}>
                         <ActionIcon
                           variant="subtle"
-                          aria-label={t('comu.afegir')}
+                          aria-label={t('immobles.afegirContracte')}
                           onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
                         >
                           <IconPlus size={18} />

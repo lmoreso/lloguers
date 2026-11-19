@@ -222,12 +222,20 @@ function FitxaContracte({ config }: Props): React.JSX.Element {
 
       {noTrobat && (
         <>
+          <Group justify="space-between">
+            <Title order={2}>{t('contractes.editar')}</Title>
+            <Button
+              mt="md"
+              variant="default"
+              onClick={tornarEnrere}
+              leftSection={<IconCornerUpLeft size={16} />}
+            >
+              {t('comu.tornar')}
+            </Button>
+          </Group>
           <Text c="dimmed">
             {immoble === null ? t('immobles.noTrobat') : t('contractes.noTrobat')}
           </Text>
-          <Button mt="md" variant="default" onClick={tornarEnrere}>
-            {t('comu.tornar')}
-          </Button>
         </>
       )}
 

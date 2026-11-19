@@ -49,7 +49,7 @@
 
 ## Funcionalitats previstes d'implementar
 - Generar un llistat amb tots els avisos dels immobles i dels contractes.
-- Generar un fitxer CSV o un full de càlcul amb totes les dades necessàries per redactar un contracte. Aquestes dades es podran combinar amb una plantilla de document per generar el contracte.
+- Generar un fitxer CSV i/o full de càlcul amb totes les dades necessàries per redactar un contracte. Aquestes dades es podran combinar amb una plantilla de document per generar el contracte.
 - Afegir plantilles de contractes que permetin generar directament el contracte des de l'aplicació.
 - Gestionar dinàmicament les clàusules i els apartats dels contractes.
 - Generar, instal·lar i provar les versions per a Windows i macOS.

@@ -174,7 +174,7 @@ function FitxaImmoble({ config }: Props): React.JSX.Element {
 
   return (
     <>
-      {(carregant || noTrobat) && (
+      {carregant && (
         <Title order={2} mb="md">
           {titol}
         </Title>
@@ -184,10 +184,18 @@ function FitxaImmoble({ config }: Props): React.JSX.Element {
 
       {noTrobat && (
         <>
+          <Group justify="space-between">
+            <Title order={2}>{titol}</Title>
+            <Button
+              mt="md"
+              variant="default"
+              onClick={tornarEnrere}
+              leftSection={<IconCornerUpLeft size={16} />}
+            >
+              {t('comu.tornar')}
+            </Button>
+          </Group>
           <Text c="dimmed">{t('immobles.noTrobat')}</Text>
-          <Button mt="md" variant="default" onClick={tornarEnrere}>
-            {t('comu.tornar')}
-          </Button>
         </>
       )}
 

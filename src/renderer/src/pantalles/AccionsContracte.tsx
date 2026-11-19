@@ -1,7 +1,14 @@
 import { ActionIcon, Menu, Text, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconCurrencyEuro, IconDots, IconFiles, IconPencil, IconTrash } from '@tabler/icons-react'
+import {
+  IconCurrencyEuro,
+  IconDots,
+  IconFiles,
+  IconPencil,
+  IconPlus,
+  IconTrash
+} from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { formatData } from '../utils/dates'
@@ -32,6 +39,10 @@ function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
 
   function immobles(): void {
     navigate(`/immobles/${c.id_inmoble}`)
+  }
+
+  function contracteNou(): void {
+    navigate(`/immobles/${c.id_inmoble}/contractes/nou`)
   }
 
   // Un contracte tancat (amb data de fi) demana confirmació abans d'editar-lo.
@@ -73,17 +84,19 @@ function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
         <Menu.Item leftSection={<IconPencil size={16} />} onClick={() => editarContracte(c)}>
           {t('contractes.editar')}
         </Menu.Item>
-        <Menu.Divider />
         <Menu.Item leftSection={<IconCurrencyEuro size={16} />} onClick={revisions}>
           {t('contractes.accions.revisarLloguer')}
         </Menu.Item>
         <Menu.Item leftSection={<IconFiles size={16} />} onClick={documents}>
           {t('contractes.accions.documents')}
         </Menu.Item>
+        <Menu.Item leftSection={<IconPlus size={16} />} onClick={contracteNou}>
+          {t('immobles.afegirContracte')}
+        </Menu.Item>
+        <Menu.Divider />
         <Menu.Item leftSection={<IconPencil size={16} />} onClick={immobles}>
           {t('immobles.editar')}
         </Menu.Item>
-
         <Menu.Divider />
         <Menu.Item color="red" leftSection={<IconTrash size={16} />} onClick={demanarEliminar}>
           {t('comu.eliminar')}

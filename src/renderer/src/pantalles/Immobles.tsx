@@ -202,7 +202,7 @@ function Immobles({ config }: Props): React.JSX.Element {
         position="top"
       >
         <ActionIcon variant="subtle" color="gray">
-          <IconInfoCircle size={18} />
+          <IconInfoCircle size={24} />
         </ActionIcon>
       </Tooltip>
     )

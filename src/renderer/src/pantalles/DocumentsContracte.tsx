@@ -143,12 +143,20 @@ function DocumentsContracte(): React.JSX.Element {
 
       {noTrobat && (
         <>
+          <Group justify="space-between">
+            <Title order={2}>{t('documents.titol')}</Title>
+            <Button
+              mt="md"
+              variant="default"
+              onClick={tornarNoTrobat}
+              leftSection={<IconCornerUpLeft size={16} />}
+            >
+              {t('comu.tornar')}
+            </Button>
+          </Group>
           <Text c="dimmed">
             {immoble === null ? t('immobles.noTrobat') : t('contractes.noTrobat')}
           </Text>
-          <Button mt="md" variant="default" onClick={tornarNoTrobat}>
-            {t('comu.tornar')}
-          </Button>
         </>
       )}
 

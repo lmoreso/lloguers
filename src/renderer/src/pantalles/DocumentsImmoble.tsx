@@ -108,10 +108,18 @@ function DocumentsImmoble(): React.JSX.Element {
 
       {!carregant && immoble === null && (
         <>
+          <Group justify="space-between">
+            <Title order={2}>{t('documentsImmoble.titol')}</Title>
+            <Button
+              mt="md"
+              variant="default"
+              onClick={tornar}
+              leftSection={<IconCornerUpLeft size={16} />}
+            >
+              {t('comu.tornar')}
+            </Button>
+          </Group>
           <Text c="dimmed">{t('immobles.noTrobat')}</Text>
-          <Button mt="md" variant="default" onClick={tornar}>
-            {t('comu.tornar')}
-          </Button>
         </>
       )}
 
