@@ -274,7 +274,23 @@
     "desat": "Contracte desat.",
     "ultims": {
       "titol": "Últims contractes",
-      "senseContracte": "Immoble sense contractes informats"
+      "senseContracte": "Immoble sense contractes informats",
+      "filtres": {
+        "estat": "Estat del contracte",
+        "estats": {
+          "senseContracte": "Sense contracte",
+          "vigent": "Vigent",
+          "futur": "Futur (inici posterior a avui)",
+          "tancat": "Tancat"
+        },
+        "municipi": "Municipi",
+        "inquilins": "Inquilins",
+        "cerca": "Nom o cognoms",
+        "tots": "Tots",
+        "neteja": "Netejar filtres",
+        "comptador": "{{visibles}} de {{total}} files",
+        "cap": "Cap fila compleix els filtres."
+      }      
     },   
     "editarInquili": "Editar l'inquilí",
     "avisIngres": "Cal gestionar l'ingrés de la fiança a l'INCASOL: encara no consta la data de l'ingrés.",   

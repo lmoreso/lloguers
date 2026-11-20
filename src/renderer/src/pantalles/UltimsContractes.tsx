@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { ActionIcon, Badge, Button, Group, Table, Text, Title, Tooltip } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
@@ -23,6 +23,10 @@ import { useEditarContracte } from '@renderer/utils/useEditarContracte'
 // import { AvisosContracteTxt } from '@renderer/utils/avisosContracte'
 import ModalExportacio from '../components/ModalExportacio'
 import { DadesExportacioDetallades } from '../utils/exportImmoblesIContractes'
+import dayjs from 'dayjs'
+import FiltresUltimsContractes from '../components/FiltresUltimsContractes'
+import { desarFiltres, llegirFiltresGuardats, passaFiltres } from '../utils/filtresUltimsContractes'
+import type { Filtres } from '../utils/filtresUltimsContractes'
 
 interface Props {
   config: ConfigObtinguda
@@ -54,17 +58,39 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
 
   const euros = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
 
-  // const files: Fila[] = dades.flatMap((d) =>
-  const files = dades.flatMap<FilaDades>((d) =>
-    d.contractes.length > 0
-      ? d.contractes.map((c) => ({ immoble: d.immoble, contracte: c }))
-      : [{ immoble: d.immoble, contracte: null }]
+  // Les dades es llegeixen de la BD una sola vegada (`dades`). Les files visibles són una llista derivada que es
+  // recalcula en canviar un filtre, sense tornar a llegir res.
+  const [filtres, setFiltres] = useState<Filtres>(llegirFiltresGuardats)
+  function canviarFiltres(f: Filtres): void {
+    desarFiltres(f)
+    setFiltres(f)
+  }
+
+  const files = useMemo(
+    () =>
+      dades.flatMap<FilaDades>((d) =>
+        d.contractes.length > 0
+          ? d.contractes.map((c) => ({ immoble: d.immoble, contracte: c }))
+          : [{ immoble: d.immoble, contracte: null }]
+      ),
+    [dades]
+  )
+  const filesVisibles = useMemo(() => {
+    const avui = dayjs().format('YYYY-MM-DD')
+    return files.filter((fila) => passaFiltres(fila, filtres, avui))
+  }, [files, filtres])
+  const municipis = useMemo(
+    () =>
+      [...new Set(files.map((f) => f.immoble.localitat))].sort((a, b) =>
+        a.localeCompare(b, 'ca', { sensitivity: 'base' })
+      ),
+    [files]
   )
 
   async function exportar(format: FormatExportacio): Promise<void> {
     // console.log('t enviat:', t, typeof t)
 
-    const dadesCuinades: ColumnaIFilesExport = DadesExportacioDetallades(files, t)
+    const dadesCuinades: ColumnaIFilesExport = DadesExportacioDetallades(filesVisibles, t)
 
     /* 
     const dadesCuinades: ColumnaIFilesExport = {
@@ -143,7 +169,7 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
       <Group justify="space-between" mb="md">
         <Title order={2}>{t('contractes.ultims.titol')}</Title>
 
-        {files.length > 0 && (
+        {filesVisibles.length > 0 && (
           <Button
             leftSection={<IconFileExport size={16} />}
             onClick={() => setModalExportacioObert(true)}
@@ -156,6 +182,19 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
       {!carregant && files.length === 0 && <Text c="dimmed">{t('immobles.buit')}</Text>}
 
       {files.length > 0 && (
+        <FiltresUltimsContractes
+          filtres={filtres}
+          onCanvi={canviarFiltres}
+          municipis={municipis}
+          total={files.length}
+          visibles={filesVisibles.length}
+        />
+      )}
+      {files.length > 0 && filesVisibles.length === 0 && (
+        <Text c="dimmed">{t('contractes.ultims.filtres.cap')}</Text>
+      )}
+
+      {filesVisibles.length > 0 && (
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>

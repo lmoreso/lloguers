@@ -275,7 +275,23 @@
     "desat": "Contrato guardado.",
     "ultims": {
       "titol": "Últimos contratos",
-      "senseContracte": "Inmueble sin contratos informados"
+      "senseContracte": "Inmueble sin contratos informados",
+      "filtres": {
+        "estat": "Estado del contrato",
+        "estats": {
+          "senseContracte": "Sin contrato",
+          "vigent": "Vigente",
+          "futur": "Futuro (inicio posterior a hoy)",
+          "tancat": "Cerrado"
+        },
+        "municipi": "Municipio",
+        "inquilins": "Inquilinos",
+        "cerca": "Nombre o apellidos",
+        "tots": "Todos",
+        "neteja": "Limpiar filtros",
+        "comptador": "{{visibles}} de {{total}} filas",
+        "cap": "Ninguna fila cumple los filtros."
+      }      
     }, 
     "editarInquili": "Editar el inquilino",    
     "avisIngres": "Hay que gestionar el ingreso de la fianza en el INCASOL: todavía no consta la fecha del ingreso.",    
