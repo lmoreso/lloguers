@@ -275,6 +275,7 @@
     "ultims": {
       "titol": "Últims contractes",
       "senseContracte": "Immoble sense contractes informats",
+      "mesDadesImmoble": "Mes dades del Immoble",
       "filtres": {
         "estat": "Estat del contracte",
         "estats": {
@@ -289,7 +290,13 @@
         "tots": "Tots",
         "neteja": "Netejar filtres",
         "comptador": "{{visibles}} de {{total}} files",
-        "cap": "Cap fila compleix els filtres."
+        "cap": "Cap fila compleix els filtres.",
+        "interruptors": {
+          "fiPrevista": "Fi prevista passada o pròxima",
+          "revisio": "Revisió del lloguer passada o pròxima",
+          "certificat": "Certificat energètic caducat o pròxim",
+          "cedula": "Cèdula d'habitabilitat caducada o pròxima"
+        }        
       }      
     },   
     "editarInquili": "Editar l'inquilí",

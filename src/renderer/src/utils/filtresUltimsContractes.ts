@@ -1,21 +1,42 @@
-import type { FilaDades } from '../../../shared/tipus'
+import { avisos } from './avisosContracte'
+import { alertes } from './avisosImmoble'
+import type { ConfigObtinguda, FilaDades } from '../../../shared/tipus'
 
 export type EstatContracte = 'senseContracte' | 'vigent' | 'futur' | 'tancat'
 
 export const ESTATS_CONTRACTE: EstatContracte[] = ['senseContracte', 'vigent', 'futur', 'tancat']
 
 // Els filtres de la vista "Últims contractes". Dins de cada grup de tria múltiple val qualsevol de les opcions triades;
-// entre grups, una fila ha de passar tots els filtres actius.
+// entre filtres, una fila ha de passar-los tots. Els quatre interruptors són "tot o res": activat, només es veuen les
+// files amb l'avís corresponent (caducat o proper), amb la mateixa lògica que les etiquetes d'avís.
 export interface Filtres {
   estats: EstatContracte[]
   municipis: string[]
   inquilins: string
+  fiPrevista: boolean
+  revisio: boolean
+  certificat: boolean
+  cedula: boolean
 }
 
-export const filtresBuits = (): Filtres => ({ estats: [], municipis: [], inquilins: '' })
+export const filtresBuits = (): Filtres => ({
+  estats: [],
+  municipis: [],
+  inquilins: '',
+  fiPrevista: false,
+  revisio: false,
+  certificat: false,
+  cedula: false
+})
 
 export const hiHaFiltres = (f: Filtres): boolean =>
-  f.estats.length > 0 || f.municipis.length > 0 || f.inquilins.trim() !== ''
+  f.estats.length > 0 ||
+  f.municipis.length > 0 ||
+  f.inquilins.trim() !== '' ||
+  f.fiPrevista ||
+  f.revisio ||
+  f.certificat ||
+  f.cedula
 
 // Els filtres es guarden en memòria mentre l'app és oberta: sobreviuen a anar i tornar entre pantalles (la vista es
 // torna a muntar) i es perden en tancar l'app.
@@ -55,10 +76,32 @@ function passaInquilins(fila: FilaDades, cerca: string): boolean {
   return paraules.every((p) => noms.includes(p))
 }
 
-export function passaFiltres(fila: FilaDades, f: Filtres, avui: string): boolean {
+// `config` porta els terminis dels avisos dels contractes; `diesAvisImmoble`, el dels documents de l'immoble
+// (certificat i cèdula). Són els mateixos que fan servir les etiquetes.
+export function passaFiltres(
+  fila: FilaDades,
+  f: Filtres,
+  avui: string,
+  config: ConfigObtinguda
+): boolean {
   if (f.estats.length > 0 && !estatsDeLaFila(fila, avui).some((e) => f.estats.includes(e))) {
     return false
   }
   if (f.municipis.length > 0 && !f.municipis.includes(fila.immoble.localitat)) return false
-  return passaInquilins(fila, f.inquilins)
+  if (!passaInquilins(fila, f.inquilins)) return false
+
+  // Avisos del contracte (només els vigents en tenen: un tancat o una fila sense contracte no passa mai).
+  const c = fila.contracte
+  if (f.fiPrevista || f.revisio) {
+    const delContracte = c === null ? [] : avisos(c, config)
+    if (f.fiPrevista && !delContracte.some((a) => a.clau === 'fi')) return false
+    if (f.revisio && !delContracte.some((a) => a.clau === 'revisio')) return false
+  }
+  // Avisos de l'immoble: valen per a totes les files d'aquell immoble, tinguin contracte o no.
+  if (f.certificat || f.cedula) {
+    const delsDocuments = alertes(fila.immoble, config.diesAvisDocumentCaducat)
+    if (f.certificat && !delsDocuments.some((a) => a.clau === 'certificat')) return false
+    if (f.cedula && !delsDocuments.some((a) => a.clau === 'cedula')) return false
+  }
+  return true
 }

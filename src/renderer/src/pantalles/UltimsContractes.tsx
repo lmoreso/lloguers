@@ -1,24 +1,36 @@
 import { useEffect, useState, useMemo } from 'react'
-import { ActionIcon, Badge, Button, Group, Table, Text, Title, Tooltip } from '@mantine/core'
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Grid,
+  Group,
+  Stack,
+  Table,
+  Text,
+  Title,
+  Tooltip
+} from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import AvisosContracte from '../components/AvisosContracte'
-import { adreca } from '../../../shared/utilitats'
+import { adreca, formatM2 } from '../../../shared/utilitats'
 import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
-import AccionsContracte from './AccionsContracte'
+import { AccionsContracte, AccionsSenseContracte } from './AccionsContracte'
 import type {
   ContracteLlistat,
   FilaDades,
+  Immoble,
   ImmobleAmbContractes,
   DadesExportacio,
   FormatExportacio,
   ConfigObtinguda,
   ColumnaIFilesExport
 } from '../../../shared/tipus'
-import { IconFileExport, IconPencil, IconPlus } from '@tabler/icons-react'
+import { IconFileExport, IconInfoCircle, IconPencil, IconPlus } from '@tabler/icons-react'
 import { useEditarContracte } from '@renderer/utils/useEditarContracte'
 // import { AvisosContracteTxt } from '@renderer/utils/avisosContracte'
 import ModalExportacio from '../components/ModalExportacio'
@@ -77,8 +89,8 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
   )
   const filesVisibles = useMemo(() => {
     const avui = dayjs().format('YYYY-MM-DD')
-    return files.filter((fila) => passaFiltres(fila, filtres, avui))
-  }, [files, filtres])
+    return files.filter((fila) => passaFiltres(fila, filtres, avui, config))
+  }, [files, filtres, config])
   const municipis = useMemo(
     () =>
       [...new Set(files.map((f) => f.immoble.localitat))].sort((a, b) =>
@@ -91,42 +103,6 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
     // console.log('t enviat:', t, typeof t)
 
     const dadesCuinades: ColumnaIFilesExport = DadesExportacioDetallades(filesVisibles, t)
-
-    /* 
-    const dadesCuinades: ColumnaIFilesExport = {
-      columnes: [
-        { titol: t('immobles.seccions.adreca'), tipus: 'text' },
-        { titol: t('contractes.camps.dataInici'), tipus: 'data' },
-        { titol: t('contractes.camps.dataFi'), tipus: 'data' },
-        { titol: t('contractes.camps.dFiPrevista'), tipus: 'data' },
-        { titol: t('contractes.camps.inquili') + ' 1', tipus: 'text' },
-        { titol: t('contractes.camps.inquili') + ' 2', tipus: 'text' },
-        { titol: t('contractes.camps.lloguerActual'), tipus: 'moneda' },
-        { titol: t('contractes.camps.dataUltimaRevisio'), tipus: 'data' },
-        { titol: t('contractes.camps.avisos'), tipus: 'text' }
-      ],
-      files: files.map(({ immoble, contracte: c }) => {
-        // console.log('Immoble:', immoble)
-        // console.log('Contracte:', c)
-
-        return [
-          adreca(immoble),
-          c?.data_inici ?? null,
-          c?.data_fi ?? null,
-          c?.d_fi_prevista ?? null,
-          c === null
-            ? t('contractes.ultims.senseContracte')
-            : nomInquili(c.inquili_nom, c.inquili_cognoms),
-          c === null || c.id_inquili_2 === null
-            ? null
-            : nomInquili(c.inquili2_nom, c.inquili2_cognoms),
-          c?.lloguer_actual ?? null,
-          c?.data_ultima_revisio ?? null,
-          c === null ? null : AvisosContracteTxt(c, config, t)
-        ]
-      })
-    }
- */
 
     const dadesExportacio: DadesExportacio = {
       nomFitxer: t('exportacio.ultimsContractes.nomFitxer'),
@@ -164,6 +140,85 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
     }
   }
 
+  function infoImmoble(i: Immoble): React.JSX.Element {
+    return (
+      <Tooltip
+        withArrow
+        arrowSize={12}
+        label={
+          <Stack gap="xs">
+            <Title
+              order={6}
+              c="white"
+              ta="center"
+              pb={2}
+              mb={2}
+              style={{ borderBottom: '1px solid white' }}
+            >
+              {t('contractes.ultims.mesDadesImmoble')}
+            </Title>
+            {/* <Divider color="white" /> */}
+            <Grid gap="xs">
+              <Grid.Col span={5}>
+                <Text size="xs">{t('immobles.seccions.adreca')}</Text>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <Text size="xs">{adreca(i)}</Text>
+              </Grid.Col>
+            </Grid>
+            <Grid gap="xs">
+              <Grid.Col span={5}>
+                <Text size="xs">{t('immobles.camps.codiPostal')}</Text>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <Text size="xs">{i.codi_postal}</Text>
+              </Grid.Col>
+            </Grid>
+            <Grid gap="xs">
+              <Grid.Col span={5}>
+                <Text size="xs">{t('immobles.camps.localitat')}</Text>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <Text size="xs">{i.localitat}</Text>
+              </Grid.Col>
+            </Grid>
+            <Grid gap="xs">
+              <Grid.Col span={5}>
+                <Text size="xs">{t('immobles.camps.provincia')}</Text>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <Text size="xs">{i.provincia}</Text>
+              </Grid.Col>
+            </Grid>
+            <Grid gap="xs">
+              <Grid.Col span={5}>
+                <Text size="xs">{t('immobles.camps.refCatastral')}</Text>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <Text size="xs">{i.ref_catastral}</Text>
+              </Grid.Col>
+            </Grid>
+            <Grid gap="xs">
+              <Grid.Col span={5}>
+                <Text size="xs">{t('immobles.camps.superficie')}</Text>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <Text size="xs">{formatM2(i.superficie_m2)}</Text>
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        }
+        multiline
+        w={300}
+        position="top"
+      >
+        <ActionIcon variant="subtle" color="gray">
+          <IconInfoCircle size={24} />
+        </ActionIcon>
+      </Tooltip>
+    )
+  }
+
   return (
     <>
       <Group justify="space-between" mb="md">
@@ -199,7 +254,9 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
           <Table.Thead>
             <Table.Tr>
               <Table.Th />
+              <Table.Th>{'Id.'}</Table.Th>
               <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
+              <Table.Th />
               <Table.Th>{t('contractes.camps.dataInici')}</Table.Th>
               <Table.Th>{t('contractes.camps.dataFi')}</Table.Th>
               <Table.Th>{t('contractes.camps.dFiPrevista')}</Table.Th>
@@ -211,7 +268,7 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {files.map(({ immoble, contracte: c }) => (
+            {filesVisibles.map(({ immoble, contracte: c }) => (
               <Table.Tr key={c ? `c${c.id}` : `i${immoble.id}`}>
                 <Table.Td style={{ width: 1 }}>
                   {c === null ? (
@@ -240,8 +297,9 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
                     </Tooltip>
                   )}
                 </Table.Td>
-
+                <Table.Td>{immoble.id}</Table.Td>
                 <Table.Td>{adreca(immoble)}</Table.Td>
+                <Table.Td>{infoImmoble(immoble)}</Table.Td>
                 {c === null ? (
                   <>
                     <Table.Td colSpan={6} ta="center">
@@ -252,15 +310,7 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
 
                     <Table.Td></Table.Td>
                     <Table.Td style={{ width: 1 }}>
-                      <Tooltip label={t('immobles.afegirContracte')}>
-                        <ActionIcon
-                          variant="subtle"
-                          aria-label={t('immobles.afegirContracte')}
-                          onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
-                        >
-                          <IconPlus size={18} />
-                        </ActionIcon>
-                      </Tooltip>
+                      <AccionsSenseContracte immoble={immoble} />
                     </Table.Td>
                   </>
                 ) : (

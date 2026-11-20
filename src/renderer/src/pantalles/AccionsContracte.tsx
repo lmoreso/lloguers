@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
-import type { ContracteLlistat } from '../../../shared/tipus'
+import type { ContracteLlistat, Immoble } from '../../../shared/tipus'
 import { useEditarContracte } from '../utils/useEditarContracte'
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
 
 // Menú d'accions d'un contracte (una sola icona per fila): Documents, Editar i Eliminar. Tancar el contracte, la
 // devolució de la fiança i la revisió del lloguer es fan des del formulari.
-function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
+export function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -106,4 +106,42 @@ function AccionsContracte({ contracte: c, onCanvi }: Props): React.JSX.Element {
   )
 }
 
-export default AccionsContracte
+interface SenseProps {
+  immoble: Immoble
+}
+/**
+ * Menú d'accions d'un Immoble sense contracte (una sola icona per fila):  Crear contracte i Editar Immoble.
+ */
+export function AccionsSenseContracte({ immoble: i }: SenseProps): React.JSX.Element {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+
+  function immobles(): void {
+    navigate(`/immobles/${i.id}`)
+  }
+
+  function contracteNou(): void {
+    navigate(`/immobles/${i.id}/contractes/nou`)
+  }
+
+  return (
+    <Menu position="bottom-end" withinPortal>
+      <Menu.Target>
+        <Tooltip label={t('contractes.accions.titol')}>
+          <ActionIcon variant="subtle" aria-label={t('contractes.accions.titol')}>
+            <IconDots size={18} />
+          </ActionIcon>
+        </Tooltip>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <Menu.Item leftSection={<IconPlus size={16} />} onClick={contracteNou}>
+          {t('immobles.afegirContracte')}
+        </Menu.Item>
+        <Menu.Divider />
+        <Menu.Item leftSection={<IconPencil size={16} />} onClick={immobles}>
+          {t('immobles.editar')}
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
+  )
+}

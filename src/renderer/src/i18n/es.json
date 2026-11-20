@@ -276,6 +276,7 @@
     "ultims": {
       "titol": "Últimos contratos",
       "senseContracte": "Inmueble sin contratos informados",
+      "mesDadesImmoble": "Mas datos del Immueble",
       "filtres": {
         "estat": "Estado del contrato",
         "estats": {
@@ -290,7 +291,13 @@
         "tots": "Todos",
         "neteja": "Limpiar filtros",
         "comptador": "{{visibles}} de {{total}} filas",
-        "cap": "Ninguna fila cumple los filtros."
+        "cap": "Ninguna fila cumple los filtros.",
+        "interruptors": {
+          "fiPrevista": "Fin prevista vencida o próxima",
+          "revisio": "Revisión del alquiler vencida o próxima",
+          "certificat": "Certificado energético caducado o próximo",
+          "cedula": "Cédula de habitabilidad caducada o próxima"
+        }        
       }      
     }, 
     "editarInquili": "Editar el inquilino",    
