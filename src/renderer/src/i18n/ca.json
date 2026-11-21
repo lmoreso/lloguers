@@ -80,7 +80,8 @@
     "tornar": "Tornar",
     "capResultat": "Cap resultat",
     "acceptar": "Acceptar",
-    "i": " i "
+    "i": " i ",
+    "filtres" : "Filtres"
   },
   "errors": {
     "CONTRACTE_SOLAPAT": "El període se solapa amb un altre contracte d'aquest immoble.",
@@ -153,6 +154,7 @@
       "adreca": "Adreça i cadastre",
       "certificat": "Certificat i cèdula"
     },    
+    "contractesRecents": "Contractes mes recents",
     "afegirContracte" : "Afegir contracte",
     "llistaContractes" : "Llista contractes",
     "mesDadesContracte": "Mes dades del últim contracte",
@@ -204,7 +206,7 @@
       "cerca": "Carrer, número, pis...",
       "tots": "Tots",
       "neteja": "Netejar filtres",
-      "comptador": "{{visibles}} de {{total}} immobles",
+      "comptador": "Mostrant {{visibles}} de {{total}} immobles",
       "cap": "Cap immoble compleix els filtres.",
       "interruptors": {
         "certificat": "Certificat energètic caducat o pròxim",
@@ -302,7 +304,7 @@
         "cerca": "Nom o cognoms",
         "tots": "Tots",
         "neteja": "Netejar filtres",
-        "comptador": "{{visibles}} de {{total}} files",
+        "comptador": "Mostrant {{visibles}} de {{total}} contractes",
         "cap": "Cap fila compleix els filtres.",
         "interruptors": {
           "fiPrevista": "Fi prevista passada o pròxima",

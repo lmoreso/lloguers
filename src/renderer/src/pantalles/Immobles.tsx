@@ -274,42 +274,34 @@ function Immobles({ config }: Props): React.JSX.Element {
                 ta="center"
                 // bg="var(--mantine-color-gray-light)"
                 style={{
-                  // borderTop: '2px solid var(--mantine-color-default-border)',
-                  // borderLeft: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '2px solid var(--mantine-color-default-border)'
+                  borderRight: '1px solid var(--mantine-color-default-border)'
                 }}
               >
-                {t('immobles.titol')}
+                {t('menu.immobles')}
               </Table.Th>
               <Table.Th
                 colSpan={4}
                 ta="center"
                 style={{
                   // borderTop: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '2px solid var(--mantine-color-default-border)'
+                  borderRight: '1px solid var(--mantine-color-default-border)'
                 }}
               >
-                {t('contractes.titol')}
+                {t('immobles.contractesRecents')}
               </Table.Th>
               <Table.Th
-                // bg="var(--mantine-color-gray-light)"
+                rowSpan={2}
                 ta="center"
-
-                style={
-                  {
-                    // borderTop: '2px solid var(--mantine-color-default-border)',
-                    // borderRight: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              ></Table.Th>
-              <Table.Th
-                style={
-                  {
-                    // borderTop: '2px solid var(--mantine-color-default-border)',
-                    // borderRight: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              ></Table.Th>
+                style={{
+                  // borderTop: '2px solid var(--mantine-color-default-border)',
+                  borderRight: '1px solid var(--mantine-color-default-border)'
+                }}
+              >
+                {t('immobles.camps.avisos')}
+              </Table.Th>
+              <Table.Th rowSpan={2} ta="center">
+                {t('comu.accions')}
+              </Table.Th>
             </Table.Tr>
 
             {/* Fila de títols */}
@@ -360,7 +352,7 @@ function Immobles({ config }: Props): React.JSX.Element {
                 //  bg="var(--mantine-color-gray-light)"
                 style={{
                   // borderBottom: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '2px solid var(--mantine-color-default-border)'
+                  borderRight: '1px solid var(--mantine-color-default-border)'
                 }}
               >
                 {t('immobles.camps.superficie')}
@@ -395,32 +387,9 @@ function Immobles({ config }: Props): React.JSX.Element {
               <Table.Th
                 style={{
                   // borderBottom: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '2px solid var(--mantine-color-default-border)'
+                  borderRight: '1px solid var(--mantine-color-default-border)'
                 }}
               ></Table.Th>
-              <Table.Th
-                //  bg="var(--mantine-color-gray-light)"
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)',
-                    // borderRight: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              >
-                {' '}
-                {t('immobles.camps.avisos')}
-              </Table.Th>
-              <Table.Th
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)',
-                    // borderRight: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              >
-                {' '}
-                {t('comu.accions')}
-              </Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -443,7 +412,14 @@ function Immobles({ config }: Props): React.JSX.Element {
                   <Table.Td>{i.id}</Table.Td>
                   <Table.Td>{adreca(i)}</Table.Td>
                   <Table.Td>{i.localitat}</Table.Td>
-                  <Table.Td ta="right" pr="sm">
+                  <Table.Td
+                    ta="right"
+                    pr="sm"
+                    style={{
+                      // borderTop: '2px solid var(--mantine-color-default-border)',
+                      borderRight: '1px solid var(--mantine-color-default-border)'
+                    }}
+                  >
                     {formatM2(i.superficie_m2)}
                   </Table.Td>
                   {contracte ? (
@@ -451,18 +427,34 @@ function Immobles({ config }: Props): React.JSX.Element {
                       <Table.Td>{formatData(contracte.data_inici)}</Table.Td>
                       <Table.Td>{formatData(contracte.data_fi)}</Table.Td>
                       <Table.Td>{contracte.inquili_nom}</Table.Td>
-                      <Table.Td>{infoContracte(contracte)}</Table.Td>
+                      <Table.Td
+                        style={{
+                          borderRight: '1px solid var(--mantine-color-default-border)'
+                        }}
+                      >
+                        {infoContracte(contracte)}
+                      </Table.Td>
                     </>
                   ) : (
-                    <Table.Td colSpan={4} ta="center">
+                    <Table.Td
+                      colSpan={4}
+                      ta="center"
+                      style={{
+                        borderRight: '1px solid var(--mantine-color-default-border)'
+                      }}
+                    >
                       <Badge variant="outline" color="gray">
                         {t('contractes.ultims.senseContracte')}
                       </Badge>
                     </Table.Td>
                   )}
 
-                  <Table.Td>
-                    <Stack gap={4} align="flex-start">
+                  <Table.Td
+                    style={{
+                      borderRight: '1px solid var(--mantine-color-default-border)'
+                    }}
+                  >
+                    <Stack gap={4} align="center">
                       {alertes(i, config.diesAvisDocumentCaducat).map((a) => (
                         <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
                           {t(`immobles.caducitats.${a.clau}`)}:{' '}

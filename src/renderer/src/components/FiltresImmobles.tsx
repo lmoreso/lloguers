@@ -1,4 +1,4 @@
-import { Button, Group, MultiSelect, Paper, Stack, Switch, Text, TextInput } from '@mantine/core'
+import { Button, Fieldset, Group, MultiSelect, Stack, Switch, Text, TextInput } from '@mantine/core'
 import { IconFilterOff, IconSearch } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { filtresImmobleBuits, hiHaFiltresImmoble } from '../utils/filtresImmobles'
@@ -24,7 +24,17 @@ function FiltresImmobles({
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
   return (
-    <Paper withBorder p="sm" mb="md">
+    <Fieldset
+      legend={
+        <Group gap={4}>
+          <span style={{ fontWeight: 700 }}> Filtres - </span>
+          <Text size="sm" c="dimmed">
+            {t('immobles.filtres.comptador', { visibles, total })}
+          </Text>
+        </Group>
+      }
+      mb={8}
+    >
       <Stack gap="sm">
         <Group align="flex-end" gap="md">
           <MultiSelect
@@ -46,6 +56,27 @@ function FiltresImmobles({
             value={filtres.adrecaText}
             onChange={(e) => onCanvi({ ...filtres, adrecaText: e.currentTarget.value })}
           />
+          <Stack gap="md">
+            {INTERRUPTORS.map((k) => (
+              <Switch
+                key={k}
+                label={t(`immobles.filtres.interruptors.${k}`)}
+                checked={filtres[k]}
+                onChange={(e) => onCanvi({ ...filtres, [k]: e.currentTarget.checked })}
+              />
+            ))}
+          </Stack>
+          {/* <Tooltip label={t('immobles.filtres.neteja')}>
+            <ActionIcon
+              mb={5}
+              variant="default"
+              disabled={!hiHaFiltresImmoble(filtres)}
+              onClick={() => onCanvi(filtresImmobleBuits())}
+              aria-label={t('immobles.filtres.neteja')}
+            >
+              <IconFilterOff size={30} />
+            </ActionIcon>
+          </Tooltip> */}
           <Button
             variant="default"
             leftSection={<IconFilterOff size={16} />}
@@ -54,23 +85,9 @@ function FiltresImmobles({
           >
             {t('immobles.filtres.neteja')}
           </Button>
-          <Text size="sm" c="dimmed">
-            {t('immobles.filtres.comptador', { visibles, total })}
-          </Text>
-        </Group>
-
-        <Group gap="xl">
-          {INTERRUPTORS.map((k) => (
-            <Switch
-              key={k}
-              label={t(`immobles.filtres.interruptors.${k}`)}
-              checked={filtres[k]}
-              onChange={(e) => onCanvi({ ...filtres, [k]: e.currentTarget.checked })}
-            />
-          ))}
         </Group>
       </Stack>
-    </Paper>
+    </Fieldset>
   )
 }
 

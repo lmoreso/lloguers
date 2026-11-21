@@ -159,7 +159,6 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
             >
               {t('contractes.ultims.mesDadesImmoble')}
             </Title>
-            {/* <Divider color="white" /> */}
             <Grid gap="xs">
               <Grid.Col span={5}>
                 <Text size="xs">{t('immobles.seccions.adreca')}</Text>

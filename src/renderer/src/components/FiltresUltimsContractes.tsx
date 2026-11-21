@@ -1,4 +1,4 @@
-import { Button, Group, MultiSelect, Paper, Stack, Switch, Text, TextInput } from '@mantine/core'
+import { Button, Fieldset, Group, MultiSelect, Stack, Switch, Text, TextInput } from '@mantine/core'
 import { IconFilterOff, IconSearch } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { ESTATS_CONTRACTE, filtresBuits, hiHaFiltres } from '../utils/filtresUltimsContractes'
@@ -24,7 +24,17 @@ function FiltresUltimsContractes({
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
   return (
-    <Paper withBorder p="sm" mb="md">
+    <Fieldset
+      legend={
+        <Group gap={4}>
+          <span style={{ fontWeight: 700 }}> Filtres - </span>
+          <Text size="sm" c="dimmed">
+            {t('contractes.ultims.filtres.comptador', { visibles, total })}
+          </Text>
+        </Group>
+      }
+      mb={8}
+    >
       <Stack gap="sm">
         <Group align="flex-end" gap="md">
           <MultiSelect
@@ -66,9 +76,6 @@ function FiltresUltimsContractes({
           >
             {t('contractes.ultims.filtres.neteja')}
           </Button>
-          <Text size="sm" c="dimmed">
-            {t('contractes.ultims.filtres.comptador', { visibles, total })}
-          </Text>
         </Group>
 
         <Group gap="xl">
@@ -82,7 +89,7 @@ function FiltresUltimsContractes({
           ))}
         </Group>
       </Stack>
-    </Paper>
+    </Fieldset>
   )
 }
 
