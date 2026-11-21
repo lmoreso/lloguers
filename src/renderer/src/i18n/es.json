@@ -199,6 +199,19 @@
       "compraAnterior": "La fecha de compra no puede ser anterior al año de construcción.",      
       "numero": "Introduce un número válido."
     },
+    "filtres": {
+      "municipi": "Municipio",
+      "adreca": "Dirección",
+      "cerca": "Calle, número, piso...",
+      "tots": "Todos",
+      "neteja": "Limpiar filtros",
+      "comptador": "{{visibles}} de {{total}} inmuebles",
+      "cap": "Ningún inmueble cumple los filtros.",
+      "interruptors": {
+        "certificat": "Certificado energético caducado o próximo",
+        "cedula": "Cédula de habitabilidad caducada o próxima"
+      }
+    },    
     "noTrobat": "No se ha encontrado este inmueble.",
     "caducitats": {
       "contractesAmbAvisos": "Contratos con avisos",      
@@ -294,9 +307,7 @@
         "cap": "Ninguna fila cumple los filtros.",
         "interruptors": {
           "fiPrevista": "Fin prevista vencida o próxima",
-          "revisio": "Revisión del alquiler vencida o próxima",
-          "certificat": "Certificado energético caducado o próximo",
-          "cedula": "Cédula de habitabilidad caducada o próxima"
+          "revisio": "Revisión del alquiler vencida o próxima"
         }        
       }      
     }, 

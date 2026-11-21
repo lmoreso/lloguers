@@ -198,6 +198,19 @@
       "compraAnterior": "La data de compra no pot ser anterior a l'any de construcció.",      
       "numero": "Introdueix un número vàlid."
     },
+    "filtres": {
+      "municipi": "Municipi",
+      "adreca": "Adreça",
+      "cerca": "Carrer, número, pis...",
+      "tots": "Tots",
+      "neteja": "Netejar filtres",
+      "comptador": "{{visibles}} de {{total}} immobles",
+      "cap": "Cap immoble compleix els filtres.",
+      "interruptors": {
+        "certificat": "Certificat energètic caducat o pròxim",
+        "cedula": "Cèdula d'habitabilitat caducada o pròxima"
+      }
+    },    
     "noTrobat": "No s'ha trobat aquest immoble.",
     "caducitats": {
       "contractesAmbAvisos": "Contractes amb avisos",      
@@ -293,9 +306,7 @@
         "cap": "Cap fila compleix els filtres.",
         "interruptors": {
           "fiPrevista": "Fi prevista passada o pròxima",
-          "revisio": "Revisió del lloguer passada o pròxima",
-          "certificat": "Certificat energètic caducat o pròxim",
-          "cedula": "Cèdula d'habitabilitat caducada o pròxima"
+          "revisio": "Revisió del lloguer passada o pròxima"
         }        
       }      
     },   

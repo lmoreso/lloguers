@@ -1,5 +1,5 @@
 import { avisos } from './avisosContracte'
-import { alertes } from './avisosImmoble'
+import { conteTotesLesParaules } from './text'
 import type { ConfigObtinguda, FilaDades } from '../../../shared/tipus'
 
 export type EstatContracte = 'senseContracte' | 'vigent' | 'futur' | 'tancat'
@@ -7,16 +7,14 @@ export type EstatContracte = 'senseContracte' | 'vigent' | 'futur' | 'tancat'
 export const ESTATS_CONTRACTE: EstatContracte[] = ['senseContracte', 'vigent', 'futur', 'tancat']
 
 // Els filtres de la vista "Últims contractes". Dins de cada grup de tria múltiple val qualsevol de les opcions triades;
-// entre filtres, una fila ha de passar-los tots. Els quatre interruptors són "tot o res": activat, només es veuen les
-// files amb l'avís corresponent (caducat o proper), amb la mateixa lògica que les etiquetes d'avís.
+// entre filtres, una fila ha de passar-los tots. Els dos interruptors són "tot o res": activat, només es veuen les
+// files amb l'avís corresponent (passat o pròxim), amb la mateixa lògica que les etiquetes d'avís.
 export interface Filtres {
   estats: EstatContracte[]
   municipis: string[]
   inquilins: string
   fiPrevista: boolean
   revisio: boolean
-  certificat: boolean
-  cedula: boolean
 }
 
 export const filtresBuits = (): Filtres => ({
@@ -24,9 +22,7 @@ export const filtresBuits = (): Filtres => ({
   municipis: [],
   inquilins: '',
   fiPrevista: false,
-  revisio: false,
-  certificat: false,
-  cedula: false
+  revisio: false
 })
 
 export const hiHaFiltres = (f: Filtres): boolean =>
@@ -34,9 +30,7 @@ export const hiHaFiltres = (f: Filtres): boolean =>
   f.municipis.length > 0 ||
   f.inquilins.trim() !== '' ||
   f.fiPrevista ||
-  f.revisio ||
-  f.certificat ||
-  f.cedula
+  f.revisio
 
 // Els filtres es guarden en memòria mentre l'app és oberta: sobreviuen a anar i tornar entre pantalles (la vista es
 // torna a muntar) i es perden en tancar l'app.
@@ -56,28 +50,18 @@ export function estatsDeLaFila(fila: FilaDades, avui: string): EstatContracte[] 
   return estats
 }
 
-// Sense majúscules ni accents (es treuen els signes combinants U+0300 a U+036F després de descompondre).
-function normalitza(text: string): string {
-  return [...text.normalize('NFD')]
-    .filter((c) => c.charCodeAt(0) < 0x300 || c.charCodeAt(0) > 0x36f)
-    .join('')
-    .toLowerCase()
-}
-
 // Totes les paraules de la cerca han de ser al nom o als cognoms d'algun dels dos inquilins.
 function passaInquilins(fila: FilaDades, cerca: string): boolean {
-  const paraules = normalitza(cerca).split(' ').filter(Boolean)
-  if (paraules.length === 0) return true
+  if (cerca.trim() === '') return true
   const c = fila.contracte
   if (c === null) return false
-  const noms = normalitza(
-    [c.inquili_nom, c.inquili_cognoms, c.inquili2_nom, c.inquili2_cognoms].filter(Boolean).join(' ')
-  )
-  return paraules.every((p) => noms.includes(p))
+  const noms = [c.inquili_nom, c.inquili_cognoms, c.inquili2_nom, c.inquili2_cognoms]
+    .filter(Boolean)
+    .join(' ')
+  return conteTotesLesParaules(noms, cerca)
 }
 
-// `config` porta els terminis dels avisos dels contractes; `diesAvisImmoble`, el dels documents de l'immoble
-// (certificat i cèdula). Són els mateixos que fan servir les etiquetes.
+// `config` porta els terminis dels avisos dels contractes: els mateixos que fan servir les etiquetes.
 export function passaFiltres(
   fila: FilaDades,
   f: Filtres,
@@ -91,17 +75,11 @@ export function passaFiltres(
   if (!passaInquilins(fila, f.inquilins)) return false
 
   // Avisos del contracte (només els vigents en tenen: un tancat o una fila sense contracte no passa mai).
-  const c = fila.contracte
   if (f.fiPrevista || f.revisio) {
+    const c = fila.contracte
     const delContracte = c === null ? [] : avisos(c, config)
     if (f.fiPrevista && !delContracte.some((a) => a.clau === 'fi')) return false
     if (f.revisio && !delContracte.some((a) => a.clau === 'revisio')) return false
-  }
-  // Avisos de l'immoble: valen per a totes les files d'aquell immoble, tinguin contracte o no.
-  if (f.certificat || f.cedula) {
-    const delsDocuments = alertes(fila.immoble, config.diesAvisDocumentCaducat)
-    if (f.certificat && !delsDocuments.some((a) => a.clau === 'certificat')) return false
-    if (f.cedula && !delsDocuments.some((a) => a.clau === 'cedula')) return false
   }
   return true
 }

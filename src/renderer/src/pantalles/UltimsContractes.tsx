@@ -87,10 +87,12 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
       ),
     [dades]
   )
+
   const filesVisibles = useMemo(() => {
     const avui = dayjs().format('YYYY-MM-DD')
     return files.filter((fila) => passaFiltres(fila, filtres, avui, config))
   }, [files, filtres, config])
+
   const municipis = useMemo(
     () =>
       [...new Set(files.map((f) => f.immoble.localitat))].sort((a, b) =>

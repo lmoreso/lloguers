@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import {
   ActionIcon,
   Alert,
@@ -41,6 +41,13 @@ import { formatCurrency, formatM2 } from '../../../shared/utilitats'
 import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '@renderer/utils/inquilins'
 import { useEditarContracte } from '@renderer/utils/useEditarContracte'
+import FiltresImmobles from '../components/FiltresImmobles'
+import {
+  desarFiltresImmobles,
+  llegirFiltresImmoblesGuardats,
+  passaFiltresImmoble
+} from '../utils/filtresImmobles'
+import type { FiltresImmoble } from '../utils/filtresImmobles'
 
 interface Props {
   config: ConfigObtinguda
@@ -56,6 +63,25 @@ function Immobles({ config }: Props): React.JSX.Element {
   // Cada cop que canvia, l'efecte torna a llegir la llista de la BD.
   const [versio, setVersio] = useState(0)
   const [ultimsContractes, setUltimsContractes] = useState<ImmobleAmbContractes[]>([])
+
+  // Les dades es llegeixen de la BD una sola vegada (`immobles`); els immobles visibles són una llista derivada que es
+  // recalcula en canviar un filtre, sense tornar a llegir res. Els filtres viuen en memòria (`utils/filtresImmobles`).
+  const [filtres, setFiltres] = useState<FiltresImmoble>(llegirFiltresImmoblesGuardats)
+  function canviarFiltres(f: FiltresImmoble): void {
+    desarFiltresImmobles(f)
+    setFiltres(f)
+  }
+  const immoblesVisibles = useMemo(
+    () => immobles.filter((i) => passaFiltresImmoble(i, filtres, config.diesAvisDocumentCaducat)),
+    [immobles, filtres, config.diesAvisDocumentCaducat]
+  )
+  const municipis = useMemo(
+    () =>
+      [...new Set(immobles.map((i) => i.localitat))].sort((a, b) =>
+        a.localeCompare(b, 'ca', { sensitivity: 'base' })
+      ),
+    [immobles]
+  )
 
   const ambAvisos = immobles.filter(
     (i) => alertes(i, config.diesAvisDocumentCaducat).length > 0
@@ -226,29 +252,179 @@ function Immobles({ config }: Props): React.JSX.Element {
       )}
 
       {immobles.length > 0 && (
+        <FiltresImmobles
+          filtres={filtres}
+          onCanvi={canviarFiltres}
+          municipis={municipis}
+          total={immobles.length}
+          visibles={immoblesVisibles.length}
+        />
+      )}
+      {immobles.length > 0 && immoblesVisibles.length === 0 && (
+        <Text c="dimmed">{t('immobles.filtres.cap')}</Text>
+      )}
+
+      {immoblesVisibles.length > 0 && (
         <Table striped highlightOnHover>
           <Table.Thead>
+            {/* Fila d'agrupació */}
+            <Table.Tr>
+              <Table.Th
+                colSpan={5}
+                ta="center"
+                // bg="var(--mantine-color-gray-light)"
+                style={{
+                  // borderTop: '2px solid var(--mantine-color-default-border)',
+                  // borderLeft: '2px solid var(--mantine-color-default-border)',
+                  borderRight: '2px solid var(--mantine-color-default-border)'
+                }}
+              >
+                {t('immobles.titol')}
+              </Table.Th>
+              <Table.Th
+                colSpan={4}
+                ta="center"
+                style={{
+                  // borderTop: '2px solid var(--mantine-color-default-border)',
+                  borderRight: '2px solid var(--mantine-color-default-border)'
+                }}
+              >
+                {t('contractes.titol')}
+              </Table.Th>
+              <Table.Th
+                // bg="var(--mantine-color-gray-light)"
+                ta="center"
+
+                style={
+                  {
+                    // borderTop: '2px solid var(--mantine-color-default-border)',
+                    // borderRight: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              ></Table.Th>
+              <Table.Th
+                style={
+                  {
+                    // borderTop: '2px solid var(--mantine-color-default-border)',
+                    // borderRight: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              ></Table.Th>
+            </Table.Tr>
+
+            {/* Fila de títols */}
             <Table.Tr>
               {/* La primera columna és només per l'icona d'editar. */}
-              <Table.Th></Table.Th>
-              <Table.Th>{t('immobles.camps.id')}</Table.Th>
-              <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
-              <Table.Th>{t('immobles.camps.localitat')}</Table.Th>
-              <Table.Th ta="right" pr="sm">
+              <Table.Th
+                //  bg="var(--mantine-color-gray-light)"
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)',
+                    // borderLeft: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              ></Table.Th>
+              <Table.Th
+                //  bg="var(--mantine-color-gray-light)"
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
+                {t('immobles.camps.id')}
+              </Table.Th>
+              <Table.Th
+                //  bg="var(--mantine-color-gray-light)"
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
+                {t('immobles.seccions.adreca')}
+              </Table.Th>
+              <Table.Th
+                //  bg="var(--mantine-color-gray-light)"
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
+                {t('immobles.camps.localitat')}
+              </Table.Th>
+              <Table.Th
+                ta="right"
+                pr="sm"
+                //  bg="var(--mantine-color-gray-light)"
+                style={{
+                  // borderBottom: '2px solid var(--mantine-color-default-border)',
+                  borderRight: '2px solid var(--mantine-color-default-border)'
+                }}
+              >
                 {t('immobles.camps.superficie')}
               </Table.Th>
-              <Table.Th>{t('contractes.camps.dataInici')}</Table.Th>
-              <Table.Th>{t('contractes.camps.dataFi')}</Table.Th>
-              <Table.Th>
+              <Table.Th
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
+                {t('contractes.camps.dataInici')}
+              </Table.Th>
+              <Table.Th
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
+                {t('contractes.camps.dataFi')}
+              </Table.Th>
+              <Table.Th
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
                 {t('inquilins.camps.nom')} {t('contractes.camps.inquili')}
               </Table.Th>
-              <Table.Th></Table.Th>
-              <Table.Th>{t('immobles.camps.avisos')}</Table.Th>
-              <Table.Th>{t('comu.accions')}</Table.Th>
+              <Table.Th
+                style={{
+                  // borderBottom: '2px solid var(--mantine-color-default-border)',
+                  borderRight: '2px solid var(--mantine-color-default-border)'
+                }}
+              ></Table.Th>
+              <Table.Th
+                //  bg="var(--mantine-color-gray-light)"
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)',
+                    // borderRight: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
+                {' '}
+                {t('immobles.camps.avisos')}
+              </Table.Th>
+              <Table.Th
+                style={
+                  {
+                    // borderBottom: '2px solid var(--mantine-color-default-border)',
+                    // borderRight: '2px solid var(--mantine-color-default-border)'
+                  }
+                }
+              >
+                {' '}
+                {t('comu.accions')}
+              </Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {immobles.map((i) => {
+            {immoblesVisibles.map((i) => {
               const contracte = ultimContracte(i.id)
 
               return (

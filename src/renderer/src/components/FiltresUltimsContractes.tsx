@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ESTATS_CONTRACTE, filtresBuits, hiHaFiltres } from '../utils/filtresUltimsContractes'
 import type { EstatContracte, Filtres } from '../utils/filtresUltimsContractes'
 
-const INTERRUPTORS = ['fiPrevista', 'revisio', 'certificat', 'cedula'] as const
+const INTERRUPTORS = ['fiPrevista', 'revisio'] as const
 
 interface Props {
   filtres: Filtres

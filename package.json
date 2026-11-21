@@ -1,6 +1,6 @@
 {
   "name": "lloguers",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Gestió de lloguers d'immobles. Gestiona immobles, inquilins, contractes, fiances, revisions del lloguer i documents relacionats.", 
   "main": "./out/main/index.js",
   "author": "Lluís Moreso Bosch <lmoreso@yahoo.com>",
