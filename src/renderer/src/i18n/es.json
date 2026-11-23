@@ -519,6 +519,12 @@
       "lloguerNegatiu": "El alquiler nuevo no puede ser negativo."
     }
   },  
+  "ajuda": {
+    "obrir": "Abrir ayuda",
+    "titol": "Ayuda",
+    "carregant": "Cargando ayuda...",
+    "error": "No se ha podido cargar el archivo de ayuda."
+  },
   "proves": {
     "titol": "Pruebas de Mantine",
     "dataPicker": "Selecciona una fecha",

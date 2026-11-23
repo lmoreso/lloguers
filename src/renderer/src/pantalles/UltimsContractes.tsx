@@ -39,6 +39,7 @@ import dayjs from 'dayjs'
 import FiltresUltimsContractes from '../components/FiltresUltimsContractes'
 import { desarFiltres, llegirFiltresGuardats, passaFiltres } from '../utils/filtresUltimsContractes'
 import type { Filtres } from '../utils/filtresUltimsContractes'
+import AjudaContextual from '@renderer/components/AjudaContextual'
 
 interface Props {
   config: ConfigObtinguda
@@ -214,7 +215,7 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
         position="top"
       >
         <ActionIcon variant="subtle" color="gray">
-          <IconInfoCircle size={24} />
+          <IconInfoCircle size={32} />
         </ActionIcon>
       </Tooltip>
     )
@@ -223,8 +224,10 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
   return (
     <>
       <Group justify="space-between" mb="md">
-        <Title order={2}>{t('contractes.ultims.titol')}</Title>
-
+        <Group>
+          <Title order={2}>{t('contractes.ultims.titol')} </Title>
+          <AjudaContextual fitxer="ultimsContractes" idioma={config.idioma} iconSize={32} />
+        </Group>
         {filesVisibles.length > 0 && (
           <Button
             leftSection={<IconFileExport size={16} />}

@@ -519,6 +519,12 @@
       "lloguerNegatiu": "El lloguer nou no pot ser negatiu."
     }
   },  
+  "ajuda": {
+    "obrir": "Obrir ajuda",
+    "titol": "Ajuda",
+    "carregant": "Carregant ajuda...",
+    "error": "No s'ha pogut carregar el fitxer d'ajuda."
+  },
   "proves": {
     "titol": "Proves de Mantine",
     "dataPicker": "Sel·lecciona una data",
