@@ -176,7 +176,8 @@ export const TIPUS_DOCUMENT_CONTRACTE = [
   'fianca_model3',
   'rebut',
   'altres',
-  'documents_inquili'
+  'documents_inquili',
+  'carta_revisio'
 ] as const
 export type TipusDocumentContracte = (typeof TIPUS_DOCUMENT_CONTRACTE)[number]
 
@@ -195,7 +196,8 @@ export const TIPUS_UNICS_CONTRACTE = [
 export const TIPUS_LLIURES_CONTRACTE: readonly TipusDocumentContracte[] = [
   'annex',
   'altres',
-  'documents_inquili'
+  'documents_inquili',
+  'carta_revisio'
 ]
 
 // Un document adjunt d'un contracte. La ruta del fitxer no s'exposa: només la fa servir el Main.

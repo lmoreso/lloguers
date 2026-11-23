@@ -219,7 +219,7 @@ function FormulariContracte({
   }
 
   // Etiqueta d'un camp amb la icona del seu document al costat.
-  function etiqueta(
+  function etiquetaAmbClip(
     text: string,
     tipus: TipusDocumentContracte,
     obligatori?: boolean
@@ -523,7 +523,7 @@ function FormulariContracte({
                 {campInquili('id_inquili_2', t('contractes.camps.inquili2'), false)}
                 <CampData
                   // withAsterisk
-                  label={etiqueta(t('contractes.camps.dataInici'), 'contracte', true)}
+                  label={etiquetaAmbClip(t('contractes.camps.dataInici'), 'contracte', true)}
                   {...form.getInputProps('data_inici')}
                 />
                 <CampData
@@ -654,12 +654,12 @@ function FormulariContracte({
                 />
                 <CampData
                   clearable
-                  label={etiqueta(t('contractes.camps.fiancaDataModel2'), 'fianca_model2')}
+                  label={etiquetaAmbClip(t('contractes.camps.fiancaDataModel2'), 'fianca_model2')}
                   {...form.getInputProps('fianca_data_model2')}
                 />
                 <CampData
                   clearable
-                  label={etiqueta(t('contractes.camps.fiancaDataIngres'), 'rebut')}
+                  label={etiquetaAmbClip(t('contractes.camps.fiancaDataIngres'), 'rebut')}
                   // label={t('contractes.camps.fiancaDataIngres')}
                   {...form.getInputProps('fianca_data_ingres')}
                 />
@@ -670,7 +670,7 @@ function FormulariContracte({
                 />
                 <CampData
                   clearable
-                  label={etiqueta(
+                  label={etiquetaAmbClip(
                     t('contractes.camps.fiancaDataNotificacio'),
                     'fianca_notificacio'
                   )}
@@ -694,7 +694,10 @@ function FormulariContracte({
                 <CampData
                   clearable
                   disabled={!teFi}
-                  label={etiqueta(t('contractes.camps.devolucioDataSollicitud'), 'fianca_model3')}
+                  label={etiquetaAmbClip(
+                    t('contractes.camps.devolucioDataSollicitud'),
+                    'fianca_model3'
+                  )}
                   {...form.getInputProps('devolucio_data_sollicitud')}
                 />
                 <CampData
