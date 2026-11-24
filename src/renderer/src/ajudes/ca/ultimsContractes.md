@@ -1,4 +1,4 @@
-## Pantalla dels últims contractes
+## Pantalla dels Últims Contractes
 Aquesta pantalla mostra l'últim contracte de cada immoble, segons les condicions següents:
 - Si un immoble encara no té cap contracte informat, també es mostra, però sense dades de contracte.
 - Si un immoble no té cap contracte vigent avui, es mostra el contracte més recent.

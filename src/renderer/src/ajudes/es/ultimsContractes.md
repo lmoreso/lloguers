@@ -1,4 +1,4 @@
-## Pantalla de los últimos contratos
+## Pantalla de los Últimos Contratos
 Esta pantalla muestra el último contrato de cada inmueble, según las siguientes condiciones:
 - Si un inmueble todavía no tiene ningún contrato registrado, también se muestra, pero sin datos de contrato.
 - Si un inmueble no tiene ningún contrato vigente hoy, se muestra el contrato más reciente.

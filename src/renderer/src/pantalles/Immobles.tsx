@@ -48,6 +48,7 @@ import {
   passaFiltresImmoble
 } from '../utils/filtresImmobles'
 import type { FiltresImmoble } from '../utils/filtresImmobles'
+import AjudaContextual from '@renderer/components/AjudaContextual'
 
 interface Props {
   config: ConfigObtinguda
@@ -237,7 +238,11 @@ function Immobles({ config }: Props): React.JSX.Element {
   return (
     <>
       <Group justify="space-between" mb="md">
+        <Group>
         <Title order={2}>{t('menu.immobles')}</Title>
+          <AjudaContextual fitxer="llistaImmobles" idioma={config.idioma} iconSize={32} />
+        </Group>
+
         <Button leftSection={<IconPlus size={16} />} onClick={() => navigate('/immobles/nou')}>
           {t('comu.afegir')}
         </Button>
