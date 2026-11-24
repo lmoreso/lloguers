@@ -173,6 +173,26 @@ export function actualitzarRevisio(id: number, dades: RevisioDades): void {
     db.prepare(
       'UPDATE contractes SET lloguer_actual = ?, data_ultima_revisio = ? WHERE id = ?'
     ).run(nou, d.data_efecte, r.id_contracte)
+    // La carta de la revisió es lliga per la data: el document té `data_document` = la data d'enviament. Si aquesta
+    // canvia, la carta la segueix. Si una altra revisió del mateix contracte té la mateixa data, la carta podria ser
+    // d'aquella i no es toca; si la nova data és buida, la carta es queda com a document del contracte, sense lligam.
+    if (
+      r.data_enviament !== null &&
+      d.data_enviament !== null &&
+      d.data_enviament !== r.data_enviament
+    ) {
+      const comparteixen = db
+        .prepare(
+          'SELECT 1 FROM revisions_lloguer WHERE id_contracte = ? AND data_enviament = ? AND id <> ? LIMIT 1'
+        )
+        .get(r.id_contracte, r.data_enviament, id)
+      if (comparteixen === undefined) {
+        db.prepare(
+          `UPDATE documents_contracte SET data_document = ?
+           WHERE id_contracte = ? AND tipus = 'carta_revisio' AND data_document = ?`
+        ).run(d.data_enviament, r.id_contracte, r.data_enviament)
+      }
+    }
   })()
 }
 

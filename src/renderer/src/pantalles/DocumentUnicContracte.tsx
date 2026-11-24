@@ -18,22 +18,39 @@ interface Props {
   tipus: TipusDocumentContracte
   doc: DocumentContracte | undefined // el document d'aquest tipus, si n'hi ha
   onCanvi: () => void // es crida quan s'afegeix o s'elimina el document
+  // Només per als documents lligats a una dada (la carta d'una revisió): la data i el comentari amb què es desa el
+  // document en afegir-lo.
+  dataDocument?: string | null
+  comentari?: string | null
+  // El clip encara no es pot fer servir (p. ex. la revisió no té data d'enviament desada); `titolBloqueig` n'explica el motiu.
+  bloquejat?: boolean
+  titolBloqueig?: string
 }
 
 // Icona amb menú per a un tipus de document que admet un sol document per contracte: sense document, Afegir (obre
 // directament el diàleg del sistema, un sol fitxer, sense comentari); amb document, Visualitzar i Eliminar. Els
 // documents es desen a l'instant, sense passar per Desar.
-function DocumentUnicContracte({ idContracte, tipus, doc, onCanvi }: Props): React.JSX.Element {
+function DocumentUnicContracte({
+  idContracte,
+  tipus,
+  doc,
+  onCanvi,
+  dataDocument = null,
+  comentari = null,
+  bloquejat = false,
+  titolBloqueig
+}: Props): React.JSX.Element {
   const { t } = useTranslation()
   const [adjuntant, setAdjuntant] = useState(false)
   const nomTipus = t(`documents.tipus.${tipus}`)
+  const inactiu = idContracte === null || bloquejat
 
   async function afegir(): Promise<void> {
     if (idContracte === null) return
     setAdjuntant(true)
     const resposta = await window.api.documents.adjuntar(
       idContracte,
-      { tipus, comentaris: null, data_document: null },
+      { tipus, comentaris: comentari, data_document: dataDocument },
       t('documents.unic.dialeg')
     )
     setAdjuntant(false)
@@ -66,19 +83,29 @@ function DocumentUnicContracte({ idContracte, tipus, doc, onCanvi }: Props): Rea
   }
 
   return (
-    <Menu position="bottom-start" withinPortal disabled={idContracte === null}>
+    <Menu position="bottom-start" withinPortal disabled={inactiu}>
       <Menu.Target>
-        <Tooltip label={doc ? t('documents.unic.amb') : t('documents.unic.sense')}>
-          <ActionIcon
-            variant={doc ? 'light' : 'subtle'}
-            color={doc ? 'blue' : 'gray'}
-            size="sm"
-            loading={adjuntant}
-            disabled={idContracte === null}
-            aria-label={nomTipus}
-          >
-            <IconPaperclip size={16} />
-          </ActionIcon>
+        <Tooltip
+          label={
+            inactiu && titolBloqueig
+              ? titolBloqueig
+              : doc
+                ? t('documents.unic.amb')
+                : t('documents.unic.sense')
+          }
+        >
+          <div>
+            <ActionIcon
+              variant={doc ? 'light' : 'subtle'}
+              color={doc ? 'blue' : 'gray'}
+              size="sm"
+              loading={adjuntant}
+              disabled={inactiu}
+              aria-label={nomTipus}
+            >
+              <IconPaperclip size={16} />
+            </ActionIcon>
+          </div>
         </Tooltip>
       </Menu.Target>
       <Menu.Dropdown>

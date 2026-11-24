@@ -196,9 +196,13 @@ export const TIPUS_UNICS_CONTRACTE = [
 export const TIPUS_LLIURES_CONTRACTE: readonly TipusDocumentContracte[] = [
   'annex',
   'altres',
-  'documents_inquili',
-  'carta_revisio'
+  'documents_inquili'
 ]
+
+// Tipus que van lligats a una altra dada i es gestionen des de la seva pantalla d'origen: la carta d'una revisió del
+// lloguer, lligada a la revisió per la data (`data_document` = la data d'enviament). No es poden afegir des de la
+// pantalla de documents ni editar (editar-ne la data trencaria el lligam); s'adjunten d'un fitxer en un fitxer.
+export const TIPUS_LLIGATS_CONTRACTE: readonly TipusDocumentContracte[] = ['carta_revisio']
 
 // Un document adjunt d'un contracte. La ruta del fitxer no s'exposa: només la fa servir el Main.
 export interface DocumentContracte {

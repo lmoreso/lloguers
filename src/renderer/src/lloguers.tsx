@@ -45,7 +45,7 @@ function Rutas({ config, onCanviarConfig }: RutasProps): React.JSX.Element {
         />
         <Route path="/immobles/:id/documents" element={<DocumentsImmoble />} />
         <Route path="/ultims-contractes" element={<UltimsContractes config={config} />} />
-        <Route path="/revisions" element={<Revisions />} />
+        <Route path="/revisions" element={<Revisions config={config} />} />
         <Route
           path="/immobles/:id/contractes/:idContracte"
           element={<FitxaContracte key="edicio" config={config} />}
@@ -56,7 +56,7 @@ function Rutas({ config, onCanviarConfig }: RutasProps): React.JSX.Element {
         />
         <Route
           path="/immobles/:id/contractes/:idContracte/revisions"
-          element={<RevisionsContracte />}
+          element={<RevisionsContracte config={config} />}
         />
         <Route path="/inquilins" element={<Inquilins />} />
         <Route

@@ -481,6 +481,8 @@
       "immoble": "Immoble",
       "obrir": "Obrir les revisions del contracte"
     },    
+    "cartaComentari": "Carta de la revisió del {{data}}",
+    "cartaSenseData": "Desa primer la revisió amb la data d'enviament per poder adjuntar-hi la carta.",
     "titol": "Cartes de revisions de lloguer",
     "subtitol": "{{adreca}} · Inquilins: {{inquilins}} · Contracte del {{inici}}",
     "actual": "Lloguer actual: {{lloguer}}, vigent des del {{data}}.",

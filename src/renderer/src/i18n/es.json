@@ -481,6 +481,8 @@
       "immoble": "Inmueble",
       "obrir": "Abrir las revisiones del contrato"
     },    
+    "cartaComentari": "Carta de la revisión del {{data}}",
+    "cartaSenseData": "Guarda primero la revisión con la fecha de envío para poder adjuntar la carta.",    
     "titol": "Cartas de revisiones de alquiler",
     "subtitol": "{{adreca}} · Inquilinos: {{inquilins}} · Contrato del {{inici}}",
     "actual": "Alquiler actual: {{lloguer}}, vigente desde el {{data}}.",

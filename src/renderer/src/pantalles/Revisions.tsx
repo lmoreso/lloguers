@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
-import type { RevisioLlistat } from '../../../shared/tipus'
+import type { ConfigObtinguda, RevisioLlistat } from '../../../shared/tipus'
+import AjudaContextual from '@renderer/components/AjudaContextual'
 
 // Una carta pendent: sense data d'enviament i amb un increment diferent de 0 (un lloguer congelat no porta carta).
 const esPendent = (r: RevisioLlistat): boolean =>
@@ -18,7 +19,7 @@ const adrecaDe = (r: RevisioLlistat): string =>
 // Revisions de lloguer de tots els contractes (/revisions): només de consulta. Amb l'interruptor es veuen només les
 // cartes pendents d'enviar o totes les revisions. Per modificar-ne una, la icona de la primera columna porta a la
 // pantalla de revisions del contracte.
-function Revisions(): React.JSX.Element {
+function Revisions({ config }: { config: ConfigObtinguda }): React.JSX.Element {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const euros = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
@@ -45,7 +46,11 @@ function Revisions(): React.JSX.Element {
   return (
     <>
       <Stack gap="sm" mb="md">
-        <Title order={2}>{t('revisions.titol')}</Title>
+        <Group>
+          <Title order={2}>{t('revisions.titol')}</Title>
+          <AjudaContextual fitxer="revisionsLloguer" idioma={config.idioma} iconSize={32} />
+        </Group>
+
         <Group gap="lg">
           <Switch
             checked={nomesPendents}

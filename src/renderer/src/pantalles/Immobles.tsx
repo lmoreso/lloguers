@@ -239,7 +239,7 @@ function Immobles({ config }: Props): React.JSX.Element {
     <>
       <Group justify="space-between" mb="md">
         <Group>
-        <Title order={2}>{t('menu.immobles')}</Title>
+          <Title order={2}>{t('menu.immobles')}</Title>
           <AjudaContextual fitxer="llistaImmobles" idioma={config.idioma} iconSize={32} />
         </Group>
 

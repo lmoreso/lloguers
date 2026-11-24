@@ -86,7 +86,7 @@ function AjudaContextual({ fitxer, idioma, iconSize }: Props): React.JSX.Element
         )}
 
         {resultat.estat === 'carregat' && (
-          <Paper>
+          <Paper p="md" className="markdown">
             <ReactMarkdown>{resultat.contingut}</ReactMarkdown>
           </Paper>
         )}

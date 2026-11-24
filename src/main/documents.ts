@@ -4,7 +4,11 @@ import fs from 'fs'
 import path from 'path'
 import { db, docsDir } from './database'
 import { fitxerNoTrobat, nomSegur, rutaDins } from './fitxers'
-import { TIPUS_DOCUMENT_CONTRACTE, TIPUS_UNICS_CONTRACTE } from '../shared/tipus'
+import {
+  TIPUS_DOCUMENT_CONTRACTE,
+  TIPUS_UNICS_CONTRACTE,
+  TIPUS_LLIGATS_CONTRACTE
+} from '../shared/tipus'
 import type { DocumentContracte, DocumentDades } from '../shared/tipus'
 import { obtenirConfig, desarConfig } from './config'
 
@@ -49,14 +53,17 @@ export async function adjuntarDocuments(
   const comentari = typeof dades.comentaris === 'string' ? dades.comentaris.trim() : ''
   const data = dades.data_document ?? null
   if (data !== null && typeof data !== 'string') throw new Error('Data invàlida')
-  const unic = (TIPUS_UNICS_CONTRACTE as readonly unknown[]).includes(dades.tipus)
 
+  // Els tipus únics i els lligats (la carta d'una revisió) s'adjunten d'un fitxer en un fitxer.
+  const unFitxer =
+    (TIPUS_UNICS_CONTRACTE as readonly unknown[]).includes(dades.tipus) ||
+    (TIPUS_LLIGATS_CONTRACTE as readonly unknown[]).includes(dades.tipus)
   const config = obtenirConfig()
   const dirOpen = config.pathImportDocs ?? app.getPath('documents')
 
   const opcions: OpenDialogOptions = {
     title: typeof titolDialeg === 'string' ? titolDialeg : undefined,
-    properties: unic ? ['openFile'] : ['openFile', 'multiSelections'],
+    properties: unFitxer ? ['openFile'] : ['openFile', 'multiSelections'],
     defaultPath: dirOpen
   }
   const finestra = BrowserWindow.getFocusedWindow()

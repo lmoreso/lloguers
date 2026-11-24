@@ -31,9 +31,18 @@ import { formatData } from '../../../shared/utilitats'
 import { aNumeroForm, buitANull } from '../utils/formulari'
 import { esOk } from '../utils/resultat'
 import { hiHaCapaOberta } from '../utils/teclat'
-import type { ContracteLlistat, Immoble, RevisioDades, RevisioLloguer } from '../../../shared/tipus'
+import type {
+  ConfigObtinguda,
+  ContracteLlistat,
+  DocumentContracte,
+  Immoble,
+  RevisioDades,
+  RevisioLloguer
+} from '../../../shared/tipus'
 import { nomsInquilinsContracte } from '../utils/inquilins'
 import { useTornar } from '../utils/useTornar'
+import DocumentUnicContracte from './DocumentUnicContracte'
+import AjudaContextual from '@renderer/components/AjudaContextual'
 
 // Els imports i el percentatge són número (o text mentre s'escriu); les dates, text ISO AAAA-MM-DD.
 interface Valors {
@@ -60,6 +69,7 @@ interface PantallaProps {
   onEdicio: (edicio: number | 'nova') => void
   onDesat: (id: number) => void
   onEliminada: () => void
+  config: ConfigObtinguda
 }
 
 // La pantalla amb el formulari. Es munta de nou (key) cada cop que canvia la revisió que s'edita.
@@ -72,7 +82,8 @@ function PantallaRevisions({
   tancat,
   onEdicio,
   onDesat,
-  onEliminada
+  onEliminada,
+  config
 }: PantallaProps): React.JSX.Element {
   const { t, i18n } = useTranslation()
   const euros = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
@@ -81,6 +92,33 @@ function PantallaRevisions({
   const tornarEnrere = useTornar(tornarUrl)
   // Amb el contracte tancat no es poden crear revisions noves: sense una revisió carregada, la pantalla és només de consulta.
   const nomesConsulta = tancat && revisio === null
+
+  // Documents del contracte: la carta de la revisió és un d'ells. Es llegeixen aquí i no a la pantalla de dalt perquè
+  // adjuntar una carta no ha de tornar a muntar el formulari (es perdrien els canvis sense desar).
+  const [documents, setDocuments] = useState<DocumentContracte[]>([])
+  const [versioDocs, setVersioDocs] = useState(0)
+
+  useEffect(() => {
+    let cancelat = false
+    window.api.documents.obtenir(contracte.id).then((resposta) => {
+      if (cancelat) return
+      if (esOk(resposta)) setDocuments(resposta.dades)
+    })
+    // Si el component es desmunta abans que arribi la resposta, no s'actualitza l'estat.
+    return () => {
+      cancelat = true
+    }
+  }, [contracte.id, versioDocs])
+
+  // La carta de la revisió desada: del tipus carta_revisio i amb la data del document igual a la seva data d'enviament.
+  const dataEnviamentDesada = revisio?.data_enviament ?? null
+  const carta =
+    dataEnviamentDesada === null
+      ? undefined
+      : documents.find(
+          (d) => d.tipus === 'carta_revisio' && d.data_document === dataEnviamentDesada
+        )
+
   const nomsInquilins = nomsInquilinsContracte(contracte)
 
   // El lloguer del qual parteix la revisió, i el dia a partir del qual pot tenir efecte.
@@ -245,7 +283,11 @@ function PantallaRevisions({
       <Stack gap="sm" mb="md">
         <div>
           <Group justify="space-between">
-            <Title order={2}>{t('contractes.revisar.titol')}</Title>
+            <Group>
+              <Title order={2}>{t('contractes.revisar.titol')}</Title>
+              <AjudaContextual fitxer="revisionsLloguer" idioma={config.idioma} iconSize={32} />
+            </Group>
+
             <Button variant="default" onClick={tornar} leftSection={<IconCornerUpLeft size={16} />}>
               {t('comu.tornar')}
             </Button>
@@ -361,7 +403,25 @@ function PantallaRevisions({
               />
               <CampData
                 clearable
-                label={t('revisions.camps.dataEnviament')}
+                label={
+                  <Group gap={6} wrap="nowrap">
+                    <span>{t('revisions.camps.dataEnviament')}</span>
+                    <DocumentUnicContracte
+                      idContracte={revisio ? contracte.id : null}
+                      tipus="carta_revisio"
+                      doc={carta}
+                      dataDocument={dataEnviamentDesada}
+                      comentari={
+                        revisio
+                          ? t('revisions.cartaComentari', { data: formatData(revisio.data_efecte) })
+                          : null
+                      }
+                      bloquejat={dataEnviamentDesada === null}
+                      titolBloqueig={t('revisions.cartaSenseData')}
+                      onCanvi={() => setVersioDocs((v) => v + 1)}
+                    />
+                  </Group>
+                }
                 {...form.getInputProps('data_enviament')}
               />
             </SimpleGrid>
@@ -451,7 +511,7 @@ function PantallaRevisions({
 }
 
 // /immobles/:id/contractes/:idContracte/revisions
-function RevisionsContracte(): React.JSX.Element {
+function RevisionsContracte({ config }: { config: ConfigObtinguda }): React.JSX.Element {
   const { t } = useTranslation()
   const { id, idContracte } = useParams()
   const [immoble, setImmoble] = useState<Immoble | null>(null)
@@ -541,6 +601,7 @@ function RevisionsContracte(): React.JSX.Element {
             setEdicio(null)
             setVersio((v) => v + 1)
           }}
+          config={config}
         />
       )}
     </>

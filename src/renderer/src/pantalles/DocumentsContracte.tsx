@@ -30,7 +30,7 @@ import { esOk } from '../utils/resultat'
 import AfegirDocument from './AfegirDocument'
 import EditarDocument from './EditarDocument'
 import type { Contracte, DocumentContracte, Immoble } from '../../../shared/tipus'
-import { TIPUS_UNICS_CONTRACTE } from '../../../shared/tipus'
+import { TIPUS_LLIGATS_CONTRACTE, TIPUS_UNICS_CONTRACTE } from '../../../shared/tipus'
 import { useTornar } from '../utils/useTornar'
 
 // Documents d'un contracte (/immobles/:id/contractes/:idContracte/documents). Les accions van a la capçalera,
@@ -66,7 +66,8 @@ function DocumentsContracte(): React.JSX.Element {
 
   const recarregar = (): void => setVersio((v) => v + 1)
   const esUnic = (d: DocumentContracte): boolean =>
-    (TIPUS_UNICS_CONTRACTE as readonly string[]).includes(d.tipus)
+    (TIPUS_UNICS_CONTRACTE as readonly string[]).includes(d.tipus) ||
+    (TIPUS_LLIGATS_CONTRACTE as readonly string[]).includes(d.tipus)
 
   // La data d'un document únic és la de la seva secció del contracte (sempre va sincronitzada); la dels altres
   // tipus, la del document.
