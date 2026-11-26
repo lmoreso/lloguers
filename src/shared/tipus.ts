@@ -152,13 +152,25 @@ export interface RevisioLlistat {
   contracte_data_inici: string
   inquili_nom: string | null
   inquili_cognoms: string | null
+  inquili_nom_complet: string | null
+  inquili_nif: string | null
+  inquili_telefon: string | null
   inquili2_nom: string | null
   inquili2_cognoms: string | null
+  inquili2_nom_complet: string | null
+  inquili2_nif: string | null
+  inquili2_telefon: string | null
+  inquilins_noms: string | null
   immoble_id: number
   immoble_via: string
   immoble_num_via: string
   immoble_pis: string
   immoble_porta: string | null
+  immoble_adreca: string | null
+  immoble_codi_postal: string | null
+  immoble_localitat: string | null
+  immoble_provincia: string | null
+  immoble_ref_catastral: string | null
 }
 
 // Idiomes de la interfície. Afegir-ne un de nou: afegir-lo aquí, crear el JSON

@@ -1,11 +1,11 @@
 import type { ColumnaExportacio, ColumnaIFilesExport, FilaDades } from '../../../shared/tipus'
-import { adreca, nomSencer } from '../../../shared/utilitats'
+// import { adreca, nomSencer } from '../../../shared/utilitats'
 import type { TFunction } from 'i18next'
 
 /**
  * Dades necessàries per exportar un immoble amb el seu contracte i els dos inquilins.
  *
- */
+
 export function DadesExportacioResum(dades: FilaDades[], t: TFunction): ColumnaIFilesExport {
   // console.log('t rebut:', t, typeof t)
 
@@ -42,7 +42,12 @@ export function DadesExportacioResum(dades: FilaDades[], t: TFunction): ColumnaI
     files: filesExportades
   }
 }
+ */
 
+/**
+ * Dades necessàries per exportar un immoble amb el seu contracte i els dos inquilins.
+ *
+ */
 export function DadesExportacioDetallades(dades: FilaDades[], t: TFunction): ColumnaIFilesExport {
   const columnes = [
     // IMMOBLE

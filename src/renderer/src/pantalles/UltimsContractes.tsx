@@ -11,7 +11,6 @@ import {
   Title,
   Tooltip
 } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import AvisosContracte from '../components/AvisosContracte'
@@ -40,6 +39,7 @@ import FiltresUltimsContractes from '../components/FiltresUltimsContractes'
 import { desarFiltres, llegirFiltresGuardats, passaFiltres } from '../utils/filtresUltimsContractes'
 import type { Filtres } from '../utils/filtresUltimsContractes'
 import AjudaContextual from '@renderer/components/AjudaContextual'
+import exportarDades from '@renderer/utils/exportarDades'
 
 interface Props {
   config: ConfigObtinguda
@@ -103,8 +103,6 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
   )
 
   async function exportar(format: FormatExportacio): Promise<void> {
-    // console.log('t enviat:', t, typeof t)
-
     const dadesCuinades: ColumnaIFilesExport = DadesExportacioDetallades(filesVisibles, t)
 
     const dadesExportacio: DadesExportacio = {
@@ -115,32 +113,7 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
       files: dadesCuinades.files
     }
 
-    const resposta =
-      format === 'csv'
-        ? await window.api.exportacio.csv(dadesExportacio)
-        : format === 'ods'
-          ? await window.api.exportacio.ods(dadesExportacio)
-          : await window.api.exportacio.xlsx(dadesExportacio)
-
-    if (!esOk(resposta)) {
-      console.error('Error en exportar els contractes:', resposta.error)
-      notifications.show({
-        title: t('exportacio.exportError'),
-        message: 'Error: ' + resposta.error,
-        color: 'red'
-      })
-    } else if (!resposta.dades.canceled && resposta.dades.filePath) {
-      notifications.show({
-        title: t('exportacio.exportOk'),
-        message: t('exportacio.exportOkDesc') + resposta.dades.filePath,
-        color: 'green'
-      })
-    } else {
-      notifications.show({
-        message: t('exportacio.exportCancel'),
-        color: 'orange'
-      })
-    }
+    await exportarDades(dadesExportacio, t)
   }
 
   function infoImmoble(i: Immoble): React.JSX.Element {

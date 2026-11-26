@@ -1,13 +1,33 @@
 import { useEffect, useState } from 'react'
-import { ActionIcon, Badge, Group, Stack, Switch, Table, Text, Title, Tooltip } from '@mantine/core'
-import { IconPencil } from '@tabler/icons-react'
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Group,
+  Stack,
+  Switch,
+  Table,
+  Text,
+  Title,
+  Tooltip
+} from '@mantine/core'
+import { IconFileExport, IconPencil } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { formatData } from '../../../shared/utilitats'
 import { nomInquili } from '../utils/inquilins'
 import { esOk } from '../utils/resultat'
-import type { ConfigObtinguda, RevisioLlistat } from '../../../shared/tipus'
+import type {
+  ColumnaIFilesExport,
+  ConfigObtinguda,
+  DadesExportacio,
+  FormatExportacio,
+  RevisioLlistat
+} from '../../../shared/tipus'
 import AjudaContextual from '@renderer/components/AjudaContextual'
+import ModalExportacio from '@renderer/components/ModalExportacio'
+import exportarDades from '@renderer/utils/exportarDades'
+import { DadesExportacioRevisions } from '@renderer/utils/exportCartesRevisio'
 
 // Una carta pendent: sense data d'enviament i amb un increment diferent de 0 (un lloguer congelat no porta carta).
 const esPendent = (r: RevisioLlistat): boolean =>
@@ -27,6 +47,7 @@ function Revisions({ config }: { config: ConfigObtinguda }): React.JSX.Element {
   const [nomesPendents, setNomesPendents] = useState(true)
   const [revisions, setRevisions] = useState<RevisioLlistat[]>([])
   const [carregant, setCarregant] = useState(true)
+  const [modalExportacioObert, setModalExportacioObert] = useState(false)
 
   useEffect(() => {
     let cancelat = false
@@ -43,14 +64,37 @@ function Revisions({ config }: { config: ConfigObtinguda }): React.JSX.Element {
 
   const pendents = revisions.filter(esPendent).length
 
+  async function exportar(format: FormatExportacio): Promise<void> {
+    const dadesCuinades: ColumnaIFilesExport = DadesExportacioRevisions(revisions, t)
+
+    const dadesExportacio: DadesExportacio = {
+      nomFitxer: t('exportacio.revisions.nomFitxer'),
+      titolDialog: t('exportacio.revisions.titolDialog'),
+      format,
+      columnes: dadesCuinades.columnes,
+      files: dadesCuinades.files
+    }
+
+    await exportarDades(dadesExportacio, t)
+  }
+
   return (
     <>
       <Stack gap="sm" mb="md">
-        <Group>
-          <Title order={2}>{t('revisions.titol')}</Title>
-          <AjudaContextual fitxer="revisionsLloguer" idioma={config.idioma} iconSize={32} />
+        <Group justify="space-between" mb="md">
+          <Group>
+            <Title order={2}>{t('revisions.titol')}</Title>
+            <AjudaContextual fitxer="revisionsLloguer" idioma={config.idioma} iconSize={32} />
+          </Group>
+          {revisions.length > 0 && (
+            <Button
+              leftSection={<IconFileExport size={16} />}
+              onClick={() => setModalExportacioObert(true)}
+            >
+              {t('exportacio.titol')}
+            </Button>
+          )}
         </Group>
-
         <Group gap="lg">
           <Switch
             checked={nomesPendents}
@@ -148,6 +192,16 @@ function Revisions({ config }: { config: ConfigObtinguda }): React.JSX.Element {
           </Table>
         </Table.ScrollContainer>
       )}
+
+      <ModalExportacio
+        obert={modalExportacioObert}
+        titol={t('exportacio.revisions.titolDialog')}
+        onAcceptar={(format) => {
+          setModalExportacioObert(false)
+          void exportar(format)
+        }}
+        onCancellar={() => setModalExportacioObert(false)}
+      />
     </>
   )
 }

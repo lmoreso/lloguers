@@ -465,6 +465,10 @@
       "nomFitxer": "ultims_contractes",
       "titolDialog": "Exportació dels contractes més recents"
     },
+    "revisions": {
+      "nomFitxer": "revisions_lloguer",
+      "titolDialog": "Exportació de les revisions de lloguer"
+    },
     "exportOk": "L'exportació ha acabat correctament.",
     "exportOkDesc": "S'ha generat el fitxer: ",
     "exportCancel": "Exportació cancel·lada pel usuari.",
@@ -499,6 +503,7 @@
     "camps": {
       "lloguerAnterior": "Lloguer anterior",
       "percentatge": "% aplicat",
+      "percentatgeEfectiu": "% efectiu",
       "incrementCalculat": "Increment calculat",
       "incrementAplicat": "Increment aplicat",
       "lloguerNou": "Lloguer nou",

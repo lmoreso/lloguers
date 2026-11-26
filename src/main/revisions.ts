@@ -52,7 +52,11 @@ export function obtenirRevisionsLlistat(nomesPendents: boolean): RevisioLlistat[
     .prepare(
       `SELECT id_revisio, id_contracte, data_efecte, lloguer_anterior, increment_aplicat, lloguer_nou, percentatge,
         percentatge_efectiu, data_enviament, comentari, contracte_data_inici, inquili_nom, inquili_cognoms,
-        inquili2_nom, inquili2_cognoms, immoble_id, immoble_via, immoble_num_via, immoble_pis, immoble_porta
+        inquili_nom_complet, inquili_nif, inquili_telefon, 
+        inquili2_nom, inquili2_cognoms, inquili2_nom_complet, inquili2_nif, inquili2_telefon,
+        inquilins_noms,
+        immoble_id, immoble_via, immoble_num_via, immoble_pis, immoble_porta, immoble_adreca,
+        immoble_codi_postal, immoble_localitat, immoble_provincia, immoble_ref_catastral
        FROM v_revisions_lloguer ${filtre}`
     )
     .all() as RevisioLlistat[]
