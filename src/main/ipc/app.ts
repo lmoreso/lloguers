@@ -5,6 +5,9 @@ export function registrarIpcApp(): void {
   // Versió de l'aplicació, la del package.json (app.getVersion()).
   ipcMain.handle('app:versio', () => executar(() => app.getVersion()))
 
+  // Tanca l'aplicació.
+  ipcMain.handle('app:sortir', () => executar(() => app.quit()))
+
   // Obre una adreça al navegador del sistema. Només s'accepten adreces https: el Renderer no és de fiar,
   // i no volem que pugui obrir fitxers locals (file://) ni executar res (javascript:).
   ipcMain.handle('app:obrirEnllac', (_, url: string) =>

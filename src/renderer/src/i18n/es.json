@@ -1,6 +1,7 @@
 {
   "app": {
-    "titol": "Alquileres"
+    "titol": "Alquileres",
+    "sortir": "Salir"
   },
   "documentsImmoble": {
     "titol": "Documentos del inmueble",

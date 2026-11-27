@@ -1,6 +1,7 @@
 {
   "app": {
-    "titol": "Lloguers"
+    "titol": "Lloguers",
+    "sortir": "Sortir"
   },
   "documentsImmoble": {
     "titol": "Documents de l'immoble",

@@ -65,6 +65,7 @@ declare global {
       app: {
         versio: () => Promise<Resultat<string>>
         obrirEnllac: (url: string) => Promise<Resultat<void>>
+        sortir: () => Promise<Resultat<void>>
       }
       documentsImmoble: {
         obtenir: (idInmoble: number) => Promise<Resultat<DocumentImmoble[]>>

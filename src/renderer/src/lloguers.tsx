@@ -1,4 +1,5 @@
-import { AppShell, Group, NavLink, Text, Title, UnstyledButton } from '@mantine/core'
+import { AppShell, Group, NavLink, Text, Title, UnstyledButton, Box } from '@mantine/core'
+import { IconLogout } from '@tabler/icons-react'
 import { HashRouter, Link, Navigate, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Inquilins from './pantalles/Inquilins'
@@ -91,6 +92,15 @@ function Estructura({ config, onCanviarConfig }: EstructuraProps): React.JSX.Ele
                 </UnstyledButton>
               ))}
             </Group>
+
+            <Box style={{ flex: 1 }} />
+
+            <UnstyledButton onClick={() => window.api.app.sortir()}>
+              <Group gap="xs">
+                <IconLogout size={18} />
+                <Text size="sm">{t('app.sortir')}</Text>
+              </Group>
+            </UnstyledButton>
           </Group>
         </AppShell.Header>
         <Rutas config={config} onCanviarConfig={onCanviarConfig} />
@@ -106,6 +116,12 @@ function Estructura({ config, onCanviarConfig }: EstructuraProps): React.JSX.Ele
           {SECCIONS.map((s) => (
             <NavLink key={s.ruta} component={Link} to={s.ruta} label={t(s.clau)} />
           ))}
+          <Box style={{ flex: 1 }} />
+          <NavLink
+            label={t('app.sortir')}
+            leftSection={<IconLogout size={18} />}
+            onClick={() => window.api.app.sortir()}
+          />
         </AppShell.Navbar>
         <Rutas config={config} onCanviarConfig={onCanviarConfig} />
       </AppShell>

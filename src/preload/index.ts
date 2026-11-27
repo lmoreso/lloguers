@@ -84,7 +84,8 @@ const api = {
   app: {
     versio: (): Promise<Resultat<string>> => ipcRenderer.invoke('app:versio'),
     obrirEnllac: (url: string): Promise<Resultat<void>> =>
-      ipcRenderer.invoke('app:obrirEnllac', url)
+      ipcRenderer.invoke('app:obrirEnllac', url),
+    sortir: (): Promise<Resultat<void>> => ipcRenderer.invoke('app:sortir')
   },
   documentsImmoble: {
     obtenir: (idInmoble: number): Promise<Resultat<DocumentImmoble[]>> =>
