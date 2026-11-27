@@ -49,6 +49,7 @@ import {
 } from '../utils/filtresImmobles'
 import type { FiltresImmoble } from '../utils/filtresImmobles'
 import AjudaContextual from '@renderer/components/AjudaContextual'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 interface Props {
   config: ConfigObtinguda
@@ -237,303 +238,314 @@ function Immobles({ config }: Props): React.JSX.Element {
 
   return (
     <>
-      <Group justify="space-between" mb="md">
-        <Group>
-          <Title order={2}>{t('menu.immobles')}</Title>
-          <AjudaContextual fitxer="llistaImmobles" idioma={config.idioma} iconSize={32} />
-        </Group>
+      <PantallaTaula
+        capcalera={
+          <>
+            <Group justify="space-between" mb="md">
+              <Group>
+                <Title order={2}>{t('menu.immobles')}</Title>
+                <AjudaContextual fitxer="llistaImmobles" idioma={config.idioma} iconSize={32} />
+              </Group>
 
-        <Button leftSection={<IconPlus size={16} />} onClick={() => navigate('/immobles/nou')}>
-          {t('comu.afegir')}
-        </Button>
-      </Group>
-
-      {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
-      {!carregant && immobles.length === 0 && <Text c="dimmed">{t('immobles.buit')}</Text>}
-      {ambAvisos > 0 && (
-        <Alert color="orange" mb="md">
-          {t('immobles.caducitats.avis', { count: ambAvisos })}
-        </Alert>
-      )}
-
-      {immobles.length > 0 && (
-        <FiltresImmobles
-          filtres={filtres}
-          onCanvi={canviarFiltres}
-          municipis={municipis}
-          total={immobles.length}
-          visibles={immoblesVisibles.length}
-        />
-      )}
-      {immobles.length > 0 && immoblesVisibles.length === 0 && (
-        <Text c="dimmed">{t('immobles.filtres.cap')}</Text>
-      )}
-
-      {immoblesVisibles.length > 0 && (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            {/* Fila d'agrupació */}
-            <Table.Tr>
-              <Table.Th
-                colSpan={5}
-                ta="center"
-                // bg="var(--mantine-color-gray-light)"
-                style={{
-                  borderRight: '1px solid var(--mantine-color-default-border)'
-                }}
+              <Button
+                leftSection={<IconPlus size={16} />}
+                onClick={() => navigate('/immobles/nou')}
               >
-                {t('menu.immobles')}
-              </Table.Th>
-              <Table.Th
-                colSpan={4}
-                ta="center"
-                style={{
-                  // borderTop: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '1px solid var(--mantine-color-default-border)'
-                }}
-              >
-                {t('immobles.contractesRecents')}
-              </Table.Th>
-              <Table.Th
-                rowSpan={2}
-                ta="center"
-                style={{
-                  // borderTop: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '1px solid var(--mantine-color-default-border)'
-                }}
-              >
-                {t('immobles.camps.avisos')}
-              </Table.Th>
-              <Table.Th rowSpan={2} ta="center">
-                {t('comu.accions')}
-              </Table.Th>
-            </Table.Tr>
+                {t('comu.afegir')}
+              </Button>
+            </Group>
 
-            {/* Fila de títols */}
-            <Table.Tr>
-              {/* La primera columna és només per l'icona d'editar. */}
-              <Table.Th
-                //  bg="var(--mantine-color-gray-light)"
-                style={
-                  {
+            {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
+            {!carregant && immobles.length === 0 && <Text c="dimmed">{t('immobles.buit')}</Text>}
+            {ambAvisos > 0 && (
+              <Alert color="orange" mb="md">
+                {t('immobles.caducitats.avis', { count: ambAvisos })}
+              </Alert>
+            )}
+
+            {immobles.length > 0 && (
+              <FiltresImmobles
+                filtres={filtres}
+                onCanvi={canviarFiltres}
+                municipis={municipis}
+                total={immobles.length}
+                visibles={immoblesVisibles.length}
+              />
+            )}
+            {immobles.length > 0 && immoblesVisibles.length === 0 && (
+              <Text c="dimmed">{t('immobles.filtres.cap')}</Text>
+            )}
+          </>
+        }
+      >
+        {immoblesVisibles.length > 0 && (
+          <Table stickyHeader striped highlightOnHover>
+            <Table.Thead>
+              {/* Fila d'agrupació */}
+              <Table.Tr>
+                <Table.Th
+                  colSpan={5}
+                  ta="center"
+                  // bg="var(--mantine-color-gray-light)"
+                  // style={{
+                  //   borderRight: '1px solid var(--mantine-color-default-border)'
+                  // }}
+                >
+                  {t('menu.immobles')}
+                </Table.Th>
+                <Table.Th
+                  colSpan={4}
+                  ta="center"
+                  // style={{
+                  //   // borderTop: '2px solid var(--mantine-color-default-border)',
+                  //   borderRight: '1px solid var(--mantine-color-default-border)'
+                  // }}
+                >
+                  {t('immobles.contractesRecents')}
+                </Table.Th>
+                <Table.Th
+                  rowSpan={2}
+                  ta="center"
+                  // style={{
+                  //   // borderTop: '2px solid var(--mantine-color-default-border)',
+                  //   borderRight: '1px solid var(--mantine-color-default-border)'
+                  // }}
+                >
+                  {t('immobles.camps.avisos')}
+                </Table.Th>
+                <Table.Th rowSpan={2} ta="center">
+                  {t('comu.accions')}
+                </Table.Th>
+              </Table.Tr>
+
+              {/* Fila de títols */}
+              <Table.Tr>
+                {/* La primera columna és només per l'icona d'editar. */}
+                <Table.Th
+                  //  bg="var(--mantine-color-gray-light)"
+                  style={
+                    {
+                      // borderBottom: '2px solid var(--mantine-color-default-border)',
+                      // borderLeft: '2px solid var(--mantine-color-default-border)'
+                    }
+                  }
+                ></Table.Th>
+                <Table.Th
+                  //  bg="var(--mantine-color-gray-light)"
+                  style={
+                    {
+                      // borderBottom: '2px solid var(--mantine-color-default-border)'
+                    }
+                  }
+                >
+                  {t('immobles.camps.id')}
+                </Table.Th>
+                <Table.Th
+                  //  bg="var(--mantine-color-gray-light)"
+                  style={
+                    {
+                      // borderBottom: '2px solid var(--mantine-color-default-border)'
+                    }
+                  }
+                >
+                  {t('immobles.seccions.adreca')}
+                </Table.Th>
+                <Table.Th
+                  //  bg="var(--mantine-color-gray-light)"
+                  style={
+                    {
+                      // borderBottom: '2px solid var(--mantine-color-default-border)'
+                    }
+                  }
+                >
+                  {t('immobles.camps.localitat')}
+                </Table.Th>
+                <Table.Th
+                  ta="right"
+                  pr="sm"
+                  //  bg="var(--mantine-color-gray-light)"
+                  style={{
                     // borderBottom: '2px solid var(--mantine-color-default-border)',
-                    // borderLeft: '2px solid var(--mantine-color-default-border)'
+                    borderRight: '1px solid var(--mantine-color-default-border)'
+                  }}
+                >
+                  {t('immobles.camps.superficie')}
+                </Table.Th>
+                <Table.Th
+                  style={
+                    {
+                      // borderBottom: '2px solid var(--mantine-color-default-border)'
+                    }
                   }
-                }
-              ></Table.Th>
-              <Table.Th
-                //  bg="var(--mantine-color-gray-light)"
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                >
+                  {t('contractes.camps.dataInici')}
+                </Table.Th>
+                <Table.Th
+                  style={
+                    {
+                      // borderBottom: '2px solid var(--mantine-color-default-border)'
+                    }
                   }
-                }
-              >
-                {t('immobles.camps.id')}
-              </Table.Th>
-              <Table.Th
-                //  bg="var(--mantine-color-gray-light)"
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)'
+                >
+                  {t('contractes.camps.dataFi')}
+                </Table.Th>
+                <Table.Th
+                  style={
+                    {
+                      // borderBottom: '2px solid var(--mantine-color-default-border)'
+                    }
                   }
-                }
-              >
-                {t('immobles.seccions.adreca')}
-              </Table.Th>
-              <Table.Th
-                //  bg="var(--mantine-color-gray-light)"
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              >
-                {t('immobles.camps.localitat')}
-              </Table.Th>
-              <Table.Th
-                ta="right"
-                pr="sm"
-                //  bg="var(--mantine-color-gray-light)"
-                style={{
-                  // borderBottom: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '1px solid var(--mantine-color-default-border)'
-                }}
-              >
-                {t('immobles.camps.superficie')}
-              </Table.Th>
-              <Table.Th
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              >
-                {t('contractes.camps.dataInici')}
-              </Table.Th>
-              <Table.Th
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              >
-                {t('contractes.camps.dataFi')}
-              </Table.Th>
-              <Table.Th
-                style={
-                  {
-                    // borderBottom: '2px solid var(--mantine-color-default-border)'
-                  }
-                }
-              >
-                {t('inquilins.camps.nom')} {t('contractes.camps.inquili')}
-              </Table.Th>
-              <Table.Th
-                style={{
-                  // borderBottom: '2px solid var(--mantine-color-default-border)',
-                  borderRight: '1px solid var(--mantine-color-default-border)'
-                }}
-              ></Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {immoblesVisibles.map((i) => {
-              const contracte = ultimContracte(i.id)
+                >
+                  {t('inquilins.camps.nom')} {t('contractes.camps.inquili')}
+                </Table.Th>
+                <Table.Th
+                // style={{
+                //   // borderBottom: '2px solid var(--mantine-color-default-border)',
+                //   borderRight: '1px solid var(--mantine-color-default-border)'
+                // }}
+                ></Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {immoblesVisibles.map((i) => {
+                const contracte = ultimContracte(i.id)
 
-              return (
-                <Table.Tr key={i.id}>
-                  <Table.Td>
-                    <Tooltip label={t('immobles.editar')}>
-                      <ActionIcon
-                        variant="subtle"
-                        aria-label={t('immobles.editar')}
-                        onClick={() => navigate(`/immobles/${i.id}`)}
-                      >
-                        <IconPencil size={18} />
-                      </ActionIcon>
-                    </Tooltip>
-                  </Table.Td>
-                  <Table.Td>{i.id}</Table.Td>
-                  <Table.Td>{adreca(i)}</Table.Td>
-                  <Table.Td>{i.localitat}</Table.Td>
-                  <Table.Td
-                    ta="right"
-                    pr="sm"
-                    style={{
-                      // borderTop: '2px solid var(--mantine-color-default-border)',
-                      borderRight: '1px solid var(--mantine-color-default-border)'
-                    }}
-                  >
-                    {formatM2(i.superficie_m2)}
-                  </Table.Td>
-                  {contracte ? (
-                    <>
-                      <Table.Td>{formatData(contracte.data_inici)}</Table.Td>
-                      <Table.Td>{formatData(contracte.data_fi)}</Table.Td>
-                      <Table.Td>{contracte.inquili_nom}</Table.Td>
+                return (
+                  <Table.Tr key={i.id}>
+                    <Table.Td>
+                      <Tooltip label={t('immobles.editar')}>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={t('immobles.editar')}
+                          onClick={() => navigate(`/immobles/${i.id}`)}
+                        >
+                          <IconPencil size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Table.Td>
+                    <Table.Td>{i.id}</Table.Td>
+                    <Table.Td>{adreca(i)}</Table.Td>
+                    <Table.Td>{i.localitat}</Table.Td>
+                    <Table.Td
+                      ta="right"
+                      pr="sm"
+                      style={{
+                        // borderTop: '2px solid var(--mantine-color-default-border)',
+                        borderRight: '1px solid var(--mantine-color-default-border)'
+                      }}
+                    >
+                      {formatM2(i.superficie_m2)}
+                    </Table.Td>
+                    {contracte ? (
+                      <>
+                        <Table.Td>{formatData(contracte.data_inici)}</Table.Td>
+                        <Table.Td>{formatData(contracte.data_fi)}</Table.Td>
+                        <Table.Td>{contracte.inquili_nom}</Table.Td>
+                        <Table.Td
+                          style={{
+                            borderRight: '1px solid var(--mantine-color-default-border)'
+                          }}
+                        >
+                          {infoContracte(contracte)}
+                        </Table.Td>
+                      </>
+                    ) : (
                       <Table.Td
+                        colSpan={4}
+                        ta="center"
                         style={{
                           borderRight: '1px solid var(--mantine-color-default-border)'
                         }}
                       >
-                        {infoContracte(contracte)}
+                        <Badge variant="outline" color="gray">
+                          {t('contractes.ultims.senseContracte')}
+                        </Badge>
                       </Table.Td>
-                    </>
-                  ) : (
+                    )}
+
                     <Table.Td
-                      colSpan={4}
-                      ta="center"
                       style={{
                         borderRight: '1px solid var(--mantine-color-default-border)'
                       }}
                     >
-                      <Badge variant="outline" color="gray">
-                        {t('contractes.ultims.senseContracte')}
-                      </Badge>
-                    </Table.Td>
-                  )}
-
-                  <Table.Td
-                    style={{
-                      borderRight: '1px solid var(--mantine-color-default-border)'
-                    }}
-                  >
-                    <Stack gap={4} align="center">
-                      {alertes(i, config.diesAvisDocumentCaducat).map((a) => (
-                        <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
-                          {t(`immobles.caducitats.${a.clau}`)}:{' '}
-                          {t(`immobles.caducitats.${a.estat}`)}
-                        </Badge>
-                      ))}
-                      {ambAvisosContractes.has(i.id) && (
-                        <Badge color="orange">{t('immobles.caducitats.contractesAmbAvisos')}</Badge>
-                      )}
-                    </Stack>
-                  </Table.Td>
-                  <Table.Td style={{ width: 1 }}>
-                    <Menu position="bottom-end" withinPortal>
-                      <Menu.Target>
-                        <Tooltip label={t('comu.accions')}>
-                          <ActionIcon variant="subtle" aria-label={t('comu.accions')}>
-                            <IconDots size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Menu.Target>
-                      <Menu.Dropdown>
-                        <Menu.Item
-                          leftSection={<IconPencil size={16} />}
-                          onClick={() => navigate(`/immobles/${i.id}`)}
-                        >
-                          {t('immobles.editar')}
-                        </Menu.Item>
-                        <Menu.Item
-                          leftSection={<IconFiles size={16} />}
-                          onClick={() => navigate(`/immobles/${i.id}/documents`)}
-                        >
-                          {t('documentsImmoble.boto')}
-                        </Menu.Item>
-                        <Menu.Divider />
-                        {contracte && (
-                          <>
-                            <Menu.Item
-                              leftSection={<IconPencil size={16} />}
-                              onClick={() => editarContracte(contracte)}
-                            >
-                              {t('contractes.editar')}
-                            </Menu.Item>
-                            <Menu.Item
-                              leftSection={<IconFileText size={16} />}
-                              onClick={() => navigate(`/immobles/${i.id}/contractes`)}
-                            >
-                              {t('immobles.llistaContractes')}
-                            </Menu.Item>
-                          </>
+                      <Stack gap={4} align="center">
+                        {alertes(i, config.diesAvisDocumentCaducat).map((a) => (
+                          <Badge key={a.clau} color={a.estat === 'caducat' ? 'red' : 'orange'}>
+                            {t(`immobles.caducitats.${a.clau}`)}:{' '}
+                            {t(`immobles.caducitats.${a.estat}`)}
+                          </Badge>
+                        ))}
+                        {ambAvisosContractes.has(i.id) && (
+                          <Badge color="orange">
+                            {t('immobles.caducitats.contractesAmbAvisos')}
+                          </Badge>
                         )}
-                        <Menu.Item
-                          leftSection={<IconPlus size={16} />}
-                          onClick={() => navigate(`/immobles/${i.id}/contractes/nou`)}
-                        >
-                          {t('immobles.afegirContracte')}
-                        </Menu.Item>
+                      </Stack>
+                    </Table.Td>
+                    <Table.Td style={{ width: 1 }}>
+                      <Menu position="bottom-end" withinPortal>
+                        <Menu.Target>
+                          <Tooltip label={t('comu.accions')}>
+                            <ActionIcon variant="subtle" aria-label={t('comu.accions')}>
+                              <IconDots size={18} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          <Menu.Item
+                            leftSection={<IconPencil size={16} />}
+                            onClick={() => navigate(`/immobles/${i.id}`)}
+                          >
+                            {t('immobles.editar')}
+                          </Menu.Item>
+                          <Menu.Item
+                            leftSection={<IconFiles size={16} />}
+                            onClick={() => navigate(`/immobles/${i.id}/documents`)}
+                          >
+                            {t('documentsImmoble.boto')}
+                          </Menu.Item>
+                          <Menu.Divider />
+                          {contracte && (
+                            <>
+                              <Menu.Item
+                                leftSection={<IconPencil size={16} />}
+                                onClick={() => editarContracte(contracte)}
+                              >
+                                {t('contractes.editar')}
+                              </Menu.Item>
+                              <Menu.Item
+                                leftSection={<IconFileText size={16} />}
+                                onClick={() => navigate(`/immobles/${i.id}/contractes`)}
+                              >
+                                {t('immobles.llistaContractes')}
+                              </Menu.Item>
+                            </>
+                          )}
+                          <Menu.Item
+                            leftSection={<IconPlus size={16} />}
+                            onClick={() => navigate(`/immobles/${i.id}/contractes/nou`)}
+                          >
+                            {t('immobles.afegirContracte')}
+                          </Menu.Item>
 
-                        <Menu.Divider />
-                        <Menu.Item
-                          color="red"
-                          leftSection={<IconTrash size={16} />}
-                          onClick={() => demanarEliminar(i)}
-                        >
-                          {t('comu.eliminar')}
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </Table.Td>
-                </Table.Tr>
-              )
-            })}
-          </Table.Tbody>
-        </Table>
-      )}
+                          <Menu.Divider />
+                          <Menu.Item
+                            color="red"
+                            leftSection={<IconTrash size={16} />}
+                            onClick={() => demanarEliminar(i)}
+                          >
+                            {t('comu.eliminar')}
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </Table.Td>
+                  </Table.Tr>
+                )
+              })}
+            </Table.Tbody>
+          </Table>
+        )}
+      </PantallaTaula>
     </>
   )
 }

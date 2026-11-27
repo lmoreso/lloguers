@@ -28,6 +28,7 @@ import AjudaContextual from '@renderer/components/AjudaContextual'
 import ModalExportacio from '@renderer/components/ModalExportacio'
 import exportarDades from '@renderer/utils/exportarDades'
 import { DadesExportacioRevisions } from '@renderer/utils/exportCartesRevisio'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 // Una carta pendent: sense data d'enviament i amb un increment diferent de 0 (un lloguer congelat no porta carta).
 const esPendent = (r: RevisioLlistat): boolean =>
@@ -80,45 +81,50 @@ function Revisions({ config }: { config: ConfigObtinguda }): React.JSX.Element {
 
   return (
     <>
-      <Stack gap="sm" mb="md">
-        <Group justify="space-between" mb="md">
-          <Group>
-            <Title order={2}>{t('revisions.titol')}</Title>
-            <AjudaContextual fitxer="revisionsLloguer" idioma={config.idioma} iconSize={32} />
-          </Group>
-          {revisions.length > 0 && (
-            <Button
-              leftSection={<IconFileExport size={16} />}
-              onClick={() => setModalExportacioObert(true)}
-            >
-              {t('exportacio.titol')}
-            </Button>
-          )}
-        </Group>
-        <Group gap="lg">
-          <Switch
-            checked={nomesPendents}
-            onChange={(e) => setNomesPendents(e.currentTarget.checked)}
-            label={t('revisions.global.nomesPendents')}
-          />
-          {!carregant && (
-            <Text c="dimmed" size="sm">
-              {t('revisions.global.pendents', { count: pendents })}
-            </Text>
-          )}
-        </Group>
-      </Stack>
+      <PantallaTaula
+        capcalera={
+          <>
+            <Stack gap="sm" mb="md">
+              <Group justify="space-between" mb="md">
+                <Group>
+                  <Title order={2}>{t('revisions.titol')}</Title>
+                  <AjudaContextual fitxer="revisionsLloguer" idioma={config.idioma} iconSize={32} />
+                </Group>
+                {revisions.length > 0 && (
+                  <Button
+                    leftSection={<IconFileExport size={16} />}
+                    onClick={() => setModalExportacioObert(true)}
+                  >
+                    {t('exportacio.titol')}
+                  </Button>
+                )}
+              </Group>
+              <Group gap="lg">
+                <Switch
+                  checked={nomesPendents}
+                  onChange={(e) => setNomesPendents(e.currentTarget.checked)}
+                  label={t('revisions.global.nomesPendents')}
+                />
+                {!carregant && (
+                  <Text c="dimmed" size="sm">
+                    {t('revisions.global.pendents', { count: pendents })}
+                  </Text>
+                )}
+              </Group>
+            </Stack>
 
-      {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
-      {!carregant && revisions.length === 0 && (
-        <Text c="dimmed">
-          {nomesPendents ? t('revisions.global.capPendent') : t('revisions.global.cap')}
-        </Text>
-      )}
-
-      {revisions.length > 0 && (
-        <Table.ScrollContainer minWidth={900}>
-          <Table striped highlightOnHover>
+            {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
+            {!carregant && revisions.length === 0 && (
+              <Text c="dimmed">
+                {nomesPendents ? t('revisions.global.capPendent') : t('revisions.global.cap')}
+              </Text>
+            )}
+          </>
+        }
+      >
+        {/*<Table stickyHeader striped highlightOnHover>*/}
+        {revisions.length > 0 && (
+          <Table stickyHeader striped highlightOnHover>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th />
@@ -190,8 +196,8 @@ function Revisions({ config }: { config: ConfigObtinguda }): React.JSX.Element {
               ))}
             </Table.Tbody>
           </Table>
-        </Table.ScrollContainer>
-      )}
+        )}
+      </PantallaTaula>
 
       <ModalExportacio
         obert={modalExportacioObert}

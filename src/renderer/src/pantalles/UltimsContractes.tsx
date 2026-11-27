@@ -40,6 +40,7 @@ import { desarFiltres, llegirFiltresGuardats, passaFiltres } from '../utils/filt
 import type { Filtres } from '../utils/filtresUltimsContractes'
 import AjudaContextual from '@renderer/components/AjudaContextual'
 import exportarDades from '@renderer/utils/exportarDades'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 interface Props {
   config: ConfigObtinguda
@@ -196,128 +197,136 @@ function UltimsContractes({ config }: Props): React.JSX.Element {
 
   return (
     <>
-      <Group justify="space-between" mb="md">
-        <Group>
-          <Title order={2}>{t('contractes.ultims.titol')} </Title>
-          <AjudaContextual fitxer="ultimsContractes" idioma={config.idioma} iconSize={32} />
-        </Group>
+      <PantallaTaula
+        capcalera={
+          <>
+            <Group justify="space-between" mb="md">
+              <Group>
+                <Title order={2}>{t('contractes.ultims.titol')} </Title>
+                <AjudaContextual fitxer="ultimsContractes" idioma={config.idioma} iconSize={32} />
+              </Group>
+              {filesVisibles.length > 0 && (
+                <Button
+                  leftSection={<IconFileExport size={16} />}
+                  onClick={() => setModalExportacioObert(true)}
+                >
+                  {t('exportacio.titol')}
+                </Button>
+              )}
+            </Group>
+            {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
+            {!carregant && files.length === 0 && <Text c="dimmed">{t('immobles.buit')}</Text>}
+
+            {files.length > 0 && (
+              <FiltresUltimsContractes
+                filtres={filtres}
+                onCanvi={canviarFiltres}
+                municipis={municipis}
+                total={files.length}
+                visibles={filesVisibles.length}
+              />
+            )}
+            {files.length > 0 && filesVisibles.length === 0 && (
+              <Text c="dimmed">{t('contractes.ultims.filtres.cap')}</Text>
+            )}
+          </>
+        }
+      >
         {filesVisibles.length > 0 && (
-          <Button
-            leftSection={<IconFileExport size={16} />}
-            onClick={() => setModalExportacioObert(true)}
-          >
-            {t('exportacio.titol')}
-          </Button>
-        )}
-      </Group>
-      {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
-      {!carregant && files.length === 0 && <Text c="dimmed">{t('immobles.buit')}</Text>}
-
-      {files.length > 0 && (
-        <FiltresUltimsContractes
-          filtres={filtres}
-          onCanvi={canviarFiltres}
-          municipis={municipis}
-          total={files.length}
-          visibles={filesVisibles.length}
-        />
-      )}
-      {files.length > 0 && filesVisibles.length === 0 && (
-        <Text c="dimmed">{t('contractes.ultims.filtres.cap')}</Text>
-      )}
-
-      {filesVisibles.length > 0 && (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th />
-              <Table.Th>{'Id.'}</Table.Th>
-              <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
-              <Table.Th />
-              <Table.Th>{t('contractes.camps.dataInici')}</Table.Th>
-              <Table.Th>{t('contractes.camps.dataFi')}</Table.Th>
-              <Table.Th>{t('contractes.camps.dFiPrevista')}</Table.Th>
-              <Table.Th>{t('contractes.camps.inquilins')}</Table.Th>
-              <Table.Th>{t('contractes.camps.lloguerActual')}</Table.Th>
-              <Table.Th>{t('contractes.camps.dataUltimaRevisio')}</Table.Th>
-              <Table.Th>{t('contractes.camps.avisos')}</Table.Th>
-              <Table.Th>{t('contractes.accions.titol')}</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {filesVisibles.map(({ immoble, contracte: c }) => (
-              <Table.Tr key={c ? `c${c.id}` : `i${immoble.id}`}>
-                <Table.Td style={{ width: 1 }}>
-                  {c === null ? (
-                    <>
-                      <Tooltip label={t('immobles.afegirContracte')}>
+          <Table stickyHeader striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th />
+                <Table.Th>{'Id.'}</Table.Th>
+                <Table.Th>{t('immobles.seccions.adreca')}</Table.Th>
+                <Table.Th />
+                <Table.Th>{t('contractes.camps.dataInici')}</Table.Th>
+                <Table.Th>{t('contractes.camps.dataFi')}</Table.Th>
+                <Table.Th>{t('contractes.camps.dFiPrevista')}</Table.Th>
+                <Table.Th>{t('contractes.camps.inquilins')}</Table.Th>
+                <Table.Th>{t('contractes.camps.lloguerActual')}</Table.Th>
+                <Table.Th>{t('contractes.camps.dataUltimaRevisio')}</Table.Th>
+                <Table.Th>{t('contractes.camps.avisos')}</Table.Th>
+                <Table.Th>{t('contractes.accions.titol')}</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {filesVisibles.map(({ immoble, contracte: c }) => (
+                <Table.Tr key={c ? `c${c.id}` : `i${immoble.id}`}>
+                  <Table.Td style={{ width: 1 }}>
+                    {c === null ? (
+                      <>
+                        <Tooltip label={t('immobles.afegirContracte')}>
+                          <ActionIcon
+                            variant="subtle"
+                            aria-label={t('immobles.afegirContracte')}
+                            onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
+                          >
+                            <IconPlus size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <Tooltip label={t('contractes.editar')}>
                         <ActionIcon
                           variant="subtle"
-                          aria-label={t('immobles.afegirContracte')}
-                          onClick={() => navigate(`/immobles/${immoble.id}/contractes/nou`)}
+                          aria-label={t('contractes.editar')}
+                          onClick={() =>
+                            editarContracte({ ...c, id_inmoble: immoble.id } as ContracteLlistat)
+                          }
                         >
-                          <IconPlus size={18} />
+                          <IconPencil size={18} />
                         </ActionIcon>
                       </Tooltip>
+                    )}
+                  </Table.Td>
+                  <Table.Td>{immoble.id}</Table.Td>
+                  <Table.Td>{adreca(immoble)}</Table.Td>
+                  <Table.Td>{infoImmoble(immoble)}</Table.Td>
+                  {c === null ? (
+                    <>
+                      <Table.Td colSpan={6} ta="center">
+                        <Badge variant="outline" color="gray">
+                          {t('contractes.ultims.senseContracte')}
+                        </Badge>
+                      </Table.Td>
+
+                      <Table.Td></Table.Td>
+                      <Table.Td style={{ width: 1 }}>
+                        <AccionsSenseContracte immoble={immoble} />
+                      </Table.Td>
                     </>
                   ) : (
-                    <Tooltip label={t('contractes.editar')}>
-                      <ActionIcon
-                        variant="subtle"
-                        aria-label={t('contractes.editar')}
-                        onClick={() =>
-                          editarContracte({ ...c, id_inmoble: immoble.id } as ContracteLlistat)
-                        }
-                      >
-                        <IconPencil size={18} />
-                      </ActionIcon>
-                    </Tooltip>
+                    <>
+                      <Table.Td>{formatData(c.data_inici)}</Table.Td>
+                      <Table.Td>{formatData(c.data_fi)}</Table.Td>
+                      <Table.Td>{formatData(c.d_fi_prevista)}</Table.Td>
+                      <Table.Td>
+                        <Text size="sm">{nomInquili(c.inquili_nom, c.inquili_cognoms)}</Text>
+                        {c.id_inquili_2 !== null && (
+                          <Text size="sm" c="dimmed">
+                            {nomInquili(c.inquili2_nom, c.inquili2_cognoms)}
+                          </Text>
+                        )}
+                      </Table.Td>
+                      <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
+                      <Table.Td>{formatData(c.data_ultima_revisio)}</Table.Td>
+                      <Table.Td>
+                        <AvisosContracte contracte={c} config={config} />
+                      </Table.Td>
+                      <Table.Td style={{ width: 1 }}>
+                        <AccionsContracte contracte={c} onCanvi={() => setVersio((v) => v + 1)} />
+                      </Table.Td>
+                    </>
                   )}
-                </Table.Td>
-                <Table.Td>{immoble.id}</Table.Td>
-                <Table.Td>{adreca(immoble)}</Table.Td>
-                <Table.Td>{infoImmoble(immoble)}</Table.Td>
-                {c === null ? (
-                  <>
-                    <Table.Td colSpan={6} ta="center">
-                      <Badge variant="outline" color="gray">
-                        {t('contractes.ultims.senseContracte')}
-                      </Badge>
-                    </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        )}
+      </PantallaTaula>
 
-                    <Table.Td></Table.Td>
-                    <Table.Td style={{ width: 1 }}>
-                      <AccionsSenseContracte immoble={immoble} />
-                    </Table.Td>
-                  </>
-                ) : (
-                  <>
-                    <Table.Td>{formatData(c.data_inici)}</Table.Td>
-                    <Table.Td>{formatData(c.data_fi)}</Table.Td>
-                    <Table.Td>{formatData(c.d_fi_prevista)}</Table.Td>
-                    <Table.Td>
-                      <Text size="sm">{nomInquili(c.inquili_nom, c.inquili_cognoms)}</Text>
-                      {c.id_inquili_2 !== null && (
-                        <Text size="sm" c="dimmed">
-                          {nomInquili(c.inquili2_nom, c.inquili2_cognoms)}
-                        </Text>
-                      )}
-                    </Table.Td>
-                    <Table.Td>{euros.format(c.lloguer_actual)}</Table.Td>
-                    <Table.Td>{formatData(c.data_ultima_revisio)}</Table.Td>
-                    <Table.Td>
-                      <AvisosContracte contracte={c} config={config} />
-                    </Table.Td>
-                    <Table.Td style={{ width: 1 }}>
-                      <AccionsContracte contracte={c} onCanvi={() => setVersio((v) => v + 1)} />
-                    </Table.Td>
-                  </>
-                )}
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      )}
+      {filesVisibles.length > 0 && <Table striped highlightOnHover></Table>}
       <ModalExportacio
         obert={modalExportacioObert}
         titol={t('exportacio.ultimsContractes.titolDialog')}

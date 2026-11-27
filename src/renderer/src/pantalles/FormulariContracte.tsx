@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   ActionIcon,
   Button,
@@ -41,6 +41,7 @@ import { ingresPendent } from '../utils/avisosContracte'
 import DocumentUnicContracte from './DocumentUnicContracte'
 import { useTornar } from '../utils/useTornar'
 import FormulariInquili from './FormulariInquili'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 // Els selectors treballen amb text (id com a string); les dates són text ISO AAAA-MM-DD; els imports, número
 // (o text mentre s'escriu).
@@ -133,6 +134,7 @@ function FormulariContracte({
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const refScroll = useRef<HTMLDivElement>(null)
 
   // Documents del contracte: els de tipus únic són els que mostren els clips. Es desen a l'instant i no formen part
   // del formulari: no afecten el diàleg de canvis sense desar.
@@ -500,226 +502,249 @@ function FormulariContracte({
 
   return (
     <>
-      {capcalera({ anarAmbGuarda, desar: desarFormulari, tornar, config })}
+      <PantallaTaula
+        refScroll={refScroll}
+        capcalera={<>{capcalera({ anarAmbGuarda, desar: desarFormulari, tornar, config })}</>}
+      >
+        <Tabs
+          value={pestanya}
+          onChange={(v) => {
+            v && onPestanya(v)
+            refScroll.current?.scrollTo({ top: 0, behavior: 'instant' })
+          }}
+          keepMounted
+          styles={{
+            list: {
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
+              backgroundColor: 'var(--mantine-color-body)'
+            }
+          }}
+        >
+          <Tabs.List>
+            <Tabs.Tab value="dades">{t('contractes.pestanyes.dades')}</Tabs.Tab>
+            <Tabs.Tab value="fianca">{t('contractes.pestanyes.fianca')}</Tabs.Tab>
+          </Tabs.List>
 
-      <Tabs value={pestanya} onChange={(v) => v && onPestanya(v)} keepMounted>
-        <Tabs.List>
-          <Tabs.Tab value="dades">{t('contractes.pestanyes.dades')}</Tabs.Tab>
-          <Tabs.Tab value="fianca">{t('contractes.pestanyes.fianca')}</Tabs.Tab>
-        </Tabs.List>
+          <Tabs.Panel value="dades" pt="md">
+            <Stack>
+              <Fieldset legend={t('contractes.seccions.dades')}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <TextInput
+                    readOnly
+                    variant="filled"
+                    label={t('contractes.camps.immoble')}
+                    value={adreca(immoble)}
+                    style={{ gridColumn: '1 / -1' }}
+                  />
+                  {campInquili('id_inquili', t('contractes.camps.inquili'), true)}
+                  {campInquili('id_inquili_2', t('contractes.camps.inquili2'), false)}
+                  <CampData
+                    // withAsterisk
+                    label={etiquetaAmbClip(t('contractes.camps.dataInici'), 'contracte', true)}
+                    {...form.getInputProps('data_inici')}
+                  />
+                  <CampData
+                    withAsterisk
+                    label={t('contractes.camps.dFiPrevista')}
+                    {...form.getInputProps('d_fi_prevista')}
+                  />
+                </SimpleGrid>
+                <Textarea
+                  mt="md"
+                  autosize
+                  minRows={2}
+                  label={t('contractes.camps.comentaris')}
+                  {...form.getInputProps('comentaris')}
+                />
+              </Fieldset>
 
-        <Tabs.Panel value="dades" pt="md">
-          <Stack>
-            <Fieldset legend={t('contractes.seccions.dades')}>
-              <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                <TextInput
-                  readOnly
-                  variant="filled"
-                  label={t('contractes.camps.immoble')}
-                  value={adreca(immoble)}
-                  style={{ gridColumn: '1 / -1' }}
-                />
-                {campInquili('id_inquili', t('contractes.camps.inquili'), true)}
-                {campInquili('id_inquili_2', t('contractes.camps.inquili2'), false)}
-                <CampData
-                  // withAsterisk
-                  label={etiquetaAmbClip(t('contractes.camps.dataInici'), 'contracte', true)}
-                  {...form.getInputProps('data_inici')}
-                />
-                <CampData
-                  withAsterisk
-                  label={t('contractes.camps.dFiPrevista')}
-                  {...form.getInputProps('d_fi_prevista')}
-                />
-              </SimpleGrid>
-              <Textarea
-                mt="md"
-                autosize
-                minRows={2}
-                label={t('contractes.camps.comentaris')}
-                {...form.getInputProps('comentaris')}
-              />
-            </Fieldset>
-
-            <Fieldset legend={t('contractes.seccions.lloguer')}>
-              <SimpleGrid cols={{ base: 1, sm: 3 }}>
-                <CampNumeric
-                  withAsterisk
-                  tipus="import"
-                  label={t('contractes.camps.lloguerInicial')}
-                  {...form.getInputProps('lloguer_inicial')}
-                />
-                <CampNumeric
-                  tipus="import"
-                  label={t('contractes.camps.fiancaImport')}
-                  {...form.getInputProps('fianca_import')}
-                />
-                <CampNumeric
-                  withAsterisk
-                  tipus="import"
-                  label={t('contractes.camps.fiancaAdicional')}
-                  {...form.getInputProps('fianca_adicional')}
-                />
-                {/* El lloguer actual i la data de revisió només existeixen en editar, i només els canvien les revisions. */}
-                {contracte && (
-                  <>
-                    <CampNumeric
-                      readOnly
-                      variant="filled"
-                      tipus="import"
-                      label={t('contractes.camps.lloguerActual')}
-                      value={form.values.lloguer_actual}
-                    />
-                    <CampData
-                      readOnly
-                      variant="filled"
-                      label={t('contractes.camps.dataUltimaRevisio')}
-                      value={form.values.data_ultima_revisio}
-                    />
-                    {/* A la mateixa línia que els dos camps, a la dreta. Porta a la pantalla de revisions (amb la
+              <Fieldset legend={t('contractes.seccions.lloguer')}>
+                <SimpleGrid cols={{ base: 1, sm: 3 }}>
+                  <CampNumeric
+                    withAsterisk
+                    tipus="import"
+                    label={t('contractes.camps.lloguerInicial')}
+                    {...form.getInputProps('lloguer_inicial')}
+                  />
+                  <CampNumeric
+                    tipus="import"
+                    label={t('contractes.camps.fiancaImport')}
+                    {...form.getInputProps('fianca_import')}
+                  />
+                  <CampNumeric
+                    withAsterisk
+                    tipus="import"
+                    label={t('contractes.camps.fiancaAdicional')}
+                    {...form.getInputProps('fianca_adicional')}
+                  />
+                  {/* El lloguer actual i la data de revisió només existeixen en editar, i només els canvien les revisions. */}
+                  {contracte && (
+                    <>
+                      <CampNumeric
+                        readOnly
+                        variant="filled"
+                        tipus="import"
+                        label={t('contractes.camps.lloguerActual')}
+                        value={form.values.lloguer_actual}
+                      />
+                      <CampData
+                        readOnly
+                        variant="filled"
+                        label={t('contractes.camps.dataUltimaRevisio')}
+                        value={form.values.data_ultima_revisio}
+                      />
+                      {/* A la mateixa línia que els dos camps, a la dreta. Porta a la pantalla de revisions (amb la
                         protecció de canvis sense desar), també amb el contracte tancat: llavors és de consulta. */}
-                    <Group justify="flex-end" align="flex-end">
-                      <Button
-                        variant="default"
-                        leftSection={<IconCurrencyEuro size={16} />}
-                        onClick={() =>
-                          anarAmbGuarda(() =>
-                            navigate(`/immobles/${immoble.id}/contractes/${contracte.id}/revisions`)
-                          )
-                        }
-                      >
-                        {t('contractes.revisar.titol')}
-                      </Button>
-                    </Group>
-                  </>
+                      <Group justify="flex-end" align="flex-end">
+                        <Button
+                          variant="default"
+                          leftSection={<IconCurrencyEuro size={16} />}
+                          onClick={() =>
+                            anarAmbGuarda(() =>
+                              navigate(
+                                `/immobles/${immoble.id}/contractes/${contracte.id}/revisions`
+                              )
+                            )
+                          }
+                        >
+                          {t('contractes.revisar.titol')}
+                        </Button>
+                      </Group>
+                    </>
+                  )}
+                </SimpleGrid>
+              </Fieldset>
+
+              <Fieldset legend={t('contractes.seccions.tancament')}>
+                {!teFi && (
+                  <Text size="sm" c="dimmed" mb="sm">
+                    {t('contractes.nota.senseFi')}
+                  </Text>
                 )}
-              </SimpleGrid>
-            </Fieldset>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <CampData
+                    clearable
+                    label={t('contractes.camps.dataFi')}
+                    {...form.getInputProps('data_fi')}
+                    onChange={canviarDataFi}
+                  />
+                  <Select
+                    clearable
+                    disabled={!teFi}
+                    data={MOTIUS_FI.map((m) => ({
+                      value: m,
+                      label: t(`contractes.motiusFi.${m}`)
+                    }))}
+                    label={t('contractes.camps.motiuFi')}
+                    {...form.getInputProps('motiu_fi')}
+                  />
+                  <CampNumeric
+                    disabled={!teFi}
+                    tipus="import"
+                    label={t('contractes.camps.importARetornar')}
+                    {...form.getInputProps('devolucio_import')}
+                  />
+                </SimpleGrid>
+                <Textarea
+                  mt="md"
+                  autosize
+                  minRows={3}
+                  disabled={!teFi}
+                  withAsterisk={justificacioObligatoria}
+                  label={t('contractes.camps.justificacioImport')}
+                  {...form.getInputProps('devolucio_motiu')}
+                />
+              </Fieldset>
+            </Stack>
+          </Tabs.Panel>
 
-            <Fieldset legend={t('contractes.seccions.tancament')}>
-              {!teFi && (
-                <Text size="sm" c="dimmed" mb="sm">
-                  {t('contractes.nota.senseFi')}
-                </Text>
-              )}
-              <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                <CampData
-                  clearable
-                  label={t('contractes.camps.dataFi')}
-                  {...form.getInputProps('data_fi')}
-                  onChange={canviarDataFi}
-                />
-                <Select
-                  clearable
-                  disabled={!teFi}
-                  data={MOTIUS_FI.map((m) => ({ value: m, label: t(`contractes.motiusFi.${m}`) }))}
-                  label={t('contractes.camps.motiuFi')}
-                  {...form.getInputProps('motiu_fi')}
-                />
-                <CampNumeric
-                  disabled={!teFi}
-                  tipus="import"
-                  label={t('contractes.camps.importARetornar')}
-                  {...form.getInputProps('devolucio_import')}
-                />
-              </SimpleGrid>
-              <Textarea
-                mt="md"
-                autosize
-                minRows={3}
-                disabled={!teFi}
-                withAsterisk={justificacioObligatoria}
-                label={t('contractes.camps.justificacioImport')}
-                {...form.getInputProps('devolucio_motiu')}
-              />
-            </Fieldset>
-          </Stack>
-        </Tabs.Panel>
+          <Tabs.Panel value="fianca" pt="md">
+            <Stack>
+              <Fieldset legend={t('contractes.seccions.ingres')}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <CampNumeric
+                    tipus="import"
+                    disabled
+                    label={t('contractes.camps.fiancaImport')}
+                    // {...form.getInputProps('fianca_import')}
+                    value={form.values.fianca_import}
+                  />
+                  <div />
+                  <TextInput
+                    label={t('contractes.camps.fiancaNc')}
+                    {...form.getInputProps('fianca_nc')}
+                  />
+                  <CampData
+                    clearable
+                    label={etiquetaAmbClip(t('contractes.camps.fiancaDataModel2'), 'fianca_model2')}
+                    {...form.getInputProps('fianca_data_model2')}
+                  />
+                  <CampData
+                    clearable
+                    label={etiquetaAmbClip(t('contractes.camps.fiancaDataIngres'), 'rebut')}
+                    // label={t('contractes.camps.fiancaDataIngres')}
+                    {...form.getInputProps('fianca_data_ingres')}
+                  />
+                  <div />
+                  <TextInput
+                    label={t('contractes.camps.fiancaNumRegistre')}
+                    {...form.getInputProps('fianca_num_registre')}
+                  />
+                  <CampData
+                    clearable
+                    label={etiquetaAmbClip(
+                      t('contractes.camps.fiancaDataNotificacio'),
+                      'fianca_notificacio'
+                    )}
+                    {...form.getInputProps('fianca_data_notificacio')}
+                  />
+                </SimpleGrid>
+              </Fieldset>
 
-        <Tabs.Panel value="fianca" pt="md">
-          <Stack>
-            <Fieldset legend={t('contractes.seccions.ingres')}>
-              <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                <CampNumeric
-                  tipus="import"
-                  disabled
-                  label={t('contractes.camps.fiancaImport')}
-                  // {...form.getInputProps('fianca_import')}
-                  value={form.values.fianca_import}
-                />
-                <div />
-                <TextInput
-                  label={t('contractes.camps.fiancaNc')}
-                  {...form.getInputProps('fianca_nc')}
-                />
-                <CampData
-                  clearable
-                  label={etiquetaAmbClip(t('contractes.camps.fiancaDataModel2'), 'fianca_model2')}
-                  {...form.getInputProps('fianca_data_model2')}
-                />
-                <CampData
-                  clearable
-                  label={etiquetaAmbClip(t('contractes.camps.fiancaDataIngres'), 'rebut')}
-                  // label={t('contractes.camps.fiancaDataIngres')}
-                  {...form.getInputProps('fianca_data_ingres')}
-                />
-                <div />
-                <TextInput
-                  label={t('contractes.camps.fiancaNumRegistre')}
-                  {...form.getInputProps('fianca_num_registre')}
-                />
-                <CampData
-                  clearable
-                  label={etiquetaAmbClip(
-                    t('contractes.camps.fiancaDataNotificacio'),
-                    'fianca_notificacio'
-                  )}
-                  {...form.getInputProps('fianca_data_notificacio')}
-                />
-              </SimpleGrid>
-            </Fieldset>
+              <Fieldset legend={t('contractes.seccions.devolucio')}>
+                {!teFi && (
+                  <Text size="sm" c="dimmed" mb="sm">
+                    {t('contractes.nota.senseFi')}
+                  </Text>
+                )}
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                  <TextInput
+                    disabled={!teFi}
+                    label={t('contractes.camps.devolucioNc')}
+                    {...form.getInputProps('devolucio_nc')}
+                  />
+                  <CampData
+                    clearable
+                    disabled={!teFi}
+                    label={etiquetaAmbClip(
+                      t('contractes.camps.devolucioDataSollicitud'),
+                      'fianca_model3'
+                    )}
+                    {...form.getInputProps('devolucio_data_sollicitud')}
+                  />
+                  <CampData
+                    clearable
+                    disabled={!teFi}
+                    label={t('contractes.camps.devolucioDataCobrament')}
+                    {...form.getInputProps('devolucio_data_cobrament')}
+                  />
+                </SimpleGrid>
+              </Fieldset>
 
-            <Fieldset legend={t('contractes.seccions.devolucio')}>
-              {!teFi && (
-                <Text size="sm" c="dimmed" mb="sm">
-                  {t('contractes.nota.senseFi')}
-                </Text>
-              )}
-              <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                <TextInput
-                  disabled={!teFi}
-                  label={t('contractes.camps.devolucioNc')}
-                  {...form.getInputProps('devolucio_nc')}
+              <Fieldset legend={t('contractes.seccions.comentari')}>
+                <Textarea
+                  autosize
+                  minRows={2}
+                  label={t('contractes.camps.fiancaComentari')}
+                  {...form.getInputProps('fianca_comentari')}
                 />
-                <CampData
-                  clearable
-                  disabled={!teFi}
-                  label={etiquetaAmbClip(
-                    t('contractes.camps.devolucioDataSollicitud'),
-                    'fianca_model3'
-                  )}
-                  {...form.getInputProps('devolucio_data_sollicitud')}
-                />
-                <CampData
-                  clearable
-                  disabled={!teFi}
-                  label={t('contractes.camps.devolucioDataCobrament')}
-                  {...form.getInputProps('devolucio_data_cobrament')}
-                />
-              </SimpleGrid>
-            </Fieldset>
-
-            <Fieldset legend={t('contractes.seccions.comentari')}>
-              <Textarea
-                autosize
-                minRows={2}
-                label={t('contractes.camps.fiancaComentari')}
-                {...form.getInputProps('fianca_comentari')}
-              />
-            </Fieldset>
-          </Stack>
-        </Tabs.Panel>
-      </Tabs>
+              </Fieldset>
+            </Stack>
+          </Tabs.Panel>
+        </Tabs>
+      </PantallaTaula>
     </>
   )
 }

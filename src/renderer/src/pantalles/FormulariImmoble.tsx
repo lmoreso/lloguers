@@ -18,6 +18,7 @@ import { CampData } from '@renderer/components/CampData'
 import CampNumeric from '@renderer/components/CampNumeric'
 import { hiHaCapaOberta } from '../utils/teclat'
 import { useTornar } from '../utils/useTornar'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 // Els camps de text són sempre string al formulari; a la BD els buits són NULL.
 // Les dates són text ISO AAAA-MM-DD (o null), tal com les desa la BD. Els números (superfícies, imports i
@@ -330,150 +331,164 @@ function FormulariImmoble({
 
   return (
     <>
-      {capcalera({ anarAmbGuarda, desar: desarFormulari, tornar })}
+      <PantallaTaula capcalera={<>{capcalera({ anarAmbGuarda, desar: desarFormulari, tornar })}</>}>
+        {/* Sense <form>: així Intro no desa. Si la validació falla, es canvia a la pestanya del primer error. */}
+        <div>
+          <Tabs
+            value={pestanya}
+            onChange={(v) => v && onPestanya(v)}
+            keepMounted
+            styles={{
+              list: {
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                backgroundColor: 'var(--mantine-color-body)'
+              }
+            }}
+          >
+            <Tabs.List>
+              <Tabs.Tab value="adreca">{t('immobles.pestanyes.adreca')}</Tabs.Tab>
+              <Tabs.Tab value="certificat">{t('immobles.pestanyes.certificat')}</Tabs.Tab>
+            </Tabs.List>
 
-      {/* Sense <form>: així Intro no desa. Si la validació falla, es canvia a la pestanya del primer error. */}
-      <div>
-        <Tabs value={pestanya} onChange={(v) => v && onPestanya(v)} keepMounted>
-          <Tabs.List>
-            <Tabs.Tab value="adreca">{t('immobles.pestanyes.adreca')}</Tabs.Tab>
-            <Tabs.Tab value="certificat">{t('immobles.pestanyes.certificat')}</Tabs.Tab>
-          </Tabs.List>
+            <Tabs.Panel value="adreca" pt="md">
+              <Stack>
+                <Fieldset legend={t('immobles.seccions.adreca')}>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                    <TextInput
+                      withAsterisk
+                      label={t('immobles.camps.via')}
+                      {...form.getInputProps('via')}
+                    />
+                    <TextInput
+                      withAsterisk
+                      label={t('immobles.camps.numVia')}
+                      {...form.getInputProps('num_via')}
+                    />
+                    <TextInput
+                      withAsterisk
+                      label={t('immobles.camps.pis')}
+                      {...form.getInputProps('pis')}
+                    />
+                    <TextInput label={t('immobles.camps.porta')} {...form.getInputProps('porta')} />
+                    <TextInput
+                      withAsterisk
+                      label={t('immobles.camps.codiPostal')}
+                      {...form.getInputProps('codi_postal')}
+                    />
+                    <TextInput
+                      withAsterisk
+                      label={t('immobles.camps.localitat')}
+                      {...form.getInputProps('localitat')}
+                    />
+                    <TextInput
+                      withAsterisk
+                      label={t('immobles.camps.provincia')}
+                      {...form.getInputProps('provincia')}
+                    />
+                  </SimpleGrid>
+                </Fieldset>
 
-          <Tabs.Panel value="adreca" pt="md">
-            <Stack>
-              <Fieldset legend={t('immobles.seccions.adreca')}>
-                <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                  <TextInput
-                    withAsterisk
-                    label={t('immobles.camps.via')}
-                    {...form.getInputProps('via')}
-                  />
-                  <TextInput
-                    withAsterisk
-                    label={t('immobles.camps.numVia')}
-                    {...form.getInputProps('num_via')}
-                  />
-                  <TextInput
-                    withAsterisk
-                    label={t('immobles.camps.pis')}
-                    {...form.getInputProps('pis')}
-                  />
-                  <TextInput label={t('immobles.camps.porta')} {...form.getInputProps('porta')} />
-                  <TextInput
-                    withAsterisk
-                    label={t('immobles.camps.codiPostal')}
-                    {...form.getInputProps('codi_postal')}
-                  />
-                  <TextInput
-                    withAsterisk
-                    label={t('immobles.camps.localitat')}
-                    {...form.getInputProps('localitat')}
-                  />
-                  <TextInput
-                    withAsterisk
-                    label={t('immobles.camps.provincia')}
-                    {...form.getInputProps('provincia')}
-                  />
-                </SimpleGrid>
-              </Fieldset>
+                <Fieldset legend={legenda(t('immobles.seccions.cadastre'), 'fitxa_cadastral')}>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                    <TextInput
+                      withAsterisk
+                      label={t('immobles.camps.refCatastral')}
+                      {...form.getInputProps('ref_catastral')}
+                    />
+                    <CampNumeric
+                      withAsterisk
+                      tipus="superficie"
+                      label={t('immobles.camps.superficie')}
+                      {...form.getInputProps('superficie_m2')}
+                    />
+                    <CampNumeric
+                      tipus="superficie"
+                      label={t('immobles.camps.superficiePati')}
+                      {...form.getInputProps('superficie_pati')}
+                    />
+                    <div />
+                    <CampNumeric
+                      tipus="import"
+                      label={t('immobles.camps.valCadastralTotal')}
+                      {...form.getInputProps('val_cadastral_total')}
+                    />
+                    <CampNumeric
+                      tipus="import"
+                      label={t('immobles.camps.valCadastralConstr')}
+                      {...form.getInputProps('val_cadastral_constr')}
+                    />
+                    <TextInput
+                      inputMode="numeric"
+                      label={t('immobles.camps.anyConstruccio')}
+                      {...form.getInputProps('any_construccio')}
+                    />
+                    <CampData
+                      label={t('immobles.camps.dataCompra')}
+                      {...form.getInputProps('data_compra')}
+                    />
+                    <CampNumeric
+                      tipus="import"
+                      label={t('immobles.camps.valorCompra')}
+                      {...form.getInputProps('valor_compra')}
+                    />
+                  </SimpleGrid>
+                </Fieldset>
+              </Stack>
+            </Tabs.Panel>
 
-              <Fieldset legend={legenda(t('immobles.seccions.cadastre'), 'fitxa_cadastral')}>
-                <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                  <TextInput
-                    withAsterisk
-                    label={t('immobles.camps.refCatastral')}
-                    {...form.getInputProps('ref_catastral')}
-                  />
-                  <CampNumeric
-                    withAsterisk
-                    tipus="superficie"
-                    label={t('immobles.camps.superficie')}
-                    {...form.getInputProps('superficie_m2')}
-                  />
-                  <CampNumeric
-                    tipus="superficie"
-                    label={t('immobles.camps.superficiePati')}
-                    {...form.getInputProps('superficie_pati')}
-                  />
-                  <div />
-                  <CampNumeric
-                    tipus="import"
-                    label={t('immobles.camps.valCadastralTotal')}
-                    {...form.getInputProps('val_cadastral_total')}
-                  />
-                  <CampNumeric
-                    tipus="import"
-                    label={t('immobles.camps.valCadastralConstr')}
-                    {...form.getInputProps('val_cadastral_constr')}
-                  />
-                  <TextInput
-                    inputMode="numeric"
-                    label={t('immobles.camps.anyConstruccio')}
-                    {...form.getInputProps('any_construccio')}
-                  />
-                  <CampData
-                    label={t('immobles.camps.dataCompra')}
-                    {...form.getInputProps('data_compra')}
-                  />
-                  <CampNumeric
-                    tipus="import"
-                    label={t('immobles.camps.valorCompra')}
-                    {...form.getInputProps('valor_compra')}
-                  />
-                </SimpleGrid>
-              </Fieldset>
-            </Stack>
-          </Tabs.Panel>
+            <Tabs.Panel value="certificat" pt="md">
+              <Stack>
+                <Fieldset
+                  legend={legenda(t('immobles.seccions.certificat'), 'certificat_energetic')}
+                >
+                  <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                    <TextInput
+                      label={t('immobles.camps.registre')}
+                      {...form.getInputProps('cert_en_reg')}
+                    />
+                    <TextInput
+                      label={t('immobles.camps.classe')}
+                      {...form.getInputProps('cert_en_class')}
+                    />
+                    <CampData
+                      label={t('immobles.camps.data')}
+                      {...form.getInputProps('cert_en_data')}
+                    />
+                    <CampData
+                      label={t('immobles.camps.caducitat')}
+                      {...form.getInputProps('cert_en_caduc')}
+                    />
+                  </SimpleGrid>
+                </Fieldset>
 
-          <Tabs.Panel value="certificat" pt="md">
-            <Stack>
-              <Fieldset legend={legenda(t('immobles.seccions.certificat'), 'certificat_energetic')}>
-                <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                  <TextInput
-                    label={t('immobles.camps.registre')}
-                    {...form.getInputProps('cert_en_reg')}
-                  />
-                  <TextInput
-                    label={t('immobles.camps.classe')}
-                    {...form.getInputProps('cert_en_class')}
-                  />
-                  <CampData
-                    label={t('immobles.camps.data')}
-                    {...form.getInputProps('cert_en_data')}
-                  />
-                  <CampData
-                    label={t('immobles.camps.caducitat')}
-                    {...form.getInputProps('cert_en_caduc')}
-                  />
-                </SimpleGrid>
-              </Fieldset>
-
-              <Fieldset legend={legenda(t('immobles.seccions.cedula'), 'cedula_habitabilitat')}>
-                <SimpleGrid cols={{ base: 1, sm: 2 }}>
-                  <TextInput
-                    label={t('immobles.camps.registre')}
-                    {...form.getInputProps('ced_hab_reg')}
-                  />
-                  <CampNumeric
-                    tipus="superficie"
-                    label={t('immobles.camps.superficieUtil')}
-                    {...form.getInputProps('ced_hab_superficie_util')}
-                  />
-                  <CampData
-                    label={t('immobles.camps.data')}
-                    {...form.getInputProps('ced_hab_data')}
-                  />
-                  <CampData
-                    label={t('immobles.camps.caducitat')}
-                    {...form.getInputProps('ced_hab_caduc')}
-                  />
-                </SimpleGrid>
-              </Fieldset>
-            </Stack>
-          </Tabs.Panel>
-        </Tabs>
-      </div>
+                <Fieldset legend={legenda(t('immobles.seccions.cedula'), 'cedula_habitabilitat')}>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                    <TextInput
+                      label={t('immobles.camps.registre')}
+                      {...form.getInputProps('ced_hab_reg')}
+                    />
+                    <CampNumeric
+                      tipus="superficie"
+                      label={t('immobles.camps.superficieUtil')}
+                      {...form.getInputProps('ced_hab_superficie_util')}
+                    />
+                    <CampData
+                      label={t('immobles.camps.data')}
+                      {...form.getInputProps('ced_hab_data')}
+                    />
+                    <CampData
+                      label={t('immobles.camps.caducitat')}
+                      {...form.getInputProps('ced_hab_caduc')}
+                    />
+                  </SimpleGrid>
+                </Fieldset>
+              </Stack>
+            </Tabs.Panel>
+          </Tabs>
+        </div>
+      </PantallaTaula>
     </>
   )
 }
