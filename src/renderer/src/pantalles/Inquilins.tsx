@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { esOk } from '../utils/resultat'
 import FormulariInquili from './FormulariInquili'
 import type { Inquili } from '../../../shared/tipus'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 function Inquilins(): React.JSX.Element {
   const { t } = useTranslation()
@@ -55,67 +56,73 @@ function Inquilins(): React.JSX.Element {
 
   return (
     <>
-      <Group justify="space-between" mb="md">
-        <Title order={2}>{t('menu.inquilins')}</Title>
-        <Button onClick={() => setModal({ inquili: null })}>{t('comu.afegir')}</Button>
-      </Group>
+      <PantallaTaula
+        capcalera={
+          <>
+            <Group justify="space-between" mb="md">
+              <Title order={2}>{t('menu.inquilins')}</Title>
+              <Button onClick={() => setModal({ inquili: null })}>{t('comu.afegir')}</Button>
+            </Group>
 
-      {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
-      {!carregant && inquilins.length === 0 && <Text c="dimmed">{t('inquilins.buit')}</Text>}
-
-      {inquilins.length > 0 && (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th />
-              <Table.Th>{t('inquilins.camps.nom')}</Table.Th>
-              <Table.Th>{t('inquilins.camps.cognoms')}</Table.Th>
-              <Table.Th>{t('inquilins.camps.nif')}</Table.Th>
-              <Table.Th>{t('inquilins.camps.telefon')}</Table.Th>
-              <Table.Th>{t('inquilins.camps.wassap')}</Table.Th>
-              <Table.Th>{t('inquilins.camps.bizum')}</Table.Th>
-              <Table.Th />
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {inquilins.map((i) => (
-              <Table.Tr key={i.id}>
-                <Table.Td>
-                  <Tooltip label={t('comu.editar')}>
-                    <ActionIcon
-                      variant="subtle"
-                      aria-label={t('comu.editar')}
-                      onClick={() => setModal({ inquili: i })}
-                    >
-                      <IconPencil size={18} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Table.Td>
-                <Table.Td>{i.nom ?? t('inquilins.senseNom')}</Table.Td>
-                <Table.Td>{i.cognoms}</Table.Td>
-                <Table.Td>{i.nif}</Table.Td>
-                <Table.Td>{i.telefon_1}</Table.Td>
-                <Table.Td>{siNo(i.ck_tel1_wassap)}</Table.Td>
-                <Table.Td>{siNo(i.ck_tel1_bizum)}</Table.Td>
-                <Table.Td>
-                  <Group gap="xs" wrap="nowrap">
-                    <Tooltip label={t('comu.eliminar')}>
+            {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
+            {!carregant && inquilins.length === 0 && <Text c="dimmed">{t('inquilins.buit')}</Text>}
+          </>
+        }
+      >
+        {!carregant && inquilins.length > 0 && (
+          <Table stickyHeader striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th />
+                <Table.Th>{t('inquilins.camps.nom')}</Table.Th>
+                <Table.Th>{t('inquilins.camps.cognoms')}</Table.Th>
+                <Table.Th>{t('inquilins.camps.nif')}</Table.Th>
+                <Table.Th>{t('inquilins.camps.telefon')}</Table.Th>
+                <Table.Th>{t('inquilins.camps.wassap')}</Table.Th>
+                <Table.Th>{t('inquilins.camps.bizum')}</Table.Th>
+                <Table.Th />
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {inquilins.map((i) => (
+                <Table.Tr key={i.id}>
+                  <Table.Td>
+                    <Tooltip label={t('comu.editar')}>
                       <ActionIcon
                         variant="subtle"
-                        color="red"
-                        aria-label={t('comu.eliminar')}
-                        onClick={() => demanarEliminar(i)}
+                        aria-label={t('comu.editar')}
+                        onClick={() => setModal({ inquili: i })}
                       >
-                        <IconTrash size={18} />
+                        <IconPencil size={18} />
                       </ActionIcon>
                     </Tooltip>
-                  </Group>
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      )}
+                  </Table.Td>
+                  <Table.Td>{i.nom ?? t('inquilins.senseNom')}</Table.Td>
+                  <Table.Td>{i.cognoms}</Table.Td>
+                  <Table.Td>{i.nif}</Table.Td>
+                  <Table.Td>{i.telefon_1}</Table.Td>
+                  <Table.Td>{siNo(i.ck_tel1_wassap)}</Table.Td>
+                  <Table.Td>{siNo(i.ck_tel1_bizum)}</Table.Td>
+                  <Table.Td>
+                    <Group gap="xs" wrap="nowrap">
+                      <Tooltip label={t('comu.eliminar')}>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          aria-label={t('comu.eliminar')}
+                          onClick={() => demanarEliminar(i)}
+                        >
+                          <IconTrash size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        )}
+      </PantallaTaula>
 
       <Modal
         opened={modal !== null}

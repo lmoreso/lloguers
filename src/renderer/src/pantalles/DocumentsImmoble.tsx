@@ -20,6 +20,7 @@ import EditarDocumentImmoble from './EditarDocumentImmoble'
 import { TIPUS_UNICS_IMMOBLE } from '../../../shared/tipus'
 import type { DocumentImmoble, Immoble } from '../../../shared/tipus'
 import { useTornar } from '../utils/useTornar'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 // Documents d'un immoble (/immobles/:id/documents). Les accions van a la capçalera, no a sota.
 // Els tipus únics (certificat, cèdula i fitxa cadastral) aquí només es poden visualitzar i eliminar: s'afegeixen
@@ -104,124 +105,129 @@ function DocumentsImmoble(): React.JSX.Element {
 
   return (
     <>
-      {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
+      <PantallaTaula
+        capcalera={
+          <>
+            {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
+            {!carregant && immoble === null && (
+              <>
+                <Group justify="space-between">
+                  <Title order={2}>{t('documentsImmoble.titol')}</Title>
+                  <Button
+                    mt="md"
+                    variant="default"
+                    onClick={tornar}
+                    leftSection={<IconCornerUpLeft size={16} />}
+                  >
+                    {t('comu.tornar')}
+                  </Button>
+                </Group>
+                <Text c="dimmed">{t('immobles.noTrobat')}</Text>
+              </>
+            )}
+            {immoble && (
+              <>
+                <Stack gap="sm" mb="md">
+                  <div>
+                    <Group justify="space-between">
+                      <Title order={2}>{t('documentsImmoble.titol')}</Title>
+                      <Button
+                        variant="default"
+                        onClick={tornar}
+                        leftSection={<IconCornerUpLeft size={16} />}
+                      >
+                        {t('comu.tornar')}
+                      </Button>
+                    </Group>
 
-      {!carregant && immoble === null && (
-        <>
-          <Group justify="space-between">
-            <Title order={2}>{t('documentsImmoble.titol')}</Title>
-            <Button
-              mt="md"
-              variant="default"
-              onClick={tornar}
-              leftSection={<IconCornerUpLeft size={16} />}
-            >
-              {t('comu.tornar')}
-            </Button>
-          </Group>
-          <Text c="dimmed">{t('immobles.noTrobat')}</Text>
-        </>
-      )}
+                    <Text c="dimmed">{adreca(immoble)}</Text>
+                  </div>
+                  {/* Mateixa fila que a l'edició d'immoble: Afegir a l'esquerra, Tornar a la dreta. */}
+                  <Group justify="space-between">
+                    <Button leftSection={<IconPlus size={16} />} onClick={afegir}>
+                      {t('comu.afegir')}
+                    </Button>
+                  </Group>
+                </Stack>
 
-      {immoble && (
-        <>
-          <Stack gap="sm" mb="md">
-            <div>
-              <Group justify="space-between">
-                <Title order={2}>{t('documentsImmoble.titol')}</Title>
-                <Button
-                  variant="default"
-                  onClick={tornar}
-                  leftSection={<IconCornerUpLeft size={16} />}
-                >
-                  {t('comu.tornar')}
-                </Button>
-              </Group>
-
-              <Text c="dimmed">{adreca(immoble)}</Text>
-            </div>
-            {/* Mateixa fila que a l'edició d'immoble: Afegir a l'esquerra, Tornar a la dreta. */}
-            <Group justify="space-between">
-              <Button leftSection={<IconPlus size={16} />} onClick={afegir}>
-                {t('comu.afegir')}
-              </Button>
-            </Group>
-          </Stack>
-
-          {documents.length === 0 && <Text c="dimmed">{t('documentsImmoble.buit')}</Text>}
-
-          {documents.length > 0 && (
-            <Table striped highlightOnHover>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th />
-                  <Table.Th>{t('documentsImmoble.camps.tipus')}</Table.Th>
-                  <Table.Th>{t('documentsImmoble.camps.fitxer')}</Table.Th>
-                  <Table.Th>{t('documentsImmoble.camps.data')}</Table.Th>
-                  <Table.Th>{t('documentsImmoble.camps.comentaris')}</Table.Th>
-                  <Table.Th>{t('comu.accions')}</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {documents.map((d) => (
-                  <Table.Tr key={d.id}>
-                    <Table.Td>
-                      <Tooltip label={t('documentsImmoble.visualitzar')}>
-                        <ActionIcon
-                          variant="subtle"
-                          aria-label={t('documentsImmoble.visualitzar')}
+                {documents.length === 0 && <Text c="dimmed">{t('documentsImmoble.buit')}</Text>}
+              </>
+            )}{' '}
+          </>
+        }
+      >
+        {/*<Table stickyHeader striped highlightOnHover>*/}
+        {immoble && documents.length > 0 && (
+          <Table stickyHeader striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th />
+                <Table.Th>{t('documentsImmoble.camps.tipus')}</Table.Th>
+                <Table.Th>{t('documentsImmoble.camps.fitxer')}</Table.Th>
+                <Table.Th>{t('documentsImmoble.camps.data')}</Table.Th>
+                <Table.Th>{t('documentsImmoble.camps.comentaris')}</Table.Th>
+                <Table.Th>{t('comu.accions')}</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {documents.map((d) => (
+                <Table.Tr key={d.id}>
+                  <Table.Td>
+                    <Tooltip label={t('documentsImmoble.visualitzar')}>
+                      <ActionIcon
+                        variant="subtle"
+                        aria-label={t('documentsImmoble.visualitzar')}
+                        onClick={() => visualitzar(d)}
+                      >
+                        <IconEye size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Table.Td>
+                  <Table.Td>{t(`documentsImmoble.tipus.${d.tipus}`)}</Table.Td>
+                  <Table.Td>{d.nom_original}</Table.Td>
+                  <Table.Td>{formatData(dataDe(d))}</Table.Td>
+                  <Table.Td>{d.comentaris}</Table.Td>
+                  <Table.Td style={{ width: 1 }}>
+                    <Menu position="bottom-end" withinPortal>
+                      <Menu.Target>
+                        <Tooltip label={t('comu.accions')}>
+                          <ActionIcon variant="subtle" aria-label={t('comu.accions')}>
+                            <IconDots size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item
+                          leftSection={<IconEye size={16} />}
                           onClick={() => visualitzar(d)}
                         >
-                          <IconEye size={18} />
-                        </ActionIcon>
-                      </Tooltip>
-                    </Table.Td>
-                    <Table.Td>{t(`documentsImmoble.tipus.${d.tipus}`)}</Table.Td>
-                    <Table.Td>{d.nom_original}</Table.Td>
-                    <Table.Td>{formatData(dataDe(d))}</Table.Td>
-                    <Table.Td>{d.comentaris}</Table.Td>
-                    <Table.Td style={{ width: 1 }}>
-                      <Menu position="bottom-end" withinPortal>
-                        <Menu.Target>
-                          <Tooltip label={t('comu.accions')}>
-                            <ActionIcon variant="subtle" aria-label={t('comu.accions')}>
-                              <IconDots size={18} />
-                            </ActionIcon>
-                          </Tooltip>
-                        </Menu.Target>
-                        <Menu.Dropdown>
+                          {t('documentsImmoble.visualitzar')}
+                        </Menu.Item>
+                        {!esUnic(d) && (
                           <Menu.Item
-                            leftSection={<IconEye size={16} />}
-                            onClick={() => visualitzar(d)}
+                            leftSection={<IconPencil size={16} />}
+                            onClick={() => editar(d)}
                           >
-                            {t('documentsImmoble.visualitzar')}
+                            {t('comu.editar')}
                           </Menu.Item>
-                          {!esUnic(d) && (
-                            <Menu.Item
-                              leftSection={<IconPencil size={16} />}
-                              onClick={() => editar(d)}
-                            >
-                              {t('comu.editar')}
-                            </Menu.Item>
-                          )}
-                          <Menu.Divider />
-                          <Menu.Item
-                            color="red"
-                            leftSection={<IconTrash size={16} />}
-                            onClick={() => demanarEliminar(d)}
-                          >
-                            {t('comu.eliminar')}
-                          </Menu.Item>
-                        </Menu.Dropdown>
-                      </Menu>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </>
-      )}
+                        )}
+                        <Menu.Divider />
+                        <Menu.Item
+                          color="red"
+                          leftSection={<IconTrash size={16} />}
+                          onClick={() => demanarEliminar(d)}
+                        >
+                          {t('comu.eliminar')}
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        )}
+      </PantallaTaula>
     </>
   )
 }

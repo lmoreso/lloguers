@@ -32,6 +32,7 @@ import EditarDocument from './EditarDocument'
 import type { Contracte, DocumentContracte, Immoble } from '../../../shared/tipus'
 import { TIPUS_LLIGATS_CONTRACTE, TIPUS_UNICS_CONTRACTE } from '../../../shared/tipus'
 import { useTornar } from '../utils/useTornar'
+import PantallaTaula from '@renderer/components/PantallaTaula'
 
 // Documents d'un contracte (/immobles/:id/contractes/:idContracte/documents). Les accions van a la capçalera,
 // no a sota.
@@ -142,138 +143,144 @@ function DocumentsContracte(): React.JSX.Element {
     <>
       {carregant && <Text c="dimmed">{t('comu.carregant')}</Text>}
 
-      {noTrobat && (
-        <>
-          <Group justify="space-between">
-            <Title order={2}>{t('documents.titol')}</Title>
-            <Button
-              mt="md"
-              variant="default"
-              onClick={tornarNoTrobat}
-              leftSection={<IconCornerUpLeft size={16} />}
-            >
-              {t('comu.tornar')}
-            </Button>
-          </Group>
-          <Text c="dimmed">
-            {immoble === null ? t('immobles.noTrobat') : t('contractes.noTrobat')}
-          </Text>
-        </>
-      )}
-
-      {!carregant && !noTrobat && immoble && contracte && (
-        <>
-          <Stack gap="sm" mb="md">
-            <div>
-              <Group justify="space-between">
-                <Title order={2}>{t('documents.titol')}</Title>
-                <Button
-                  variant="default"
-                  onClick={tornar}
-                  leftSection={<IconCornerUpLeft size={16} />}
-                >
-                  {t('comu.tornar')}
-                </Button>
-              </Group>
-
-              <Text c="dimmed">
-                {t('documents.subtitol', {
-                  adreca: adreca(immoble),
-                  inici: formatData(contracte.data_inici)
-                })}
-              </Text>
-            </div>
-
-            {(faltaModel2 || faltaNotificacio || faltaModel3) && (
-              <Alert color="orange">
-                {faltaModel2 && <Text size="sm">{t('documents.avis.model2')}</Text>}
-                {faltaNotificacio && <Text size="sm">{t('documents.avis.notificacio')}</Text>}
-                {faltaModel3 && <Text size="sm">{t('documents.avis.model3')}</Text>}
-              </Alert>
+      <PantallaTaula
+        capcalera={
+          <>
+            {noTrobat && (
+              <>
+                <Group justify="space-between">
+                  <Title order={2}>{t('documents.titol')}</Title>
+                  <Button
+                    mt="md"
+                    variant="default"
+                    onClick={tornarNoTrobat}
+                    leftSection={<IconCornerUpLeft size={16} />}
+                  >
+                    {t('comu.tornar')}
+                  </Button>
+                </Group>
+                <Text c="dimmed">
+                  {immoble === null ? t('immobles.noTrobat') : t('contractes.noTrobat')}
+                </Text>
+              </>
             )}
 
-            {/* Mateixa fila que a l'edició: accions a l'esquerra, Tornar a la dreta. */}
-            <Group justify="space-between">
-              <Button leftSection={<IconPlus size={16} />} onClick={afegir}>
-                {t('comu.afegir')}
-              </Button>
-            </Group>
-          </Stack>
+            {!carregant && !noTrobat && immoble && contracte && (
+              <>
+                <Stack gap="sm" mb="md">
+                  <div>
+                    <Group justify="space-between">
+                      <Title order={2}>{t('documents.titol')}</Title>
+                      <Button
+                        variant="default"
+                        onClick={tornar}
+                        leftSection={<IconCornerUpLeft size={16} />}
+                      >
+                        {t('comu.tornar')}
+                      </Button>
+                    </Group>
 
-          {documents.length === 0 && <Text c="dimmed">{t('documents.buit')}</Text>}
+                    <Text c="dimmed">
+                      {t('documents.subtitol', {
+                        adreca: adreca(immoble),
+                        inici: formatData(contracte.data_inici)
+                      })}
+                    </Text>
+                  </div>
 
-          {documents.length > 0 && (
-            <Table striped highlightOnHover>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th />
-                  <Table.Th>{t('documents.camps.tipus')}</Table.Th>
-                  <Table.Th>{t('documents.camps.fitxer')}</Table.Th>
-                  <Table.Th>{t('documents.camps.data')}</Table.Th>
-                  <Table.Th>{t('documents.camps.comentaris')}</Table.Th>
-                  <Table.Th>{t('comu.accions')}</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {documents.map((d) => (
-                  <Table.Tr key={d.id}>
-                    <Table.Td>
-                      <Tooltip label={t('documents.visualitzar')}>
-                        <ActionIcon
-                          variant="subtle"
-                          aria-label={t('documents.visualitzar')}
+                  {(faltaModel2 || faltaNotificacio || faltaModel3) && (
+                    <Alert color="orange">
+                      {faltaModel2 && <Text size="sm">{t('documents.avis.model2')}</Text>}
+                      {faltaNotificacio && <Text size="sm">{t('documents.avis.notificacio')}</Text>}
+                      {faltaModel3 && <Text size="sm">{t('documents.avis.model3')}</Text>}
+                    </Alert>
+                  )}
+
+                  {/* Mateixa fila que a l'edició: accions a l'esquerra, Tornar a la dreta. */}
+                  <Group justify="space-between">
+                    <Button leftSection={<IconPlus size={16} />} onClick={afegir}>
+                      {t('comu.afegir')}
+                    </Button>
+                  </Group>
+                </Stack>
+
+                {documents.length === 0 && <Text c="dimmed">{t('documents.buit')}</Text>}
+              </>
+            )}
+          </>
+        }
+      >
+        {!carregant && !noTrobat && immoble && contracte && documents.length > 0 && (
+          <Table stickyHeader striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th />
+                <Table.Th>{t('documents.camps.tipus')}</Table.Th>
+                <Table.Th>{t('documents.camps.fitxer')}</Table.Th>
+                <Table.Th>{t('documents.camps.data')}</Table.Th>
+                <Table.Th>{t('documents.camps.comentaris')}</Table.Th>
+                <Table.Th>{t('comu.accions')}</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {documents.map((d) => (
+                <Table.Tr key={d.id}>
+                  <Table.Td>
+                    <Tooltip label={t('documents.visualitzar')}>
+                      <ActionIcon
+                        variant="subtle"
+                        aria-label={t('documents.visualitzar')}
+                        onClick={() => visualitzar(d)}
+                      >
+                        <IconEye size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Table.Td>
+                  <Table.Td>{t(`documents.tipus.${d.tipus}`)}</Table.Td>
+                  <Table.Td>{d.nom_original}</Table.Td>
+                  <Table.Td>{formatData(dataDe(d))}</Table.Td>
+                  <Table.Td>{d.comentaris}</Table.Td>
+                  <Table.Td style={{ width: 1 }}>
+                    <Menu position="bottom-end" withinPortal>
+                      <Menu.Target>
+                        <Tooltip label={t('comu.accions')}>
+                          <ActionIcon variant="subtle" aria-label={t('comu.accions')}>
+                            <IconDots size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item
+                          leftSection={<IconEye size={16} />}
                           onClick={() => visualitzar(d)}
                         >
-                          <IconEye size={18} />
-                        </ActionIcon>
-                      </Tooltip>
-                    </Table.Td>
-                    <Table.Td>{t(`documents.tipus.${d.tipus}`)}</Table.Td>
-                    <Table.Td>{d.nom_original}</Table.Td>
-                    <Table.Td>{formatData(dataDe(d))}</Table.Td>
-                    <Table.Td>{d.comentaris}</Table.Td>
-                    <Table.Td style={{ width: 1 }}>
-                      <Menu position="bottom-end" withinPortal>
-                        <Menu.Target>
-                          <Tooltip label={t('comu.accions')}>
-                            <ActionIcon variant="subtle" aria-label={t('comu.accions')}>
-                              <IconDots size={18} />
-                            </ActionIcon>
-                          </Tooltip>
-                        </Menu.Target>
-                        <Menu.Dropdown>
+                          {t('documents.visualitzar')}
+                        </Menu.Item>
+                        {!esUnic(d) && (
                           <Menu.Item
-                            leftSection={<IconEye size={16} />}
-                            onClick={() => visualitzar(d)}
+                            leftSection={<IconPencil size={16} />}
+                            onClick={() => editar(d)}
                           >
-                            {t('documents.visualitzar')}
+                            {t('comu.editar')}
                           </Menu.Item>
-                          {!esUnic(d) && (
-                            <Menu.Item
-                              leftSection={<IconPencil size={16} />}
-                              onClick={() => editar(d)}
-                            >
-                              {t('comu.editar')}
-                            </Menu.Item>
-                          )}
-                          <Menu.Divider />
-                          <Menu.Item
-                            color="red"
-                            leftSection={<IconTrash size={16} />}
-                            onClick={() => demanarEliminar(d)}
-                          >
-                            {t('comu.eliminar')}
-                          </Menu.Item>
-                        </Menu.Dropdown>
-                      </Menu>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </>
-      )}
+                        )}
+                        <Menu.Divider />
+                        <Menu.Item
+                          color="red"
+                          leftSection={<IconTrash size={16} />}
+                          onClick={() => demanarEliminar(d)}
+                        >
+                          {t('comu.eliminar')}
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        )}
+      </PantallaTaula>
     </>
   )
 }
